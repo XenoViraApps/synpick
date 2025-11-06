@@ -92,18 +92,6 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       return;
     }
 
-    // Handle number keys for quick selection
-    if (input >= '1' && input <= '9') {
-      const index = parseInt(input) - 1;
-      if (index < filteredModels.length) {
-        const selectedModel = filteredModels[index];
-        if (selectedModel) {
-          onSelect(selectedModel);
-          exit();
-        }
-      }
-      return;
-    }
 
     // 'q' to quit
     if (input === 'q') {
@@ -181,7 +169,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
           <Box marginTop={1}>
             <Text color="gray">
-              Use ↑↓ to navigate, Enter to select, 1-9 for quick selection, q to quit
+              Use ↑↓ to navigate, Enter to select, type to search, q to quit
             </Text>
           </Box>
         </>
