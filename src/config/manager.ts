@@ -204,4 +204,19 @@ export class ConfigManager {
   async setSavedModel(model: string): Promise<boolean> {
     return this.updateConfig({ selectedModel: model, firstRunCompleted: true });
   }
+
+  hasSavedThinkingModel(): boolean {
+    return Boolean(this.config.selectedThinkingModel && this.config.firstRunCompleted);
+  }
+
+  getSavedThinkingModel(): string {
+    if (this.hasSavedThinkingModel()) {
+      return this.config.selectedThinkingModel;
+    }
+    return '';
+  }
+
+  async setSavedThinkingModel(model: string): Promise<boolean> {
+    return this.updateConfig({ selectedThinkingModel: model, firstRunCompleted: true });
+  }
 }

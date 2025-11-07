@@ -16,6 +16,7 @@ export const AppConfigSchema = z.object({
     .default(24)
     .describe('Model cache duration in hours'),
   selectedModel: z.string().default('').describe('Last selected model'),
+  selectedThinkingModel: z.string().default('').describe('Last selected thinking model'),
   firstRunCompleted: z.boolean()
     .default(false)
     .describe('Whether first-time setup has been completed'),

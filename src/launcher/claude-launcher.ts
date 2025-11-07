@@ -6,6 +6,7 @@ export interface LaunchOptions {
   claudePath?: string;
   additionalArgs?: string[];
   env?: Record<string, string>;
+  thinkingModel?: string | null;
 }
 
 export interface LaunchResult {
@@ -87,6 +88,11 @@ export class ClaudeLauncher {
 
     // Set Claude Code subagent model
     env.CLAUDE_CODE_SUBAGENT_MODEL = model;
+
+    // Set thinking model if provided
+    if (options.thinkingModel) {
+      env.ANTHROPIC_THINKING_MODEL = options.thinkingModel;
+    }
 
     // Disable non-essential traffic
     env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';

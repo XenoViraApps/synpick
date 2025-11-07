@@ -18,6 +18,7 @@ export function createProgram(): Command {
 
   program
     .option('-m, --model <model>', 'Use specific model (skip selection)')
+    .option('-t, --thinking-model <model>', 'Use specific thinking model (for Claude thinking mode)')
     .option('-v, --verbose', 'Enable verbose logging')
     .option('-q, --quiet', 'Suppress non-error output')
     .allowUnknownOption(true)
@@ -30,7 +31,7 @@ export function createProgram(): Command {
       // Get all raw args from process.argv and extract unknown options
       const rawArgs = process.argv.slice(2);
       const additionalArgs: string[] = [];
-      const knownFlags = new Set(['--model', '--verbose', '--quiet', '--help', '--version', '-m', '-v', '-q', '-h', '-V']);
+      const knownFlags = new Set(['--model', '--thinking-model', '--verbose', '--quiet', '--help', '--version', '-m', '-t', '-v', '-q', '-h', '-V']);
 
       for (let i = 0; i < rawArgs.length; i++) {
         const arg = rawArgs[i];
@@ -58,6 +59,16 @@ export function createProgram(): Command {
     .action(async (options) => {
       const app = new SyntheticClaudeApp();
       await app.interactiveModelSelection();
+    });
+
+  // Thinking model selection command
+  program
+    .command('thinking-model')
+    .description('Interactive thinking model selection and save to config')
+    .option('-v, --verbose', 'Enable verbose logging')
+    .action(async (options) => {
+      const app = new SyntheticClaudeApp();
+      await app.interactiveThinkingModelSelection();
     });
 
   // List models command
@@ -95,7 +106,7 @@ export function createProgram(): Command {
 
   configCmd
     .command('set <key> <value>')
-    .description('Set configuration value')
+    .description('Set configuration value (keys: apiKey, baseUrl, modelsApiUrl, cacheDurationHours, selectedModel, selectedThinkingModel)')
     .action(async (key, value) => {
       const app = new SyntheticClaudeApp();
       await app.setConfig(key, value);

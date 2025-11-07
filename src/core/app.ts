@@ -11,6 +11,7 @@ export interface AppOptions {
   verbose?: boolean;
   quiet?: boolean;
   additionalArgs?: string[];
+  thinkingModel?: string;
 }
 
 
@@ -68,8 +69,11 @@ export class SyntheticClaudeApp {
       return;
     }
 
+    // Get thinking model to use (if specified)
+    const thinkingModel = await this.selectThinkingModel(options.thinkingModel);
+
     // Launch Claude Code
-    await this.launchClaudeCode(model, options);
+    await this.launchClaudeCode(model, options, thinkingModel);
   }
 
   async interactiveModelSelection(): Promise<boolean> {
@@ -102,6 +106,40 @@ export class SyntheticClaudeApp {
       return true;
     } catch (error) {
       this.ui.error(`Error during model selection: ${error}`);
+      return false;
+    }
+  }
+
+  async interactiveThinkingModelSelection(): Promise<boolean> {
+    if (!this.configManager.hasApiKey()) {
+      this.ui.error('No API key configured. Please run "synclaude setup" first.');
+      return false;
+    }
+
+    try {
+      const modelManager = this.getModelManager();
+      this.ui.coloredInfo('Fetching available models...');
+      const models = await modelManager.fetchModels();
+
+      if (models.length === 0) {
+        this.ui.error('No models available. Please check your API key and connection.');
+        return false;
+      }
+
+      // Sort models for consistent display
+      const sortedModels = modelManager.getModels(models);
+      const selectedThinkingModel = await this.ui.selectModel(sortedModels);
+      if (!selectedThinkingModel) {
+        this.ui.info('Thinking model selection cancelled');
+        return false;
+      }
+
+      await this.configManager.updateConfig({ selectedThinkingModel: selectedThinkingModel.id });
+      this.ui.coloredSuccess(`Thinking model saved: ${selectedThinkingModel.getDisplayName()}`);
+      this.ui.highlightInfo('Now run "synclaude --thinking-model" to start Claude Code with this thinking model.', ['synclaude', '--thinking-model']);
+      return true;
+    } catch (error) {
+      this.ui.error(`Error during thinking model selection: ${error}`);
       return false;
     }
   }
@@ -162,6 +200,7 @@ export class SyntheticClaudeApp {
     this.ui.info(`Models API: ${config.modelsApiUrl}`);
     this.ui.info(`Cache Duration: ${config.cacheDurationHours} hours`);
     this.ui.info(`Selected Model: ${config.selectedModel || 'None'}`);
+    this.ui.info(`Selected Thinking Model: ${config.selectedThinkingModel || 'None'}`);
     this.ui.info(`First Run Completed: ${config.firstRunCompleted}`);
   }
 
@@ -184,6 +223,9 @@ export class SyntheticClaudeApp {
         break;
       case 'selectedModel':
         updates.selectedModel = value;
+        break;
+      case 'selectedThinkingModel':
+        updates.selectedThinkingModel = value;
         break;
       default:
         this.ui.error(`Unknown configuration key: ${key}`);
@@ -340,11 +382,29 @@ export class SyntheticClaudeApp {
     return null;
   }
 
-  private async launchClaudeCode(model: string, options: LaunchOptions): Promise<void> {
-    this.ui.highlightInfo(`Launching with ${model}. Use "synclaude model" to change model.`, [model, 'synclaude model']);
+  private async selectThinkingModel(preselectedThinkingModel?: string): Promise<string | null> {
+    if (preselectedThinkingModel) {
+      return preselectedThinkingModel;
+    }
+
+    // Use saved thinking model if available
+    if (this.configManager.hasSavedThinkingModel()) {
+      return this.configManager.getSavedThinkingModel();
+    }
+
+    return null; // Thinking model is optional
+  }
+
+  private async launchClaudeCode(model: string, options: LaunchOptions, thinkingModel?: string | null): Promise<void> {
+    const launchInfo = thinkingModel
+      ? `Launching with ${model} (thinking: ${thinkingModel}). Use "synclaude model" to change model.`
+      : `Launching with ${model}. Use "synclaude model" to change model.`;
+
+    this.ui.highlightInfo(launchInfo, [model, 'synclaude model']);
 
     const result = await this.launcher.launchClaudeCode({
       model,
+      thinkingModel,
       additionalArgs: options.additionalArgs,
       env: {
         ANTHROPIC_AUTH_TOKEN: this.configManager.getApiKey(),
