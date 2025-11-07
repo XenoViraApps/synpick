@@ -1,0 +1,10 @@
+Synclaude Version 1.4.0
+
+Original Author: parnexcodes (https://github.com/parnexcodes)
+
+Version 1.4.0 Changes:
+- Added support for passing Claude Code flags through synclaude
+- Examples: --dangerously-skip-permissions and other native Claude Code options
+- Enhanced CLI description to document flag passthrough functionality
+
+This update enables users to use all native Claude Code features while still benefiting from synclaude's model selection and Synthetic AI integration.

@@ -13,19 +13,41 @@ export function createProgram(): Command {
 
   program
     .name('synclaude')
-    .description('Interactive model selection tool for Claude Code with Synthetic AI models')
+    .description('Interactive model selection tool for Claude Code with Synthetic AI models\n\nAdditional Claude Code flags (e.g., --dangerously-skip-permissions) are passed through to Claude Code.')
     .version(packageVersion);
 
   program
     .option('-m, --model <model>', 'Use specific model (skip selection)')
     .option('-v, --verbose', 'Enable verbose logging')
-    .option('-q, --quiet', 'Suppress non-error output');
+    .option('-q, --quiet', 'Suppress non-error output')
+    .allowUnknownOption(true)
+    .passThroughOptions(true);
 
   // Main command (launch Claude Code)
   program
-    .action(async (options) => {
+    .action(async (options, command) => {
       const app = new SyntheticClaudeApp();
-      await app.run(options);
+      // Get all raw args from process.argv and extract unknown options
+      const rawArgs = process.argv.slice(2);
+      const additionalArgs: string[] = [];
+      const knownFlags = new Set(['--model', '--verbose', '--quiet', '--help', '--version', '-m', '-v', '-q', '-h', '-V']);
+
+      for (let i = 0; i < rawArgs.length; i++) {
+        const arg = rawArgs[i];
+        if (arg && arg.startsWith('--')) {
+          // Check if this is a known synclaude option
+          const flagName = arg.split('=')[0]!; // Handle --flag=value format
+          if (!knownFlags.has(flagName) && !knownFlags.has(arg)) {
+            additionalArgs.push(arg);
+            // If this is a flag that takes a value and it's not in --flag=value format, skip the next arg
+            if (!arg.includes('=') && i + 1 < rawArgs.length && rawArgs[i + 1] && !rawArgs[i + 1]!.startsWith('-')) {
+              additionalArgs.push(rawArgs[i + 1]!);
+              i++; // Skip the next argument as it's a value
+            }
+          }
+        }
+      }
+      await app.run({ ...options, additionalArgs });
     });
 
   // Model selection command

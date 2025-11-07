@@ -10,6 +10,7 @@ import { setupLogging, log } from '../utils/logger';
 export interface AppOptions {
   verbose?: boolean;
   quiet?: boolean;
+  additionalArgs?: string[];
 }
 
 
