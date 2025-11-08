@@ -3,6 +3,7 @@ import { SyntheticClaudeApp } from '../core/app';
 import { ConfigManager } from '../config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { normalizeDangerousFlags } from '../utils/banner';
 
 export function createProgram(): Command {
   const program = new Command();
@@ -48,7 +49,10 @@ export function createProgram(): Command {
           }
         }
       }
-      await app.run({ ...options, additionalArgs });
+
+      // Normalize dangerous flags
+      const normalizedArgs = normalizeDangerousFlags(additionalArgs);
+      await app.run({ ...options, additionalArgs: normalizedArgs });
     });
 
   // Model selection command (launches after selection)

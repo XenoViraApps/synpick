@@ -6,6 +6,7 @@ import { UserInterface } from '../ui';
 import { ClaudeLauncher, LaunchOptions } from '../launcher';
 import { ModelInfoImpl } from '../models';
 import { setupLogging, log } from '../utils/logger';
+import { createBanner, normalizeDangerousFlags } from '../utils/banner';
 
 export interface AppOptions {
   verbose?: boolean;
@@ -55,7 +56,17 @@ export class SyntheticClaudeApp {
   }
 
   async run(options: AppOptions & LaunchOptions): Promise<void> {
+    // Normalize dangerous flags first
+    if (options.additionalArgs) {
+      options.additionalArgs = normalizeDangerousFlags(options.additionalArgs);
+    }
+
     await this.setupLogging(options);
+
+    // Display banner unless quiet mode
+    if (!options.quiet) {
+      console.log(createBanner(options));
+    }
 
     // Note: Updates are now handled manually by users via `npm update -g synclaude`
     // This eliminates complex update checking and related bugs
