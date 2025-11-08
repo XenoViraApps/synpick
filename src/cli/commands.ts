@@ -156,22 +156,37 @@ export function createProgram(): Command {
   // Dangerous command - launch Claude Code with --dangerously-skip-permissions
   program
     .command('dangerously')
-    .description('Interactive model selection and launch with --dangerously-skip-permissions')
+    .description('Launch with --dangerously-skip-permissions using last used provider(s)')
     .option('-v, --verbose', 'Enable verbose logging')
     .option('-q, --quiet', 'Suppress non-error output')
+    .option('-f, --force', 'Force model selection even if last used provider is available')
     .action(async (options) => {
       const app = new SyntheticClaudeApp();
-      await app.interactiveModelSelection();
-
-      // After successful model selection, launch Claude Code with --dangerously-skip-permissions
       const config = app.getConfig();
-      if (config.selectedModel || config.selectedThinkingModel) {
+
+      // Check if we have saved models and user didn't force selection
+      if (!options.force && (config.selectedModel || config.selectedThinkingModel)) {
+        // Use existing saved models
         await app.run({
           verbose: options.verbose,
           quiet: options.quiet,
           model: '', // Will use saved models from config
           additionalArgs: ['--dangerously-skip-permissions']
         });
+      } else {
+        // Need to select models first
+        await app.interactiveModelSelection();
+
+        // After successful model selection, launch Claude Code with --dangerously-skip-permissions
+        const updatedConfig = app.getConfig();
+        if (updatedConfig.selectedModel || updatedConfig.selectedThinkingModel) {
+          await app.run({
+            verbose: options.verbose,
+            quiet: options.quiet,
+            model: '', // Will use saved models from config
+            additionalArgs: ['--dangerously-skip-permissions']
+          });
+        }
       }
     });
 
