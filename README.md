@@ -27,36 +27,42 @@ synclaude is a modern TypeScript/Node.js application that provides a seamless in
 
 ### Installation
 
-#### Option 1: One-line Installer (Recommended)
+#### Option 1: GitHub Release (Recommended)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/parnexcodes/synclaude/main/scripts/install.sh | bash
+npm install -g https://github.com/jeffersonwarrior/synclaude/releases/latest/download/synclaude.tgz
 ```
 
-#### Option 2: npm Global Install
+#### Option 2: Download from GitHub Releases
+
+1. Visit [GitHub Releases](https://github.com/jeffersonwarrior/synclaude/releases)
+2. Download the latest `synclaude-X.Y.Z.tgz` file
+3. Install with: `npm install -g synclaude-X.Y.Z.tgz`
+
+#### Option 3: One-line Installer
 
 ```bash
-npm install -g synclaude
+curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash
 ```
 
-#### Option 3: Local Development
+#### Option 4: Local Development Install
 
 ```bash
-npm install -g synclaude
-# Or download the source and run:
-curl -sSL https://github.com/parnexcodes/synclaude/archive/main.tar.gz | tar -xz
-cd synclaude-main
+git clone https://github.com/jeffersonwarrior/synclaude.git
+cd synclaude
 npm install
 npm run build
-npm link
+sudo npm link
 ```
+
+**Important**: Direct git installation (`npm install -g https://github.com/.../synclaude.git`) is not supported due to npm's git installation limitations. Use the release tarball installation instead.
 
 ### Uninstallation
 
 #### Option 1: One-line Uninstaller
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/parnexcodes/synclaude/main/scripts/uninstall.sh | bash
+curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/uninstall.sh | bash
 ```
 
 #### Option 2: Manual Uninstall
@@ -191,7 +197,7 @@ export SYNTHETIC_CACHE_DURATION=24
 #### Setup Development Environment
 
 ```bash
-git clone https://github.com/parnexcodes/synclaude.git
+git clone https://github.com/jeffersonwarrior/synclaude.git
 cd synclaude
 npm install
 ```
@@ -341,7 +347,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/parnexcodes/synclaude/issues)
-- **Documentation**: [GitHub Wiki](https://github.com/parnexcodes/synclaude/wiki)
-- **Discussions**: [GitHub Discussions](https://github.com/parnexcodes/synclaude/discussions)
+- **Issues**: [GitHub Issues](https://github.com/jeffersonwarrior/synclaude/issues)
+- **Documentation**: [GitHub Wiki](https://github.com/jeffersonwarrior/synclaude/wiki)
+- **Discussions**: [GitHub Discussions](https://github.com/jeffersonwarrior/synclaude/discussions)
 - **Synthetic API**: [https://dev.synthetic.new](https://dev.synthetic.new)
