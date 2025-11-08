@@ -29,8 +29,23 @@ synclaude is a modern TypeScript/Node.js application that provides a seamless in
 
 #### Option 1: GitHub Release (Recommended)
 
+**Linux/Windows:**
 ```bash
-npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.5/synclaude-1.4.5.tgz
+npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz
+```
+
+**macOS (if permissions error):**
+```bash
+sudo npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz
+```
+
+**Alternative for macOS (permanent fix):**
+```bash
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
+source ~/.zshrc
+npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz
 ```
 
 #### Option 2: Download from GitHub Releases
@@ -45,7 +60,13 @@ npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v
 curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash
 ```
 
-#### Option 4: Local Development Install
+#### Option 4: macOS One-line Script
+
+```bash
+curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install-macos.sh | bash
+```
+
+#### Option 5: Local Development Install
 
 ```bash
 git clone https://github.com/jeffersonwarrior/synclaude.git
@@ -57,7 +78,7 @@ sudo npm link
 
 **Important**:
 - Direct git installation (`npm install -g https://github.com/.../synclaude.git`) is not supported due to npm's git installation limitations
-- Use the specific release tarball: `https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.5/synclaude-1.4.5.tgz`
+- Use the specific release tarball: `https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz`
 - Or visit [GitHub Releases](https://github.com/jeffersonwarrior/synclaude/releases) for the latest version
 
 ### Uninstallation
