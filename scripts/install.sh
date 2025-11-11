@@ -22,6 +22,11 @@ TARBALL_URL="$REPO_URL/archive/main.tar.gz"
 VERBOSE="${VERBOSE:-false}"
 PATH_UPDATED="${PATH_UPDATED:-false}"
 PATH_IN_PATH="${PATH_IN_PATH:-false}"
+NPM_GLOBAL_INSTALL="${NPM_GLOBAL_INSTALL:-false}"
+NPM_CAN_INSTALL_USER="${NPM_CAN_INSTALL_USER:-false}"
+SHELL_CONFIG="${SHELL_CONFIG:-}"
+VERSION_INSTALLED="${VERSION_INSTALLED:-unknown}"
+NPM_BIN_DIR_USED="${NPM_BIN_DIR_USED:-}"
 
 # Helper functions
 log() {
@@ -93,88 +98,245 @@ create_directories() {
 install_package() {
     progress
 
-    # Clean up any existing installation
-    rm -rf "$INSTALL_DIR"
-    mkdir -p "$INSTALL_DIR"
+    # Determine if we can install globally without sudo
+    NPM_GLOBAL_INSTALL=false
+    NPM_CAN_INSTALL_USER=false
 
-    # Download and extract repository
-    cd "$INSTALL_DIR"
-    progress
-    if command_exists curl; then
-        if curl -sL "$TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
-            progress
-        else
-            error "Failed to download repository with curl"
-            exit 1
-        fi
-    elif command_exists wget; then
-        if wget -qO- "$TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
-            progress
-        else
-            error "Failed to download repository with wget"
-            exit 1
-        fi
+    # Test if we can install globally without sudo
+    if npm config get prefix | grep -q "^$HOME\|^/home"; then
+        NPM_CAN_INSTALL_USER=true
+        log "Using user-level npm installation"
+    elif npm ls -g synclaude >/dev/null 2>&1 || [ -w "$(npm config get prefix)" ]; then
+        NPM_CAN_INSTALL_USER=true
+        log "Using system-level npm installation"
     fi
 
-    # Install dependencies and build
-    progress
-    if npm install --silent >/dev/null 2>&1 && npm run build >/dev/null 2>&1; then
+    if [ "$NPM_CAN_INSTALL_USER" = true ]; then
+        # Try npm registry first, then fallback to building from source
+        log "Installing synclaude package"
         progress
-        ln -sf "$INSTALL_DIR/dist/cli/index.js" "$BIN_DIR/synclaude"
-        chmod +x "$BIN_DIR/synclaude"
+
+        # For development/direct installation, build from source first
+        # Fallback to registry if source build fails
+        log "Building from source"
+        rm -rf "$INSTALL_DIR"
+        mkdir -p "$INSTALL_DIR"
+
+        # Download and extract
+        cd "$INSTALL_DIR"
+        if command_exists curl; then
+            if curl -sL "$TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
+                progress
+            else
+                error "Failed to download repository with curl"
+                exit 1
+            fi
+        elif command_exists wget; then
+            if wget -qO- "$TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
+                progress
+            else
+                error "Failed to download repository with wget"
+                exit 1
+            fi
+        fi
+
+        # Install dependencies
+        npm install --silent >/dev/null 2>&1
+
+        # Since npm install -g might fail due to build scripts,
+        # let's use a more robust manual approach
+        # Create the package structure in global node_modules
+        NPM_PREFIX=$(npm config get prefix)
+        NPM_GLOBAL_DIR="$NPM_PREFIX/lib/node_modules/synclaude"
+        NPM_BIN_DIR="$NPM_PREFIX/bin"
+
+        # Remove any existing installation
+        rm -rf "$NPM_GLOBAL_DIR"
+        rm -f "$NPM_BIN_DIR/synclaude"
+
+        # Copy everything to global location
+        cp -r "$INSTALL_DIR" "$NPM_GLOBAL_DIR"
+
+        # Create symlink in bin
+        ln -sf "$NPM_GLOBAL_DIR/dist/cli/index.js" "$NPM_BIN_DIR/synclaude" >/dev/null 2>&1
+
+        # Set executable permissions
+        chmod +x "$NPM_GLOBAL_DIR/dist/cli/index.js" >/dev/null 2>&1
+        chmod +x "$NPM_BIN_DIR/synclaude" >/dev/null 2>&1
+
+        progress
+        NPM_GLOBAL_INSTALL=true
+        log "Package installed manually via built-from-source method"
+
+        # If the above failed for any reason, fallback to npm registry
+        if [ ! -f "$NPM_BIN_DIR/synclaude" ] || [ ! -x "$NPM_BIN_DIR/synclaude" ]; then
+            log "Source build failed, trying npm registry fallback"
+            if npm install -g synclaude >/dev/null 2>&1; then
+                progress
+                NPM_GLOBAL_INSTALL=true
+                log "Package installed globally via npm (fallback)"
+            else
+                error "Both source build and npm registry install failed"
+                exit 1
+            fi
+        fi
     else
-        error "Failed to install dependencies or build project"
-        exit 1
+        # Fallback to manual installation (requires PATH setup)
+        log "Falling back to manual installation"
+        progress
+
+        # Clean up any existing installation
+        rm -rf "$INSTALL_DIR"
+        mkdir -p "$INSTALL_DIR"
+
+        # Download and extract repository
+        cd "$INSTALL_DIR"
+        progress
+        if command_exists curl; then
+            if curl -sL "$TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
+                progress
+            else
+                error "Failed to download repository with curl"
+                exit 1
+            fi
+        elif command_exists wget; then
+            if wget -qO- "$TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
+                progress
+            else
+                error "Failed to download repository with wget"
+                exit 1
+            fi
+        fi
+
+        # Install dependencies and build
+        progress
+        if npm install --silent >/dev/null 2>&1 && npm run build >/dev/null 2>&1; then
+            progress
+            ln -sf "$INSTALL_DIR/dist/cli/index.js" "$BIN_DIR/synclaude"
+            chmod +x "$BIN_DIR/synclaude"
+        else
+            error "Failed to install dependencies or build project"
+            exit 1
+        fi
     fi
 }
 
 # Update PATH
 update_path() {
-    if ! echo "$PATH" | grep -q "$BIN_DIR"; then
-        # Detect shell and update appropriate config file
-        SHELL_NAME=$(basename "$SHELL")
-        case "$SHELL_NAME" in
-            bash)
-                if [ -f "$HOME/.bashrc" ]; then
-                    echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.bashrc"
-                    SHELL_CONFIG="$HOME/.bashrc"
-                elif [ -f "$HOME/.bash_profile" ]; then
-                    echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.bash_profile"
-                    SHELL_CONFIG="$HOME/.bash_profile"
-                fi
-                ;;
-            zsh)
-                echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.zshrc"
-                SHELL_CONFIG="$HOME/.zshrc"
-                ;;
-            fish)
-                echo "set -gx PATH \$PATH $BIN_DIR" >> "$HOME/.config/fish/config.fish"
-                SHELL_CONFIG="$HOME/.config/fish/config.fish"
-                ;;
-            *)
-                warn "Unsupported shell: $SHELL_NAME"
-                warn "Please add $BIN_DIR to your PATH manually"
-                SHELL_CONFIG=""
-                ;;
-        esac
+    # Only update PATH for manual installations or if npm global install failed
+    if [ "$NPM_GLOBAL_INSTALL" = "true" ]; then
+        # For npm global install, determine the actual npm bin directory
+        NPM_BIN_DIR=$(npm bin -g 2>/dev/null)
+        if [ -z "$NPM_BIN_DIR" ]; then
+            NPM_BIN_DIR=$(dirname $(dirname $(npm config get prefix)))/bin
+        fi
 
-        if [ -n "$SHELL_CONFIG" ]; then
-            PATH_UPDATED=true
+        if ! echo "$PATH" | grep -q "$NPM_BIN_DIR"; then
+            # Detect shell and update appropriate config file
+            SHELL_NAME=$(basename "$SHELL")
+            case "$SHELL_NAME" in
+                bash)
+                    if [ -f "$HOME/.bashrc" ]; then
+                        echo "export PATH=\"\$PATH:$NPM_BIN_DIR\"" >> "$HOME/.bashrc"
+                        SHELL_CONFIG="$HOME/.bashrc"
+                    elif [ -f "$HOME/.bash_profile" ]; then
+                        echo "export PATH=\"\$PATH:$NPM_BIN_DIR\"" >> "$HOME/.bash_profile"
+                        SHELL_CONFIG="$HOME/.bash_profile"
+                    fi
+                    ;;
+                zsh)
+                    echo "export PATH=\"\$PATH:$NPM_BIN_DIR\"" >> "$HOME/.zshrc"
+                    SHELL_CONFIG="$HOME/.zshrc"
+                    ;;
+                fish)
+                    echo "set -gx PATH \$PATH $NPM_BIN_DIR" >> "$HOME/.config/fish/config.fish"
+                    SHELL_CONFIG="$HOME/.config/fish/config.fish"
+                    ;;
+                *)
+                    warn "Unsupported shell: $SHELL_NAME"
+                    warn "Please add $NPM_BIN_DIR to your PATH manually"
+                    SHELL_CONFIG=""
+                    ;;
+            esac
+
+            if [ -n "$SHELL_CONFIG" ]; then
+                PATH_UPDATED=true
+                NPM_BIN_DIR_USED="$NPM_BIN_DIR"
+            fi
+        else
+            PATH_IN_PATH=true
+            NPM_BIN_DIR_USED="$NPM_BIN_DIR"
         fi
     else
-        PATH_IN_PATH=true
+        # For manual installation, use our bin directory
+        if ! echo "$PATH" | grep -q "$BIN_DIR"; then
+            # Detect shell and update appropriate config file
+            SHELL_NAME=$(basename "$SHELL")
+            case "$SHELL_NAME" in
+                bash)
+                    if [ -f "$HOME/.bashrc" ]; then
+                        echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.bashrc"
+                        SHELL_CONFIG="$HOME/.bashrc"
+                    elif [ -f "$HOME/.bash_profile" ]; then
+                        echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.bash_profile"
+                        SHELL_CONFIG="$HOME/.bash_profile"
+                    fi
+                    ;;
+                zsh)
+                    echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.zshrc"
+                    SHELL_CONFIG="$HOME/.zshrc"
+                    ;;
+                fish)
+                    echo "set -gx PATH \$PATH $BIN_DIR" >> "$HOME/.config/fish/config.fish"
+                    SHELL_CONFIG="$HOME/.config/fish/config.fish"
+                    ;;
+                *)
+                    warn "Unsupported shell: $SHELL_NAME"
+                    warn "Please add $BIN_DIR to your PATH manually"
+                    SHELL_CONFIG=""
+                    ;;
+            esac
+
+            if [ -n "$SHELL_CONFIG" ]; then
+                PATH_UPDATED=true
+            fi
+        else
+            PATH_IN_PATH=true
+        fi
     fi
 }
 
 # Verify installation
 verify_installation() {
+    # For npm global install, the command should be available immediately
+    # For manual install, we need to add the bin directory to PATH temporarily for verification
+    if [ "$NPM_GLOBAL_INSTALL" != "true" ] && [ "$PATH_IN_PATH" != "true" ]; then
+        export PATH="$PATH:$BIN_DIR"
+    fi
+
     if command_exists synclaude; then
         progress
         SYNCLAUDE_VERSION=$(synclaude --version 2>/dev/null || echo "unknown")
         VERSION_INSTALLED="$SYNCLAUDE_VERSION"
+
+        # Test that it actually works
+        if ! synclaude --help >/dev/null 2>&1; then
+            error "synclaude command found but failed to execute correctly"
+            error "This may indicate a module resolution issue"
+            exit 1
+        fi
     else
-        error "synclaude command not found after installation"
-        error "Please ensure $BIN_DIR is in your PATH"
+        if [ "$NPM_GLOBAL_INSTALL" = "true" ]; then
+            NPM_BIN_DIR=$(npm bin -g 2>/dev/null)
+            if [ -z "$NPM_BIN_DIR" ]; then
+                NPM_BIN_DIR=$(dirname $(dirname $(npm config get prefix)))/bin
+            fi
+            error "synclaude command not found after installation"
+            error "Please ensure $NPM_BIN_DIR is in your PATH"
+        else
+            error "synclaude command not found after installation"
+            error "Please ensure $BIN_DIR is in your PATH"
+        fi
         exit 1
     fi
 }
@@ -183,13 +345,30 @@ verify_installation() {
 show_final_message() {
     echo ""
     echo "✓ synclaude installed successfully!"
+    echo "Version: $VERSION_INSTALLED"
 
-    if [ "$PATH_UPDATED" = "true" ]; then
-        echo "⚠️  Please restart your terminal or run 'source $SHELL_CONFIG'"
+    if [ "$NPM_GLOBAL_INSTALL" = "true" ]; then
+        echo "Installation method: npm global install (recommended)"
+        NPM_BIN_DIR_USED=${NPM_BIN_DIR_USED:-$(npm bin -g 2>/dev/null)}
+        if [ "$PATH_UPDATED" = "true" ]; then
+            echo "⚠️  Please restart your terminal or run 'source $SHELL_CONFIG'"
+            echo "   Added $NPM_BIN_DIR_USED to PATH"
+        fi
+    else
+        echo "Installation method: manual install"
+        if [ "$PATH_UPDATED" = "true" ]; then
+            echo "⚠️  Please restart your terminal or run 'source $SHELL_CONFIG'"
+            echo "   Added $BIN_DIR to PATH"
+        fi
     fi
 
     echo ""
     echo "Run 'synclaude setup' to configure, then 'synclaude' to start."
+    echo ""
+    echo "If you encounter MODULE_NOT_FOUND errors:"
+    echo "1. Make sure the bin directory is in your PATH"
+    echo "2. Try restarting your terminal"
+    echo "3. Run 'synclaude doctor' for diagnostics"
 }
 
 # Main installation flow

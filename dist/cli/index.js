@@ -10,6 +10,29 @@ while (packageDir !== '/' && !fs.existsSync(path.join(packageDir, 'package.json'
   packageDir = path.dirname(packageDir);
 }
 
+// Additional search for npm global installations
+if (packageDir === '/') {
+  // Try common npm global installation directories
+  const npmPrefix = process.env.npm_config_prefix || '';
+  const homeDir = require('os').homedir();
+
+  const possiblePrefixes = [
+    npmPrefix,
+    path.join(homeDir, '.local'),
+    path.join(homeDir, '.npm-global'),
+    '/usr/local',
+    '/usr'
+  ];
+
+  for (const prefix of possiblePrefixes) {
+    const possiblePackageDir = path.join(prefix, 'lib', 'node_modules', 'synclaude');
+    if (fs.existsSync(path.join(possiblePackageDir, 'package.json'))) {
+      packageDir = possiblePackageDir;
+      break;
+    }
+  }
+}
+
 // Add all possible node_modules directories to module search paths
 const addNodeModulesToPath = (baseDir) => {
   const nodeModulesPath = path.join(baseDir, 'node_modules');

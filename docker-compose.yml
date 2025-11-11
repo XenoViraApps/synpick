@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  synclaude-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: synclaude-test
+    volumes:
+      - ./logs:/home/testuser/logs
+      - ./test-results:/home/testuser/test-results
+    environment:
+      - NODE_ENV=testing
+      - VERBOSE=true
+      - DEBUG=synclaude:*
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash"]
+    command: ["-c", "tail -f /dev/null"]
+    networks:
+      - synclaude-network
+
+  synclaude-test-alpine:
+    build:
+      context: .
+      dockerfile: Dockerfile.alpine
+    container_name: synclaude-test-alpine
+    volumes:
+      - ./logs:/home/testuser/logs
+      - ./test-results:/home/testuser/test-results
+    environment:
+      - NODE_ENV=testing
+      - VERBOSE=true
+      - DEBUG=synclaude:*
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "tail -f /dev/null"]
+    networks:
+      - synclaude-network
+
+networks:
+  synclaude-network:
+    driver: bridge
+
+volumes:
+  logs:
+  test-results:
