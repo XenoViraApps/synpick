@@ -1,4 +1,48 @@
 #!/usr/bin/env node
+
+// Set up module resolution before anything else
+const path = require('path');
+const fs = require('fs');
+
+// Find the package directory by looking for package.json
+let packageDir = __dirname;
+while (packageDir !== '/' && !fs.existsSync(path.join(packageDir, 'package.json'))) {
+  packageDir = path.dirname(packageDir);
+}
+
+// Add all possible node_modules directories to module search paths
+const addNodeModulesToPath = (baseDir) => {
+  const nodeModulesPath = path.join(baseDir, 'node_modules');
+  if (fs.existsSync(nodeModulesPath)) {
+    const Module = require('module');
+
+    // Add to global paths if not already there
+    if (!Module.globalPaths.includes(nodeModulesPath)) {
+      Module.globalPaths.unshift(nodeModulesPath);
+    }
+
+    // Add to current module paths if not already there
+    if (!module.paths.includes(nodeModulesPath)) {
+      module.paths.unshift(nodeModulesPath);
+    }
+  }
+};
+
+// Add node_modules from current directory and all parent directories
+let currentDir = packageDir;
+while (currentDir !== path.dirname(currentDir)) {
+  addNodeModulesToPath(currentDir);
+  currentDir = path.dirname(currentDir);
+}
+
+// Set NODE_PATH environment variable
+const nodeModulesPath = path.join(packageDir, 'node_modules');
+if (fs.existsSync(nodeModulesPath)) {
+  process.env.NODE_PATH = process.env.NODE_PATH
+    ? `${nodeModulesPath}${path.delimiter}${process.env.NODE_PATH}`
+    : nodeModulesPath;
+}
+
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = main;
