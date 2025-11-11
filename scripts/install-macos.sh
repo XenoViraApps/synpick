@@ -28,20 +28,20 @@ if command_exists synclaude; then
     npm uninstall -g synclaude 2>/dev/null || true
 fi
 
-echo "📦 Installing Synclaude v1.4.6..."
+echo "📦 Installing Synclaude v1.5.0..."
 
 # Try installation methods in order of preference
 
 # Method 1: Try without sudo first
 echo "🔧 Attempting installation without sudo..."
-if npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz 2>/dev/null; then
+if npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.5.0/synclaude-1.5.0.tgz 2>/dev/null; then
     echo "✅ Installation successful!"
 else
     echo "⚠️  Permission denied. Trying alternative methods..."
 
     # Method 2: Try with sudo
     echo "🔧 Attempting installation with sudo..."
-    if sudo npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz; then
+    if sudo npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.5.0/synclaude-1.5.0.tgz; then
         echo "✅ Installation successful with sudo!"
     else
         echo "⚠️  Sudo installation failed. Setting up user npm directory..."
@@ -71,12 +71,12 @@ else
 
         # Try installation again
         echo "🔧 Attempting installation with user npm directory..."
-        if npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz; then
+        if npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.5.0/synclaude-1.5.0.tgz; then
             echo "✅ Installation successful with user directory!"
         else
             echo "❌ All installation methods failed."
             echo "💡 Manual installation instructions:"
-            echo "   1. Download: https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz"
+            echo "   1. Download: https://github.com/jeffersonwarrior/synclaude/releases/download/v1.5.0/synclaude-1.5.0.tgz"
             echo "   2. Extract and run: sudo npm install -g ."
             exit 1
         fi

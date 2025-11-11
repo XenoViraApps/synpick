@@ -31,12 +31,12 @@ synclaude is a modern TypeScript/Node.js application that provides a seamless in
 
 **Linux/Windows:**
 ```bash
-npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz
+npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.5.0/synclaude-1.5.0.tgz
 ```
 
 **macOS (if permissions error):**
 ```bash
-sudo npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz
+sudo npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.5.0/synclaude-1.5.0.tgz
 ```
 
 **Alternative for macOS (permanent fix):**
@@ -45,7 +45,7 @@ mkdir ~/.npm-global
 npm config set prefix '~/.npm-global'
 echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
-npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz
+npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.5.0/synclaude-1.5.0.tgz
 ```
 
 #### Option 2: Download from GitHub Releases
@@ -78,7 +78,7 @@ sudo npm link
 
 **Important**:
 - Direct git installation (`npm install -g https://github.com/.../synclaude.git`) is not supported due to npm's git installation limitations
-- Use the specific release tarball: `https://github.com/jeffersonwarrior/synclaude/releases/download/v1.4.6/synclaude-1.4.6.tgz`
+- Use the specific release tarball: `https://github.com/jeffersonwarrior/synclaude/releases/download/v1.5.0/synclaude-1.5.0.tgz`
 - Or visit [GitHub Releases](https://github.com/jeffersonwarrior/synclaude/releases) for the latest version
 
 ### Uninstallation
