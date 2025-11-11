@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Synclaude Installation Script
-# One-line installer: curl -sSL https://raw.githubusercontent.com/parnexcodes/synclaude/main/scripts/install.sh | bash
+# One-line installer: curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash
 
 set -e
 
@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # Default installation directory
 INSTALL_DIR="$HOME/.local/share/synclaude"
 BIN_DIR="$HOME/.local/bin"
-REPO_URL="https://github.com/parnexcodes/synclaude"
+REPO_URL="https://github.com/jeffersonwarrior/synclaude"
 TARBALL_URL="$REPO_URL/archive/main.tar.gz"
 
 # Script variables
