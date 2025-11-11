@@ -7,7 +7,6 @@
     "synclaude": "./dist/cli/index.js"
   },
   "scripts": {
-    "prepare": "npm run build",
     "build": "tsc && chmod +x dist/cli/index.js",
     "build:tsc": "tsc",
     "dev": "ts-node src/index.ts",
