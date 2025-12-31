@@ -70,7 +70,7 @@ describe('ApiClient', () => {
 
     it('should set default User-Agent header', () => {
       const instance = client.getAxiosInstance();
-      expect(instance.defaults.headers['User-Agent']).toBe('synclaude/1.0.0');
+      expect(instance.defaults.headers['User-Agent']).toBe('synpick/1.0.0');
     });
 
     it('should merge custom headers with defaults', () => {

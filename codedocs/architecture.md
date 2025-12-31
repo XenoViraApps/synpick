@@ -82,17 +82,17 @@
 - `index.ts` - CLI entry point with error handling
 
 **Key Commands:**
-- `synclaude` - Launch Claude Code (main command)
-- `synclaude model` - Interactive model selection
-- `synclaude thinking-model` - Select thinking model
-- `synclaude models` - List available models
-- `synclaude search <query>` - Search models
-- `synclaude config show/set/reset` - Configuration management
-- `synclaude setup` - First-time setup wizard
-- `synclaude doctor` - System health check
-- `synclaude update` - Update Claude Code
-- `synclaude dangerously` - Launch with --dangerously-skip-permissions
-- `synclaude install` - Local system-wide installation
+- `synpick` - Launch Claude Code (main command)
+- `synpick model` - Interactive model selection
+- `synpick thinking-model` - Select thinking model
+- `synpick models` - List available models
+- `synpick search <query>` - Search models
+- `synpick config show/set/reset` - Configuration management
+- `synpick setup` - First-time setup wizard
+- `synpick doctor` - System health check
+- `synpick update` - Update Claude Code
+- `synpick dangerously` - Launch with --dangerously-skip-permissions
+- `synpick install` - Local system-wide installation
 
 ### 2. Core Application (`src/core/app.ts`)
 
@@ -167,9 +167,9 @@ interface AppConfig {
 ```
 
 **Storage:**
-- Location: `~/.config/synclaude/config.json`
+- Location: `~/.config/synpick/config.json`
 - Permissions: 0o600 (user-only)
-- Backup: `~/.config/synclaude/config.json.backup`
+- Backup: `~/.config/synpick/config.json.backup`
 
 ### 4. Model Layer (`src/models/`)
 
@@ -200,7 +200,7 @@ interface ModelInfo {
 ```
 
 **Cache Details:**
-- Location: `~/.config/synclaude/models_cache.json`
+- Location: `~/.config/synpick/models_cache.json`
 - Duration: Configurable (default 24 hours)
 - Structure:
 ```json
@@ -378,7 +378,7 @@ ModelManager is created only when needed:
 private getModelManager(): ModelManager {
   if (!this.modelManager) {
     const config = this.configManager.config;
-    const cacheFile = join(homedir(), '.config', 'synclaude', 'models_cache.json');
+    const cacheFile = join(homedir(), '.config', 'synpick', 'models_cache.json');
     this.modelManager = new ModelManager({
       apiKey: config.apiKey,
       modelsApiUrl: config.modelsApiUrl,
@@ -461,7 +461,7 @@ export class ApiError extends Error {
 ## File System Layout
 
 ```
-~/.config/synclaude/
+~/.config/synpick/
 ├── config.json           # User configuration
 ├── config.json.backup    # Backup of last config
 └── models_cache.json     # Cached model data

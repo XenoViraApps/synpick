@@ -13,10 +13,10 @@
 
 ## Overview
 
-The synclaude CLI provides the following command structure:
+The synpick CLI provides the following command structure:
 
 ```
-synclaude [global-options] [command] [command-options]
+synpick [global-options] [command] [command-options]
 ```
 
 ### Global Options
@@ -42,34 +42,34 @@ Any unknown options are passed through to Claude Code, including:
 
 ## Main Command
 
-### `synclaude` (default)
+### `synpick` (default)
 
 **Description:** Launch Claude Code with the saved or specified model.
 
 **Usage:**
 ```bash
-synclaude [options] [claude-code-options...]
+synpick [options] [claude-code-options...]
 ```
 
 **Examples:**
 ```bash
 # Use saved model
-synclaude
+synpick
 
 # Use specific model
-synclaude --model anthropic:claude-3-5-sonnet-20241022
+synpick --model anthropic:claude-3-5-sonnet-20241022
 
 # Use saved model with thinking model
-synclaude --thinking-model deepseek:deepseek-r1
+synpick --thinking-model deepseek:deepseek-r1
 
 # Pass options to Claude Code
-synclaude --dangerously-skip-permissions
+synpick --dangerously-skip-permissions
 
 # Verbose mode
-synclaude --verbose
+synpick --verbose
 
 # Quiet mode
-synclaude --quiet
+synpick --quiet
 ```
 
 **Behavior:**
@@ -83,13 +83,13 @@ synclaude --quiet
 
 ## Model Commands
 
-### `synclaude model`
+### `synpick model`
 
 **Description:** Interactive model selection and launch Claude Code.
 
 **Usage:**
 ```bash
-synclaude model [options]
+synpick model [options]
 ```
 
 **Options:**
@@ -101,10 +101,10 @@ synclaude model [options]
 **Examples:**
 ```bash
 # Interactive selection
-synclaude model
+synpick model
 
 # Verbose mode
-synclaude model --verbose
+synpick model --verbose
 ```
 
 **Behavior:**
@@ -125,13 +125,13 @@ synclaude model --verbose
 | Space | Launch with current selections |
 | q / Escape | Quit without saving |
 
-### `synclaude thinking-model`
+### `synpick thinking-model`
 
 **Description:** Interactive thinking model selection and save to config.
 
 **Usage:**
 ```bash
-synclaude thinking-model [options]
+synpick thinking-model [options]
 ```
 
 **Options:**
@@ -141,7 +141,7 @@ synclaude thinking-model [options]
 
 **Examples:**
 ```bash
-synclaude thinking-model
+synpick thinking-model
 ```
 
 **Behavior:**
@@ -150,13 +150,13 @@ synclaude thinking-model
 3. Allows selection of a thinking model
 4. Saves to configuration as `selectedThinkingModel`
 
-### `synclaude models`
+### `synpick models`
 
 **Description:** List available models.
 
 **Usage:**
 ```bash
-synclaude models [options]
+synpick models [options]
 ```
 
 **Options:**
@@ -167,10 +167,10 @@ synclaude models [options]
 **Examples:**
 ```bash
 # List from cache
-synclaude models
+synpick models
 
 # Force refresh from API
-synclaude models --refresh
+synpick models --refresh
 ```
 
 **Output Format:**
@@ -190,13 +190,13 @@ Available Models:
     ID: openai:gpt-4o-mini-2024-07-18
 ```
 
-### `synclaude search <query>`
+### `synpick search <query>`
 
 **Description:** Search models by name or provider.
 
 **Usage:**
 ```bash
-synclaude search <query> [options]
+synpick search <query> [options]
 ```
 
 **Options:**
@@ -207,13 +207,13 @@ synclaude search <query> [options]
 **Examples:**
 ```bash
 # Search by name
-synclaude search sonnet
+synpick search sonnet
 
 # Search by provider
-synclaude search anthropic
+synpick search anthropic
 
 # Force refresh while searching
-synclaude search deepseek --refresh
+synpick search deepseek --refresh
 ```
 
 **Search Fields:**
@@ -225,13 +225,13 @@ synclaude search deepseek --refresh
 
 ## Configuration Commands
 
-### `synclaude config show`
+### `synpick config show`
 
 **Description:** Show current configuration.
 
 **Usage:**
 ```bash
-synclaude config show
+synpick config show
 ```
 
 **Output Format:**
@@ -250,13 +250,13 @@ Update Check Interval: 24 hours
 Max Token Size: 128000
 ```
 
-### `synclaude config set <key> <value>`
+### `synpick config set <key> <value>`
 
 **Description:** Set configuration value.
 
 **Usage:**
 ```bash
-synclaude config set <key> <value>
+synpick config set <key> <value>
 ```
 
 **Supported Keys:**
@@ -275,25 +275,25 @@ synclaude config set <key> <value>
 **Examples:**
 ```bash
 # Set API key
-synclaude config set apiKey sk-xxxxxxxxxx
+synpick config set apiKey sk-xxxxxxxxxx
 
 # Set cache duration to 48 hours
-synclaude config set cacheDurationHours 48
+synpick config set cacheDurationHours 48
 
 # Disable auto-update
-synclaude config set autoUpdateClaudeCode false
+synpick config set autoUpdateClaudeCode false
 
 # Set max token size
-synclaude config set maxTokenSize 200000
+synpick config set maxTokenSize 200000
 ```
 
-### `synclaude config reset`
+### `synpick config reset`
 
 **Description:** Reset configuration to defaults (requires confirmation).
 
 **Usage:**
 ```bash
-synclaude config reset
+synpick config reset
 ```
 
 **Behavior:**
@@ -305,13 +305,13 @@ synclaude config reset
 
 ## System Commands
 
-### `synclaude setup`
+### `synpick setup`
 
 **Description:** Run initial setup.
 
 **Usage:**
 ```bash
-synclaude setup
+synpick setup
 ```
 
 **Behavior:**
@@ -325,13 +325,13 @@ synclaude setup
 2. `Test API connection? (Y/n):` (defaults to yes)
 3. `Select a model now? (Y/n):` (defaults to yes)
 
-### `synclaude doctor`
+### `synpick doctor`
 
 **Description:** Check system health and configuration.
 
 **Usage:**
 ```bash
-synclaude doctor
+synpick doctor
 ```
 
 **Output Format:**
@@ -357,13 +357,13 @@ Max Token Size: 128000
 - API connection
 - Configuration summary
 
-### `synclaude update`
+### `synpick update`
 
 **Description:** Update Claude Code to the latest version.
 
 **Usage:**
 ```bash
-synclaude update [options]
+synpick update [options]
 ```
 
 **Options:**
@@ -372,27 +372,27 @@ synclaude update [options]
 | `--force` | `-f` | Force update even if already up to date |
 
 **Behavior:**
-1. Checks for synclaude updates from GitHub
-2. Updates synclaude if available (via installer script)
+1. Checks for synpick updates from GitHub
+2. Updates synpick if available (via installer script)
 3. Checks for Claude Code updates from npm
 4. Updates Claude Code if available (via npm or installer)
 
 **Examples:**
 ```bash
 # Normal update
-synclaude update
+synpick update
 
 # Force update
-synclaude update --force
+synpick update --force
 ```
 
-### `synclaude check-update`
+### `synpick check-update`
 
 **Description:** Check if there are Claude Code updates available.
 
 **Usage:**
 ```bash
-synclaude check-update
+synpick check-update
 ```
 
 **Output Format:**
@@ -402,10 +402,10 @@ Current version: 2.0.76
 Latest version: 2.1.0
 
 ✓ Update available!
-Run "synclaude update" to update Claude Code
+Run "synpick update" to update Claude Code
 ```
 
-### `synclaude dangerously`
+### `synpick dangerously`
 
 **Description:** Launch Claude Code with `--dangerously-skip-permissions` using last used models.
 
@@ -413,7 +413,7 @@ Run "synclaude update" to update Claude Code
 
 **Usage:**
 ```bash
-synclaude dangerously [options]
+synpick dangerously [options]
 ```
 
 **Options:**
@@ -426,19 +426,19 @@ synclaude dangerously [options]
 **Examples:**
 ```bash
 # Use saved models with dangerous flags
-synclaude dangerously
+synpick dangerously
 
 # Force model selection
-synclaude dangerously --force
+synpick dangerously --force
 ```
 
-### `synclaude install`
+### `synpick install`
 
-**Description:** Install synclaude from local directory to system-wide.
+**Description:** Install synpick from local directory to system-wide.
 
 **Usage:**
 ```bash
-synclaude install [options]
+synpick install [options]
 ```
 
 **Options:**
@@ -458,39 +458,39 @@ synclaude install [options]
 **Examples:**
 ```bash
 # Install
-synclaude install
+synpick install
 
 # Verbose installation
-synclaude install --verbose
+synpick install --verbose
 
 # Force reinstall
-synclaude install --force --verbose
+synpick install --force --verbose
 ```
 
 ---
 
 ## Cache Commands
 
-### `synclaude cache clear`
+### `synpick cache clear`
 
 **Description:** Clear model cache.
 
 **Usage:**
 ```bash
-synclaude cache clear
+synpick cache clear
 ```
 
 **Behavior:**
-- Deletes `~/.config/synclaude/models_cache.json`
+- Deletes `~/.config/synpick/models_cache.json`
 - Next model fetch will refresh from API
 
-### `synclaude cache info`
+### `synpick cache info`
 
 **Description:** Show cache information.
 
 **Usage:**
 ```bash
-synclaude cache info
+synpick cache info
 ```
 
 **Output Format:**
@@ -498,13 +498,13 @@ synclaude cache info
 Cache Information:
 ==================
 Status: Valid  (or Expired)
-File: /home/user/.config/synclaude/models_cache.json
+File: /home/user/.config/synpick/models_cache.json
 Size: 45678 bytes
 Models: 42
 Modified: 2024-12-31T12:34:56.789Z
 ```
 
-### `synclaude cache`
+### `synpick cache`
 
 **Description:** Cache management group command.
 
@@ -544,27 +544,27 @@ Modified: 2024-12-31T12:34:56.789Z
 
 ```bash
 # First-time setup
-synclaude setup
+synpick setup
 
 # Select and use a model
-synclaude model
+synpick model
 
 # Use a specific model with thinking model
-synclaude --model anthropic:claude-3-5-sonnet-20241022 --thinking-model deepseek:deepseek-r1
+synpick --model anthropic:claude-3-5-sonnet-20241022 --thinking-model deepseek:deepseek-r1
 
 # Check system health
-synclaude doctor
+synpick doctor
 
 # Update everything
-synclaude update
+synpick update
 
 # Check for updates only
-synclaude check-update
+synpick check-update
 
 # Search for a model
-synclaude search sonnet
+synpick search sonnet
 
 # Clear cache and refresh models
-synclaude cache clear
-synclaude models --refresh
+synpick cache clear
+synpick models --refresh
 ```

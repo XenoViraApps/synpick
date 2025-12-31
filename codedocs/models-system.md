@@ -326,7 +326,7 @@ constructor(options: ModelCacheOptions)
 **Example:**
 ```typescript
 const cache = new ModelCache({
-  cacheFile: '~/.config/synclaude/models_cache.json',
+  cacheFile: '~/.config/synpick/models_cache.json',
   cacheDurationHours: 24
 });
 ```
@@ -476,7 +476,7 @@ constructor(options: ModelManagerOptions)
 const manager = new ModelManager({
   apiKey: 'sk-xxxxxxxxxx',
   modelsApiUrl: 'https://api.synthetic.new/openai/v1/models',
-  cacheFile: '~/.config/synclaude/models_cache.json',
+  cacheFile: '~/.config/synpick/models_cache.json',
   cacheDurationHours: 24
 });
 ```
@@ -754,7 +754,7 @@ import { ModelManager } from './models/manager';
 const manager = new ModelManager({
   apiKey: 'sk-xxxxxxxxxx',
   modelsApiUrl: 'https://api.synthetic.new/openai/v1/models',
-  cacheFile: '~/.config/synclaude/models_cache.json',
+  cacheFile: '~/.config/synpick/models_cache.json',
   cacheDurationHours: 24
 });
 

@@ -93,7 +93,7 @@ System health check that verifies:
 - Configuration summary
 
 ##### `updateClaudeCode(force?)`
-Updates both synclaude (via GitHub) and Claude Code (via npm).
+Updates both synpick (via GitHub) and Claude Code (via npm).
 
 **Parameters:**
 - `force: boolean` - Force update even if up to date
@@ -711,7 +711,7 @@ Main installation function that detects the best installation method and execute
 async function uninstallSynclaude(): Promise<void>
 ```
 
-Uninstalls synclaude from the system.
+Uninstalls synpick from the system.
 
 **Process:**
 1. Detect installation method
@@ -784,12 +784,12 @@ Gets the npm global binaries directory.
 async function verifyInstallation(): Promise<boolean>
 ```
 
-Verifies that synclaude is correctly installed and accessible.
+Verifies that synpick is correctly installed and accessible.
 
 **Returns:** `true` if verification passes, `false` otherwise
 
 **Checks:**
-- Can execute `synclaude --version`
+- Can execute `synpick --version`
 - Version output is valid
 - Binary is accessible from current PATH
 
@@ -815,7 +815,7 @@ Checks for and removes stale symlinks in the npm bin directory.
 async function npmGlobalInstallPathExists(): Promise<boolean>
 ```
 
-Checks if synclaude is installed globally via npm.
+Checks if synpick is installed globally via npm.
 
 **Returns:** `true` if installed, `false` otherwise
 
@@ -825,6 +825,6 @@ Checks if synclaude is installed globally via npm.
 function getSynclaudeGlobalInstallPath(): string | null
 ```
 
-Gets the global installation path if synclaude is installed via npm.
+Gets the global installation path if synpick is installed via npm.
 
 **Returns:** The installation path, or `null` if not found

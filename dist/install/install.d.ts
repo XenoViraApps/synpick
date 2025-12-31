@@ -37,7 +37,7 @@ export interface PathUpdateResult {
     error?: string;
 }
 /**
- * Check for and clean up stale synclaude symlinks
+ * Check for and clean up stale synpick symlinks
  */
 export declare function checkCleanStaleSymlinks(options?: {
     verbose?: boolean;
@@ -68,7 +68,7 @@ export declare function addToPathIfNotExists(directory: string, options?: {
  */
 export declare function getNpmBinDir(): string;
 /**
- * Verifies installation by checking if synclaude command is available
+ * Verifies installation by checking if synpick command is available
  */
 export declare function verifyInstallation(method: InstallMethodEnum): Promise<{
     success: boolean;

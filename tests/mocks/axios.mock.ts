@@ -20,7 +20,7 @@ const createMockAxiosInstance = (options: any = {}) => {
       timeout: options.timeout !== undefined ? options.timeout : 30000,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'synclaude/1.0.0',
+        'User-Agent': 'synpick/1.0.0',
         common: {},
         ...(options.headers || {}),
       },

@@ -22,10 +22,10 @@ fi
 
 echo "✅ npm found: $(npm --version)"
 
-# Check if synclaude is already installed
-if command_exists synclaude; then
+# Check if synpick is already installed
+if command_exists synpick; then
     echo "⚠️  Synclaude is already installed. Uninstalling first..."
-    npm uninstall -g synclaude 2>/dev/null || true
+    npm uninstall -g synpick 2>/dev/null || true
 fi
 
 echo "📦 Installing Synclaude v1.6.1..."
@@ -34,14 +34,14 @@ echo "📦 Installing Synclaude v1.6.1..."
 
 # Method 1: Try without sudo first
 echo "🔧 Attempting installation without sudo..."
-if npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz 2>/dev/null; then
+if npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz 2>/dev/null; then
     echo "✅ Installation successful!"
 else
     echo "⚠️  Permission denied. Trying alternative methods..."
 
     # Method 2: Try with sudo
     echo "🔧 Attempting installation with sudo..."
-    if sudo npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz; then
+    if sudo npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz; then
         echo "✅ Installation successful with sudo!"
     else
         echo "⚠️  Sudo installation failed. Setting up user npm directory..."
@@ -71,12 +71,12 @@ else
 
         # Try installation again
         echo "🔧 Attempting installation with user npm directory..."
-        if npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz; then
+        if npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz; then
             echo "✅ Installation successful with user directory!"
         else
             echo "❌ All installation methods failed."
             echo "💡 Manual installation instructions:"
-            echo "   1. Download: https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz"
+            echo "   1. Download: https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz"
             echo "   2. Extract and run: sudo npm install -g ."
             exit 1
         fi
@@ -84,16 +84,16 @@ else
 fi
 
 # Verify installation
-if command_exists synclaude; then
+if command_exists synpick; then
     echo ""
     echo "🎉 Synclaude installed successfully!"
-    echo "📋 Version: $(synclaude --version)"
+    echo "📋 Version: $(synpick --version)"
     echo ""
     echo "🚀 Try these commands:"
-    echo "   synclaude --help"
-    echo "   synclaude dangerously"
-    echo "   synclaude dangerous    # This typo now works!"
-    echo "   synclaude config show"
+    echo "   synpick --help"
+    echo "   synpick dangerously"
+    echo "   synpick dangerous    # This typo now works!"
+    echo "   synpick config show"
     echo ""
     echo "🔧 If you see 'command not found', restart your terminal or run:"
     if [[ "$SHELL" == *"zsh"* ]]; then
@@ -102,5 +102,5 @@ if command_exists synclaude; then
         echo "   source ~/.bash_profile"
     fi
 else
-    echo "❌ Installation verification failed. Please restart your terminal and try 'synclaude --version'."
+    echo "❌ Installation verification failed. Please restart your terminal and try 'synpick --version'."
 fi

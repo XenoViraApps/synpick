@@ -603,7 +603,7 @@ ui.error(`API connection failed: ${(error as Error).message}`);
 
 // Actionable message
 ui.info('No models available. Please check your API key and connection.');
-ui.info('Run "synclaude setup" to configure your API key.');
+ui.info('Run "synpick setup" to configure your API key.');
 ```
 
 ### Error Icons
@@ -626,7 +626,7 @@ ui.coloredSuccess('Operation completed');
 ui.coloredInfo('Fetching models...');
 
 // Highlights - cyan (chalk)
-ui.highlightInfo('Run synclaude model', ['synclaude', 'model']);
+ui.highlightInfo('Run synpick model', ['synpick', 'model']);
 
 // Thinking models - yellow (chalk)
 // 🤔 Thinking indicator
@@ -637,7 +637,7 @@ ui.highlightInfo('Run synclaude model', ['synclaude', 'model']);
 ```typescript
 // API key not configured
 ui.error('No API key configured.');
-ui.info('Please run "synclaude setup" to configure your API key.');
+ui.info('Please run "synpick setup" to configure your API key.');
 
 // Network error
 ui.error('API connection failed: Network timeout');
@@ -645,7 +645,7 @@ ui.info('Check your internet connection and try again.');
 
 // Permission error
 ui.error('Failed to save configuration: Permission denied');
-ui.info('Check that you have write access to ~/.config/synclaude/');
+ui.info('Check that you have write access to ~/.config/synpick/');
 
 // Invalid input
 ui.error(`Invalid cache duration: ${value}`);

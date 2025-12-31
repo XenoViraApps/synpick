@@ -1,14 +1,14 @@
 # Code Audit Report
 
 **Date:** 2025-12-31
-**Repository:** synclaude
+**Repository:** synpick
 **Version:** 1.6.1
 
 ---
 
 ## Executive Summary
 
-The synclaude codebase is well-structured with clear separation of concerns. The application follows modern TypeScript practices and uses established libraries for CLI, UI, and data validation.
+The synpick codebase is well-structured with clear separation of concerns. The application follows modern TypeScript practices and uses established libraries for CLI, UI, and data validation.
 
 **Overall Assessment:** Excellent
 - Architecture: Clear layered design with proper separation
@@ -405,7 +405,7 @@ None
 
 ## Conclusion
 
-The synclaude codebase is excellently architected and properly maintained. The code follows modern best practices with strong type safety, good error handling, and proper separation of concerns.
+The synpick codebase is excellently architected and properly maintained. The code follows modern best practices with strong type safety, good error handling, and proper separation of concerns.
 
 **Key Improvements Since Last Audit:**
 1. **Resolved code duplication** - `isThinkingModel()` now centralized in `src/utils/model-utils.ts`

@@ -1,46 +1,46 @@
 version: '3.8'
 
 services:
-  synclaude-test:
+  synpick-test:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: synclaude-test
+    container_name: synpick-test
     volumes:
       - ./logs:/home/testuser/logs
       - ./test-results:/home/testuser/test-results
     environment:
       - NODE_ENV=testing
       - VERBOSE=true
-      - DEBUG=synclaude:*
+      - DEBUG=synpick:*
     stdin_open: true
     tty: true
     entrypoint: ["/bin/bash"]
     command: ["-c", "tail -f /dev/null"]
     networks:
-      - synclaude-network
+      - synpick-network
 
-  synclaude-test-alpine:
+  synpick-test-alpine:
     build:
       context: .
       dockerfile: Dockerfile.alpine
-    container_name: synclaude-test-alpine
+    container_name: synpick-test-alpine
     volumes:
       - ./logs:/home/testuser/logs
       - ./test-results:/home/testuser/test-results
     environment:
       - NODE_ENV=testing
       - VERBOSE=true
-      - DEBUG=synclaude:*
+      - DEBUG=synpick:*
     stdin_open: true
     tty: true
     entrypoint: ["/bin/sh"]
     command: ["-c", "tail -f /dev/null"]
     networks:
-      - synclaude-network
+      - synpick-network
 
 networks:
-  synclaude-network:
+  synpick-network:
     driver: bridge
 
 volumes:

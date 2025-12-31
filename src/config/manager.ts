@@ -14,10 +14,10 @@ export class ConfigManager {
    * Creates a new ConfigManager instance
    *
    * @param configDir - Optional custom config directory path.
-   *                    Defaults to ~/.config/synclaude
+   *                    Defaults to ~/.config/synpick
    */
   constructor(configDir?: string) {
-    this.configDir = configDir || join(homedir(), '.config', 'synclaude');
+    this.configDir = configDir || join(homedir(), '.config', 'synpick');
     this.configPath = join(this.configDir, 'config.json');
   }
 

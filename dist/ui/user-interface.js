@@ -7,7 +7,7 @@ import { StatusMessage } from './components/StatusMessage.js';
 import { BYTES_PER_KB, PERCENTAGE_MAX, DEFAULT_PROGRESS_BAR_LENGTH } from '../utils/constants.js';
 import { isThinkingModel } from '../utils/index.js';
 /**
- * UserInterface handles all user interaction for the synclaude CLI
+ * UserInterface handles all user interaction for the synpick CLI
  *
  * Provides methods for displaying messages, progress indicators,
  * user input collection, and interactive model selection.

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Synclaude is a modern TypeScript/Node.js interactive CLI tool that integrates Synthetic AI models with Claude Code. It provides model selection, configuration management, and seamless launching of Claude Code with various language models through synthetic endpoints.
 
-**Note**: This is a fork of [jeffersonwarrior/synclaude](https://github.com/jeffersonwarrior/synclaude). When making changes or documenting, be aware this is not the original repository.
+**Note**: This is a fork of [jeffersonwarrior/synpick](https://github.com/jeffersonwarrior/synpick). When making changes or documenting, be aware this is not the original repository.
 
 ## Development Commands
 
@@ -61,12 +61,12 @@ npm run lint && npm test && npm run build
 npm install && npm run build && npm link
 
 # Test the CLI
-synclaude --help
-synclaude doctor
-synclaude models
+synpick --help
+synpick doctor
+synpick models
 
 # Uninstall when done
-npm unlink -g synclaude
+npm unlink -g synpick
 ```
 
 ## Architecture Overview
@@ -87,12 +87,12 @@ The application follows a modular TypeScript architecture with clear separation 
 
 1. **Model Selection Flow**: CLI → App → ModelManager.fetch_models() → UI.selection → Launcher.launch()
 2. **Configuration Flow**: CLI → App → ConfigManager → UI prompts → Config persistence
-3. **Manual Update Flow**: Users update via `npm update -g synclaude` (standard npm package management)
+3. **Manual Update Flow**: Users update via `npm update -g synpick` (standard npm package management)
 
 ### Configuration Architecture
 
-- **Config Storage**: `~/.config/synclaude/config.json`
-- **Cache Storage**: `~/.config/synclaude/models_cache.json`
+- **Config Storage**: `~/.config/synpick/config.json`
+- **Cache Storage**: `~/.config/synpick/models_cache.json`
 - **Version Info**: `src/config/version.json`
 - **Executable**: `dist/cli/index.js` (via npm bin)
 
@@ -152,7 +152,7 @@ All UI components use Ink (React for CLI):
 
 The project supports multiple installation methods:
 1. **One-line installer**: `curl -sSL ... | bash` (npm-based installation)
-2. **Package install**: `npm install -g synclaude`
+2. **Package install**: `npm install -g synpick`
 3. **Local development**: `npm install && npm run build && npm link`
 
 Key installation files:

@@ -132,7 +132,7 @@ class ConfigManager {
 
 **Parameters:**
 - `configDir?: string` - Configuration directory path
-  - Default: `~/.config/synclaude`
+  - Default: `~/.config/synpick`
 
 **Example:**
 ```typescript
@@ -312,9 +312,9 @@ if (manager.isFirstRun()) {
 
 | File | Location | Purpose |
 |------|----------|---------|
-| `config.json` | `~/.config/synclaude/config.json` | Main configuration |
-| `config.json.backup` | `~/.config/synclaude/config.json.backup` | Backup of last config |
-| `models_cache.json` | `~/.config/synclaude/models_cache.json` | Model data cache |
+| `config.json` | `~/.config/synpick/config.json` | Main configuration |
+| `config.json.backup` | `~/.config/synpick/config.json.backup` | Backup of last config |
+| `models_cache.json` | `~/.config/synpick/models_cache.json` | Model data cache |
 
 ### File Permissions
 
@@ -369,10 +369,10 @@ const baseUrl =
 ```bash
 # Use API key from environment
 export SYNTHETIC_API_KEY="sk-xxxxxxxxxx"
-synclaude
+synpick
 
 # Override base URL (for testing)
-synclaude SYNTHETIC_BASE_URL="http://localhost:8080"
+synpick SYNTHETIC_BASE_URL="http://localhost:8080"
 ```
 
 ---
@@ -525,7 +525,7 @@ import { ModelCache } from './models/cache';
 
 const configManager = new ConfigManager();
 const cache = new ModelCache({
-  cacheFile: '~/.config/synclaude/models_cache.json',
+  cacheFile: '~/.config/synpick/models_cache.json',
   cacheDurationHours: configManager.config.cacheDurationHours
 });
 

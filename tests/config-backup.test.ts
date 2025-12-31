@@ -16,7 +16,7 @@ describe('ConfigManager - Backup Cleanup', () => {
 
   beforeEach(async () => {
     // Create a temporary directory for testing
-    tempConfigDir = join(tmpdir(), `synclaude-test-${Date.now()}`);
+    tempConfigDir = join(tmpdir(), `synpick-test-${Date.now()}`);
     await fs.mkdir(tempConfigDir, { recursive: true });
     tempConfigPath = join(tempConfigDir, 'config.json');
 

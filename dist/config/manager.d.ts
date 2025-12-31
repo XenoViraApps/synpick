@@ -8,7 +8,7 @@ export declare class ConfigManager {
      * Creates a new ConfigManager instance
      *
      * @param configDir - Optional custom config directory path.
-     *                    Defaults to ~/.config/synclaude
+     *                    Defaults to ~/.config/synpick
      */
     constructor(configDir?: string);
     get config(): AppConfig;

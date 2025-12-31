@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Synclaude Installation Script
-# One-line installer: curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash
+# One-line installer: curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash
 
 set -e
 
@@ -13,9 +13,9 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default installation directory
-INSTALL_DIR="$HOME/.local/share/synclaude"
+INSTALL_DIR="$HOME/.local/share/synpick"
 BIN_DIR="$HOME/.local/bin"
-REPO_URL="https://github.com/jeffersonwarrior/synclaude"
+REPO_URL="https://github.com/jeffersonwarrior/synpick"
 # Specify version to install from GitHub releases
 # Read from version.txt if available in the source directory, otherwise use default
 if [ -f "$(dirname "$0")/version.txt" ]; then
@@ -26,7 +26,7 @@ else
     SYNCLAUDE_VERSION="${SYNCLAUDE_VERSION:-1.6.1}"
 fi
 # Use GitHub releases instead of main branch to get specific version
-TARBALL_URL="https://github.com/jeffersonwarrior/synclaude/archive/refs/tags/v${SYNCLAUDE_VERSION}.tar.gz"
+TARBALL_URL="https://github.com/jeffersonwarrior/synpick/archive/refs/tags/v${SYNCLAUDE_VERSION}.tar.gz"
 
 # Script variables
 VERBOSE="${VERBOSE:-false}"
@@ -117,22 +117,22 @@ create_directories() {
     mkdir -p "$BIN_DIR"
 }
 
-# Clean up old synclaude installations from NVM and other locations
+# Clean up old synpick installations from NVM and other locations
 cleanup_old_installations() {
-    info "Cleaning up old synclaude installations..."
+    info "Cleaning up old synpick installations..."
 
     local found_old=0
 
     # Remove from NVM versions
     if [ -d "$HOME/.nvm" ]; then
-        for NVM_DIR in "$HOME/.nvm/versions/node"/*/lib/node_modules/synclaude; do
+        for NVM_DIR in "$HOME/.nvm/versions/node"/*/lib/node_modules/synpick; do
             if [ -d "$NVM_DIR" ]; then
                 info "Removing NVM installation: $NVM_DIR"
                 rm -rf "$NVM_DIR" || true
                 found_old=1
             fi
         done
-        for SYMLINK in "$HOME/.nvm/versions/node"/*/bin/synclaude; do
+        for SYMLINK in "$HOME/.nvm/versions/node"/*/bin/synpick; do
             if [ -L "$SYMLINK" ]; then
                 info "Removing NVM symlink: $SYMLINK"
                 rm -f "$SYMLINK" || true
@@ -144,8 +144,8 @@ cleanup_old_installations() {
     NPM_PREFIX=$(npm config get prefix 2>/dev/null || echo "")
     if [ -n "$NPM_PREFIX" ]; then
         for DIR in \
-            "$NPM_PREFIX/lib/node_modules/synclaude" \
-            "$NPM_PREFIX/bin/synclaude"
+            "$NPM_PREFIX/lib/node_modules/synpick" \
+            "$NPM_PREFIX/bin/synpick"
         do
             if [ -e "$DIR" ]; then
                 info "Removing npm global: $DIR"
@@ -157,10 +157,10 @@ cleanup_old_installations() {
 
     # Remove from common local bin directories
     for BIN_DIR_TO_CLEAN in \
-        "$HOME/.local/bin/synclaude" \
-        "$HOME/.npm-local/bin/synclaude" \
-        "/usr/local/bin/synclaude" \
-        "/usr/bin/synclaude"
+        "$HOME/.local/bin/synpick" \
+        "$HOME/.npm-local/bin/synpick" \
+        "/usr/local/bin/synpick" \
+        "/usr/bin/synpick"
     do
         if [ -e "$BIN_DIR_TO_CLEAN" ]; then
             info "Removing from bin dir: $BIN_DIR_TO_CLEAN"
@@ -169,12 +169,12 @@ cleanup_old_installations() {
         fi
     done
 
-    # Find and remove all synclaude executables from PATH directories
+    # Find and remove all synpick executables from PATH directories
     IFS=':' read -ra PATHDirs <<< "$PATH"
     for PDIR in "${PATHDirs[@]}"; do
-        if [ -e "$PDIR/synclaude" ]; then
-            info "Found synclaude in PATH: $PDIR/synclaude"
-            rm -f "$PDIR/synclaude" 2>/dev/null || sudo rm -f "$PDIR/synclaude" 2>/dev/null || true
+        if [ -e "$PDIR/synpick" ]; then
+            info "Found synpick in PATH: $PDIR/synpick"
+            rm -f "$PDIR/synpick" 2>/dev/null || sudo rm -f "$PDIR/synpick" 2>/dev/null || true
         fi
     done
 
@@ -187,7 +187,7 @@ cleanup_old_installations() {
     done
 
     if [ "$found_old" = "1" ]; then
-        info "Removed old synclaude installations"
+        info "Removed old synpick installations"
     else
         info "No old installations found"
     fi
@@ -226,7 +226,7 @@ add_path_entry() {
     esac
 }
 
-# Install synclaude package
+# Install synpick package
 install_package() {
     progress
 
@@ -238,7 +238,7 @@ install_package() {
     if npm config get prefix | grep -q "^$HOME\|^/home"; then
         NPM_CAN_INSTALL_USER=true
         info "Using user-level npm installation"
-    elif npm ls -g synclaude >/dev/null 2>&1 || [ -w "$(npm config get prefix)" ]; then
+    elif npm ls -g synpick >/dev/null 2>&1 || [ -w "$(npm config get prefix)" ]; then
         NPM_CAN_INSTALL_USER=true
         info "Using system-level npm installation"
     fi
@@ -251,16 +251,16 @@ install_package() {
 
         if [ "$LOCAL" = "true" ]; then
             # Local installation from current directory
-            info "Installing synclaude from local directory: $(pwd)"
+            info "Installing synpick from local directory: $(pwd)"
             progress
 
             NPM_PREFIX=$(npm config get prefix)
-            NPM_GLOBAL_DIR="$NPM_PREFIX/lib/node_modules/synclaude"
+            NPM_GLOBAL_DIR="$NPM_PREFIX/lib/node_modules/synpick"
             NPM_BIN_DIR="$NPM_PREFIX/bin"
 
             # Remove any existing installation
             rm -rf "$NPM_GLOBAL_DIR"
-            rm -f "$NPM_BIN_DIR/synclaude"
+            rm -f "$NPM_BIN_DIR/synpick"
 
             info "Installing dependencies..."
             progress
@@ -271,22 +271,22 @@ install_package() {
                 cp -r "$(pwd)" "$NPM_GLOBAL_DIR"
 
                 # Create symlink in bin
-                ln -sf "$NPM_GLOBAL_DIR/dist/cli/index.js" "$NPM_BIN_DIR/synclaude"
+                ln -sf "$NPM_GLOBAL_DIR/dist/cli/index.js" "$NPM_BIN_DIR/synpick"
 
                 # Set executable permissions
                 chmod +x "$NPM_GLOBAL_DIR/dist/cli/index.js"
-                chmod +x "$NPM_BIN_DIR/synclaude"
+                chmod +x "$NPM_BIN_DIR/synpick"
 
                 progress
                 NPM_GLOBAL_INSTALL=true
                 info "Package installed from local directory"
             else
-                error "Failed to build synclaude from local directory"
+                error "Failed to build synpick from local directory"
                 exit 1
             fi
         else
             # Try npm registry first, then fallback to building from source
-            info "Installing synclaude package from GitHub..."
+            info "Installing synpick package from GitHub..."
             progress
 
             # For development/direct installation, build from source first
@@ -318,7 +318,7 @@ install_package() {
 
             # Fallback: download from main branch if version specific failed
             if [ "$DOWNLOAD_SUCCESS" = false ]; then
-                MAIN_TARBALL_URL="https://github.com/jeffersonwarrior/synclaude/archive/refs/heads/main.tar.gz"
+                MAIN_TARBALL_URL="https://github.com/jeffersonwarrior/synpick/archive/refs/heads/main.tar.gz"
                 if command_exists curl; then
                     if curl -sL "$MAIN_TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
                         progress
@@ -355,22 +355,22 @@ install_package() {
             # let's use a more robust manual approach
             # Create the package structure in global node_modules
             NPM_PREFIX=$(npm config get prefix)
-            NPM_GLOBAL_DIR="$NPM_PREFIX/lib/node_modules/synclaude"
+            NPM_GLOBAL_DIR="$NPM_PREFIX/lib/node_modules/synpick"
             NPM_BIN_DIR="$NPM_PREFIX/bin"
 
             # Remove any existing installation
             rm -rf "$NPM_GLOBAL_DIR"
-            rm -f "$NPM_BIN_DIR/synclaude"
+            rm -f "$NPM_BIN_DIR/synpick"
 
             # Copy everything to global location
             cp -r "$INSTALL_DIR" "$NPM_GLOBAL_DIR"
 
             # Create symlink in bin
-            ln -sf "$NPM_GLOBAL_DIR/dist/cli/index.js" "$NPM_BIN_DIR/synclaude" >/dev/null 2>&1
+            ln -sf "$NPM_GLOBAL_DIR/dist/cli/index.js" "$NPM_BIN_DIR/synpick" >/dev/null 2>&1
 
             # Set executable permissions
             chmod +x "$NPM_GLOBAL_DIR/dist/cli/index.js" >/dev/null 2>&1
-            chmod +x "$NPM_BIN_DIR/synclaude" >/dev/null 2>&1
+            chmod +x "$NPM_BIN_DIR/synpick" >/dev/null 2>&1
 
             progress
             info "Installing..."
@@ -379,8 +379,8 @@ install_package() {
             info "Package installed from source"
 
             # Verify installation was successful
-            if [ ! -f "$NPM_BIN_DIR/synclaude" ] || [ ! -x "$NPM_BIN_DIR/synclaude" ]; then
-                error "Installation failed - synclaude not found at $NPM_BIN_DIR/synclaude"
+            if [ ! -f "$NPM_BIN_DIR/synpick" ] || [ ! -x "$NPM_BIN_DIR/synpick" ]; then
+                error "Installation failed - synpick not found at $NPM_BIN_DIR/synpick"
                 exit 1
             fi
         fi
@@ -417,7 +417,7 @@ install_package() {
 
         # Fallback: download from main branch if version specific failed
         if [ "$DOWNLOAD_SUCCESS" = false ]; then
-            MAIN_TARBALL_URL="https://github.com/jeffersonwarrior/synclaude/archive/refs/heads/main.tar.gz"
+            MAIN_TARBALL_URL="https://github.com/jeffersonwarrior/synpick/archive/refs/heads/main.tar.gz"
             if command_exists curl; then
                 if curl -sL "$MAIN_TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
                     progress
@@ -445,8 +445,8 @@ install_package() {
         progress
         if npm install --silent >/dev/null 2>&1 && npm run build >/dev/null 2>&1; then
             progress
-            ln -sf "$INSTALL_DIR/dist/cli/index.js" "$BIN_DIR/synclaude"
-            chmod +x "$BIN_DIR/synclaude"
+            ln -sf "$INSTALL_DIR/dist/cli/index.js" "$BIN_DIR/synpick"
+            chmod +x "$BIN_DIR/synpick"
         else
             error "Failed to install dependencies or build project"
             exit 1
@@ -598,22 +598,22 @@ verify_installation() {
         export PATH="$VERIFY_BIN_DIR:$PATH"
     fi
 
-    # Clear shell hash table before checking for synclaude
+    # Clear shell hash table before checking for synpick
     hash -r 2>/dev/null || true
 
-    if command_exists synclaude; then
+    if command_exists synpick; then
         progress
-        SYNCLAUDE_VERSION=$(synclaude --version 2>/dev/null || echo "unknown")
+        SYNCLAUDE_VERSION=$(synpick --version 2>/dev/null || echo "unknown")
         VERSION_INSTALLED="$SYNCLAUDE_VERSION"
         info "Detected version: $VERSION_INSTALLED"
 
         # Test that it actually works
-        if ! synclaude --help >/dev/null 2>&1; then
-            warn "synclaude --help failed, but installed version detected"
+        if ! synpick --help >/dev/null 2>&1; then
+            warn "synpick --help failed, but installed version detected"
             # Don't exit on this, just warn
         fi
     else
-        error "synclaude command not found after installation"
+        error "synpick command not found after installation"
         error "Bin directory: $VERIFY_BIN_DIR"
         error "Current PATH: $PATH"
         error ""
@@ -626,7 +626,7 @@ verify_installation() {
 # Show final message
 show_final_message() {
     echo ""
-    success "synclaude installed successfully!"
+    success "synpick installed successfully!"
     echo "Version: $VERSION_INSTALLED"
 
     # Set up nvm for Node.js v24.12.0 if nvm is available
@@ -657,7 +657,7 @@ show_final_message() {
             warn "=================================================================="
         fi
         echo ""
-        echo "synclaude command location: $NPM_BIN_DIR_USED/synclaude"
+        echo "synpick command location: $NPM_BIN_DIR_USED/synpick"
     else
         echo "Installation method: manual install"
         if [ "$PATH_UPDATED" = "true" ]; then
@@ -673,23 +673,23 @@ show_final_message() {
             warn "=================================================================="
         fi
         echo ""
-        echo "synclaude command location: $BIN_DIR/synclaude"
+        echo "synpick command location: $BIN_DIR/synpick"
     fi
 
     echo ""
     echo "Getting started:"
-    echo "  synclaude setup    # First-time configuration"
-    echo "  synclaude          # Launch Claude Code"
-    echo "  synclaude --help   # Show all commands"
+    echo "  synpick setup    # First-time configuration"
+    echo "  synpick          # Launch Claude Code"
+    echo "  synpick --help   # Show all commands"
     echo ""
     echo "If you encounter issues:"
     echo "1. Restart your terminal or run: source ~/.bashrc (or your shell config)"
-    echo "2. Run 'synclaude doctor' for diagnostics"
+    echo "2. Run 'synpick doctor' for diagnostics"
 }
 
 # Main installation flow
 main() {
-    echo -n "Installing synclaude"
+    echo -n "Installing synpick"
 
     # Pre-installation checks
     check_dependencies
@@ -719,7 +719,7 @@ case "${1:-}" in
         echo ""
         echo "This script will:"
         echo "1. Check for Node.js and npm installation"
-        echo "2. Download and install the synclaude package (or use local if --local)"
+        echo "2. Download and install the synpick package (or use local if --local)"
         echo "3. Clean up old installations"
         echo "4. Set up PATH if needed"
         echo "5. Verify the installation"

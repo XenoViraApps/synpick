@@ -222,10 +222,10 @@ Prints info with highlighted terms in cyan.
 **Example:**
 ```typescript
 ui.highlightInfo(
-  'Run synclaude model to select a model',
-  ['synclaude', 'model']
+  'Run synpick model to select a model',
+  ['synpick', 'model']
 );
-// ℹ Run synclaude model to select a model
+// ℹ Run synpick model to select a model
 //         ------ -----  (cyan)
 ```
 
@@ -816,8 +816,8 @@ ui.showStatus('success', 'Data fetched!');
 
 ```typescript
 ui.highlightInfo(
-  'Run synclaude model to select and synclaude to start',
-  ['synclaude', 'model', 'start']
+  'Run synpick model to select and synpick to start',
+  ['synpick', 'model', 'start']
 );
 // Blue info with cyan highlighted terms
 ```

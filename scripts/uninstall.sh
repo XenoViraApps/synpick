@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Synclaude Uninstallation Script
-# One-line uninstaller: curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/uninstall.sh | bash
+# One-line uninstaller: curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/uninstall.sh | bash
 
 set -e
 
@@ -13,8 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default paths
-INSTALL_DIR="$HOME/.local/share/synclaude"
-CONFIG_DIR="$HOME/.config/synclaude"
+INSTALL_DIR="$HOME/.local/share/synpick"
+CONFIG_DIR="$HOME/.config/synpick"
 BIN_DIR="$HOME/.local/bin"
 
 # Force uninstall flag
@@ -45,11 +45,11 @@ command_exists() {
 # Confirm uninstallation
 confirm_uninstall() {
     echo ""
-    warn "This will uninstall synclaude and remove all configuration files."
+    warn "This will uninstall synpick and remove all configuration files."
     echo "The following will be removed:"
-    echo "  - synclaude package (global and local installations)"
-    echo "  - Configuration files in ~/.config/synclaude"
-    echo "  - Cache files in ~/.local/share/synclaude"
+    echo "  - synpick package (global and local installations)"
+    echo "  - Configuration files in ~/.config/synpick"
+    echo "  - Cache files in ~/.local/share/synpick"
     echo ""
 
     # Check if force flag is set or running in interactive mode
@@ -79,10 +79,10 @@ confirm_uninstall() {
 
 # Uninstall global package
 uninstall_global() {
-    log "Removing global synclaude package..."
+    log "Removing global synpick package..."
 
-    if npm list -g synclaude >/dev/null 2>&1; then
-        if npm uninstall -g synclaude; then
+    if npm list -g synpick >/dev/null 2>&1; then
+        if npm uninstall -g synpick; then
             success "Global package removed"
         else
             warn "Failed to remove global package (might not be globally installed)"
@@ -94,10 +94,10 @@ uninstall_global() {
 
 # Remove npm link
 remove_npm_link() {
-    if command_exists npm && [ -L "$(which synclaude 2>/dev/null)" ]; then
+    if command_exists npm && [ -L "$(which synpick 2>/dev/null)" ]; then
         log "Removing npm link..."
         # Remove the symlink directly
-        SYNCLAUDE_PATH=$(which synclaude)
+        SYNCLAUDE_PATH=$(which synpick)
         if [ -L "$SYNCLAUDE_PATH" ]; then
             rm -f "$SYNCLAUDE_PATH"
             success "Npm link removed"
@@ -118,9 +118,9 @@ uninstall_local() {
 
 # Remove symlink
 remove_symlink() {
-    if [ -L "$BIN_DIR/synclaude" ]; then
+    if [ -L "$BIN_DIR/synpick" ]; then
         log "Removing symlink..."
-        rm -f "$BIN_DIR/synclaude"
+        rm -f "$BIN_DIR/synpick"
         success "Symlink removed"
     fi
 }
@@ -154,12 +154,12 @@ cleanup_path() {
 
 # Verify uninstallation
 verify_uninstall() {
-    if command_exists synclaude; then
-        error "synclaude command still found after uninstallation"
+    if command_exists synpick; then
+        error "synpick command still found after uninstallation"
         warn "You may need to restart your terminal or manually clean up PATH"
         exit 1
     else
-        success "synclaude has been successfully uninstalled"
+        success "synpick has been successfully uninstalled"
     fi
 }
 
@@ -170,9 +170,9 @@ main() {
     echo "=================================="
     echo ""
 
-    # Check if synclaude is installed
-    if ! command_exists synclaude && [ ! -d "$INSTALL_DIR" ] && [ ! -d "$CONFIG_DIR" ]; then
-        warn "synclaude doesn't appear to be installed"
+    # Check if synpick is installed
+    if ! command_exists synpick && [ ! -d "$INSTALL_DIR" ] && [ ! -d "$CONFIG_DIR" ]; then
+        warn "synpick doesn't appear to be installed"
         exit 0
     fi
 
@@ -192,7 +192,7 @@ main() {
 
     echo ""
     success "Uninstallation completed successfully!"
-    log "Thank you for using synclaude!"
+    log "Thank you for using synpick!"
     echo ""
 }
 
@@ -213,7 +213,7 @@ parse_args() {
                 echo "  --help, -h     Show this help message"
                 echo ""
                 echo "This script will:"
-                echo "1. Remove the synclaude package (both global and local)"
+                echo "1. Remove the synpick package (both global and local)"
                 echo "2. Remove configuration files"
                 echo "3. Remove cache files"
                 echo "4. Clean up symlinks"

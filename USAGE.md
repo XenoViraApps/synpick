@@ -22,7 +22,7 @@ Complete reference for using Synclaude with Claude Code and Synthetic AI models.
 After installation, run the setup wizard:
 
 ```bash
-synclaude setup
+synpick setup
 ```
 
 The setup wizard will guide you through:
@@ -34,10 +34,10 @@ The setup wizard will guide you through:
 
 ```bash
 # Interactive model selection (uses saved model if available)
-synclaude
+synpick
 
 # Or explicitly:
-synclaude launch
+synpick launch
 ```
 
 ---
@@ -47,7 +47,7 @@ synclaude launch
 ### Interactive Selection
 
 ```bash
-synclaude model
+synpick model
 ```
 
 This opens a rich terminal UI to browse and select models:
@@ -60,13 +60,13 @@ This opens a rich terminal UI to browse and select models:
 
 ```bash
 # Launch with a specific model
-synclaude --model "openai:gpt-4"
+synpick --model "openai:gpt-4"
 
 # Or:
-synclaude -m "claude:claude-3-5-sonnet-20241022"
+synpick -m "claude:claude-3-5-sonnet-20241022"
 
 # Use the saved/default model
-synclaude
+synpick
 ```
 
 ### Model Categories
@@ -87,33 +87,33 @@ Models are organized by provider:
 
 ```bash
 # List all available models
-synclaude models
+synpick models
 
 # Display with details (provider, context size, etc.)
-synclaude models --verbose
+synpick models --verbose
 ```
 
 ### Search Models
 
 ```bash
 # Search by name or keyword
-synclaude search "gpt"
+synpick search "gpt"
 
 # Search for specific provider
-synclaude search "openai"
+synpick search "openai"
 
 # Search partial names
-synclaude search "sonnet"
+synpick search "sonnet"
 ```
 
 ### Refresh Cache
 
 ```bash
 # Force refresh model list from API
-synclaude models --refresh
+synpick models --refresh
 
 # Or use the cache command
-synclaude cache refresh
+synpick cache refresh
 ```
 
 ---
@@ -124,38 +124,38 @@ synclaude cache refresh
 
 ```bash
 # Show current configuration
-synclaude config show
+synpick config show
 
 # Filter to specific setting
-synclaude config show apiKey
+synpick config show apiKey
 ```
 
 ### Set Configuration
 
 ```bash
 # Set API key
-synclaude config set apiKey "your-api-key-here"
+synpick config set apiKey "your-api-key-here"
 
 # Set cache duration (2-168 hours, default 24)
-synclaude config set cacheDurationHours 12
+synpick config set cacheDurationHours 12
 
-# Set default model (uses model ID from "synclaude models")
-synclaude config set selectedModel "openai:gpt-4"
+# Set default model (uses model ID from "synpick models")
+synpick config set selectedModel "openai:gpt-4"
 ```
 
 ### Reset Configuration
 
 ```bash
 # Reset to defaults
-synclaude config reset
+synpick config reset
 
 # Reset specific option
-synclaude config reset apiKey
+synpick config reset apiKey
 ```
 
 ### Configuration File Location
 
-Configuration is stored in: `~/.config/synclaude/config.json`
+Configuration is stored in: `~/.config/synpick/config.json`
 
 ```json
 {
@@ -176,7 +176,7 @@ Configuration is stored in: `~/.config/synclaude/config.json`
 
 ```bash
 # Run full diagnostic check
-synclaude doctor
+synpick doctor
 ```
 
 The doctor command checks:
@@ -191,17 +191,17 @@ The doctor command checks:
 
 ```bash
 # Show installed version
-synclaude --version
+synpick --version
 
 # Short form
-synclaude -V
+synpick -V
 ```
 
 ### Update
 
 ```bash
 # Update to latest version from GitHub
-synclaude update
+synpick update
 ```
 
 The update command:
@@ -214,16 +214,16 @@ The update command:
 
 ```bash
 # Clear model cache
-synclaude cache clear
+synpick cache clear
 
 # Refresh cache from API
-synclaude cache refresh
+synpick cache refresh
 
 # Show cache info (size, age, etc.)
-synclaude cache info
+synpick cache info
 ```
 
-Cache is stored in: `~/.config/synclaude/models_cache.json`
+Cache is stored in: `~/.config/synpick/models_cache.json`
 
 ---
 
@@ -243,28 +243,28 @@ export SYNTHETIC_BASE_URL="https://api.synthetic.new"
 # Cache duration (overrides config)
 export SYNTHETIC_CACHE_DURATION=12
 
-# Then run synclaude
-synclaude
+# Then run synpick
+synpick
 ```
 
 ### Silent Mode
 
 ```bash
 # Launch Claude Code without banner
-synclaude --quiet
+synpick --quiet
 
 # Or:
-synclaude -q
+synpick -q
 ```
 
 ### Verbose Logging
 
 ```bash
 # Enable verbose debug output
-synclaude --verbose
+synpick --verbose
 
 # Or:
-synclaude -v
+synpick -v
 ```
 
 ### Configuration File Format
@@ -292,67 +292,67 @@ The configuration file is validated using Zod schemas:
 
 ```bash
 # Install
-git clone https://github.com/jeffersonwarrior/synclaude.git
-cd synclaude
+git clone https://github.com/jeffersonwarrior/synpick.git
+cd synpick
 ./scripts/install.sh
 
 # Setup
-synclaude setup
+synpick setup
 
 # Launch
-synclaude
+synpick
 ```
 
 #### 2. Quick Model Switch
 
 ```bash
 # List available models
-synclaude models
+synpick models
 
 # Search for a specific one
-synclaude search "gpt-4"
+synpick search "gpt-4"
 
 # Launch with it directly
-synclaude --model "openai:gpt-4"
+synpick --model "openai:gpt-4"
 ```
 
 #### 3. Save a Favorite Model
 
 ```bash
 # Select and save
-synclaude model
+synpick model
 
 # Now launches use saved model
-synclaude
+synpick
 
 # Check what's saved
-synclaude config show selectedModel
+synpick config show selectedModel
 ```
 
 #### 4. Debug Connection Issues
 
 ```bash
 # Run diagnostics
-synclaude doctor
+synpick doctor
 
 # Refresh cache
-synclaude cache refresh
+synpick cache refresh
 
 # Test with verbose output
-synclaude --verbose models
+synpick --verbose models
 ```
 
 #### 5. Update to Latest
 
 ```bash
 # Check version
-synclaude --version
+synpick --version
 
 # Update
-synclaude update
+synpick update
 
 # Verify
-synclaude --version
+synpick --version
 ```
 
 ---
@@ -363,7 +363,7 @@ synclaude --version
 
 ```bash
 # Check installation
-npm list -g synclaude
+npm list -g synpick
 
 # Find where npm installed binaries
 npm bin -g
@@ -376,22 +376,22 @@ export PATH="$PATH:$(npm bin -g)"
 
 ```bash
 # Reset API key
-synclaude config set apiKey "your-new-key"
+synpick config set apiKey "your-new-key"
 
 # Or use env var
 export SYNTHETIC_API_KEY="your-new-key"
-synclaude
+synpick
 
 # Verify with doctor
-synclaude doctor
+synpick doctor
 ```
 
 ### stale Models
 
 ```bash
 # Force refresh
-synclaude cache clear
-synclaude models --refresh
+synpick cache clear
+synpick models --refresh
 ```
 
 ### Permission Errors
@@ -409,15 +409,15 @@ source ~/.bashrc
 
 ```bash
 # General help
-synclaude --help
+synpick --help
 
 # Command-specific help
-synclaude models --help
-synclaude config --help
-synclaude cache --help
+synpick models --help
+synpick config --help
+synpick cache --help
 
 # Diagnostic info
-synclaude doctor
+synpick doctor
 ```
 
 ---
@@ -426,5 +426,5 @@ synclaude doctor
 
 - **Installation**: See [README.md](README.md) for installation instructions
 - **Development**: See [CLAUDE.md](CLAUDE.md) for development guide
-- **Issues**: [GitHub Issues](https://github.com/jeffersonwarrior/synclaude/issues)
-- **Source**: [GitHub Repository](https://github.com/jeffersonwarrior/synclaude)
+- **Issues**: [GitHub Issues](https://github.com/jeffersonwarrior/synpick/issues)
+- **Source**: [GitHub Repository](https://github.com/jeffersonwarrior/synpick)

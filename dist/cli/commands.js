@@ -25,7 +25,7 @@ function getVersion() {
 export function createProgram() {
     const program = new Command();
     program
-        .name('synclaude')
+        .name('synpick')
         .description('Interactive model selection tool for Claude Code with Synthetic AI models\n\nAdditional Claude Code flags (e.g., --dangerously-skip-permissions) are passed through to Claude Code.')
         .version(getVersion());
     program
@@ -58,7 +58,7 @@ export function createProgram() {
         for (let i = 0; i < rawArgs.length; i++) {
             const arg = rawArgs[i];
             if (arg && arg.startsWith('--')) {
-                // Check if this is a known synclaude option
+                // Check if this is a known synpick option
                 const flagName = arg.split('=')[0]; // Handle --flag=value format
                 if (!knownFlags.has(flagName) && !knownFlags.has(arg)) {
                     additionalArgs.push(arg);
@@ -233,10 +233,10 @@ export function createProgram() {
         const app = new SyntheticClaudeApp();
         await app.cacheInfo();
     });
-    // Install command - install synclaude from local directory to system-wide
+    // Install command - install synpick from local directory to system-wide
     program
         .command('install')
-        .description('Install synclaude from local directory to system-wide')
+        .description('Install synpick from local directory to system-wide')
         .option('-v, --verbose', 'Show detailed installation output')
         .option('-f, --force', 'Force reinstallation even if already installed')
         .option('--skip-path', 'Skip PATH updates')

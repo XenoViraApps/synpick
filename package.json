@@ -1,10 +1,10 @@
 {
-  "name": "synclaude",
+  "name": "synpick",
   "version": "1.6.1",
   "description": "Interactive model selection tool for Claude Code with Synthetic AI models",
   "main": "dist/index.js",
   "bin": {
-    "synclaude": "./dist/cli/index.js"
+    "synpick": "./dist/cli/index.js"
   },
   "type": "module",
   "scripts": {
@@ -36,16 +36,16 @@
     "typescript",
     "nodejs"
   ],
-  "author": "Synclaude Contributors",
+  "author": "Synpick Contributors",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jeffersonwarrior/synclaude"
+    "url": "https://github.com/jeffersonwarrior/synpick"
   },
   "bugs": {
-    "url": "https://github.com/jeffersonwarrior/synclaude/issues"
+    "url": "https://github.com/jeffersonwarrior/synpick/issues"
   },
-  "homepage": "https://github.com/jeffersonwarrior/synclaude#readme",
+  "homepage": "https://github.com/jeffersonwarrior/synpick#readme",
   "dependencies": {
     "axios": "^1.8.2",
     "chalk": "^5.3.0",

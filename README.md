@@ -1,12 +1,10 @@
-# Synclaude
+# Synpick
 
 Interactive model selection tool for Claude Code with Synthetic AI models.
 
-**Note**: This is a fork of [jeffersonwarrior/synclaude](https://github.com/jeffersonwarrior/synclaude).
-
 ## Overview
 
-synclaude is a modern TypeScript/Node.js application that provides a seamless interface for selecting and launching Claude Code with various AI models from the Synthetic API.
+synpick is a modern TypeScript/Node.js application that provides a seamless interface for selecting and launching Claude Code with various AI models from the Synthetic API.
 
 ## Features
 
@@ -27,18 +25,20 @@ synclaude is a modern TypeScript/Node.js application that provides a seamless in
 - Synthetic API key (get one from [synthetic.new](https://synthetic.new))
 - Claude Code installed (get from [claude.com/product/claude-code](https://claude.com/product/claude-code))
 
+**Note**: The installer script will automatically configure nvm to use Node.js v24.12.0 if available.
+
 ### Installation
 
 #### Option 1: GitHub Release (Recommended)
 
 **Linux/Windows:**
 ```bash
-npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz
+npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
 ```
 
 **macOS (if permissions error):**
 ```bash
-sudo npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz
+sudo npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
 ```
 
 **Alternative for macOS (permanent fix):**
@@ -47,66 +47,61 @@ mkdir ~/.npm-global
 npm config set prefix '~/.npm-global'
 echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
-npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz
+npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
 ```
 
-#### Option 2: Download from GitHub Releases
-
-1. Visit [GitHub Releases](https://github.com/jeffersonwarrior/synclaude/releases)
-2. Download the latest `synclaude-X.Y.Z.tgz` file
-3. Install with: `npm install -g synclaude-X.Y.Z.tgz`
-
-#### Option 3: One-line Installer
+#### Option 2: One-line Installer
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash
 ```
 
-#### Option 4: macOS One-line Script
+#### Option 3: macOS One-line Script
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install-macos.sh | bash
+curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install-macos.sh | bash
 ```
 
-#### Option 5: Clone and Install
+#### Option 4: Clone and Install
 
 ```bash
-git clone https://github.com/jeffersonwarrior/synclaude.git
-cd synclaude
+git clone https://github.com/jeffersonwarrior/synpick.git
+cd synpick
 ./scripts/install.sh
 ```
 
 You can also use the macOS-specific installer:
 ```bash
-git clone https://github.com/jeffersonwarrior/synclaude.git
-cd synclaude
+git clone https://github.com/jeffersonwarrior/synpick.git
+cd synpick
 ./scripts/install-macos.sh
 ```
 
 **Important**:
-- Direct git installation (`npm install -g https://github.com/.../synclaude.git`) is not supported due to npm's git installation limitations
-- Use the specific release tarball: `https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz`
-- Or visit [GitHub Releases](https://github.com/jeffersonwarrior/synclaude/releases) for the latest version
+- Direct git installation via npm is not supported due to npm's git installation limitations
+- Use the specific release tarball from GitHub Releases
+- GitHub-only installation (npm registry fallback removed)
+- Installer tries version-specific release first, then falls back to main branch
 
 ### Uninstallation
 
 #### Option 1: One-line Uninstaller
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/uninstall.sh | bash
+curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/uninstall.sh | bash
 ```
 
 #### Option 2: Manual Uninstall
 
 ```bash
 # If installed globally via npm
-npm uninstall -g synclaude
+npm uninstall -g synpick
 
 # If installed locally via npm link
-npm unlink -g synclaude
+npm unlink -g synpick
 
 # Remove configuration and cache
-rm -rf ~/.config/synclaude
+rm -rf ~/.config/synpick
 ```
 
 ### Initial Setup
@@ -114,7 +109,7 @@ rm -rf ~/.config/synclaude
 After installation, run the setup wizard:
 
 ```bash
-synclaude setup
+synpick setup
 ```
 
 This will guide you through:
@@ -124,20 +119,20 @@ This will guide you through:
 
 ### Basic Usage
 
-After setup, you can start using Synclaude:
+After setup, you can start using Synpick:
 
 ```bash
 # Launch with interactive model selection
-synclaude
+synpick
 
 # Launch with a specific model
-synclaude --model "openai:gpt-4"
+synpick --model "openai:gpt-4"
 
 # Browse and save a default model
-synclaude model
+synpick model
 
 # Check system health
-synclaude doctor
+synpick doctor
 ```
 
 **See [USAGE.md](USAGE.md) for comprehensive usage documentation.**
@@ -148,7 +143,7 @@ synclaude doctor
 
 ### Configuration Options
 
-Synclaude stores configuration in `~/.config/synclaude/config.json`. Key options include:
+Synpick stores configuration in `~/.config/synpick/config.json`. Key options include:
 
 - `apiKey`: Your Synthetic API key
 - `baseUrl`: Synthetic API base URL
@@ -163,17 +158,17 @@ Synclaude stores configuration in `~/.config/synclaude/config.json`. Key options
 
 ### Updates
 
-Synclaude provides multiple ways to update:
+Synpick provides multiple ways to update:
 
 #### Automatic Update Command
 
 ```bash
 # Check for and install updates from GitHub
-synclaude update
+synpick update
 ```
 
 The update command:
-- Checks your GitHub repository for the latest release
+- Checks GitHub repository for the latest release
 - Compares versions using semver (won't downgrade)
 - Runs the installer if a newer version is available
 - Only updates from official GitHub releases
@@ -182,23 +177,17 @@ The update command:
 
 ```bash
 # Install specific version from GitHub release
-npm install -g https://github.com/jeffersonwarrior/synclaude/releases/download/v1.6.1/synclaude-1.6.1.tgz
+npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
 
 # Or run the installer again
-curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash
 ```
 
 #### Check Current Version
 
 ```bash
-synclaude --version
+synpick --version
 ```
-
-This approach provides:
-- **Full control** over when updates happen
-- **Standard npm workflow** that developers are familiar with
-- **No update-related bugs or complexity**
-- **Rollback capability** if needed (`npm install -g synclaude@specific-version`)
 
 ### Environment Variables
 
@@ -215,8 +204,8 @@ export SYNTHETIC_CACHE_DURATION=24
 #### Setup Development Environment
 
 ```bash
-git clone https://github.com/jeffersonwarrior/synclaude.git
-cd synclaude
+git clone https://github.com/jeffersonwarrior/synpick.git
+cd synpick
 npm install
 ```
 
@@ -248,7 +237,7 @@ npm run lint && npm test && npm run build
 #### Project Structure
 
 ```
-synclaude/
+synpick/
 ├── src/
 │   ├── cli/           # CLI commands and parsing (Commander.js)
 │   ├── core/          # Application orchestration
@@ -260,6 +249,7 @@ synclaude/
 │   └── utils/         # Shared utilities
 ├── tests/             # Jest tests
 ├── scripts/           # Installation and utility scripts
+```
 
 ## API Integration
 
@@ -270,7 +260,7 @@ synclaude/
 
 ### Environment Variables for Claude Code
 
-When launching Claude Code, Synclaude automatically sets:
+When launching Claude Code, Synpick automatically sets:
 
 - `ANTHROPIC_BASE_URL=https://api.synthetic.new/anthropic`
 - `ANTHROPIC_AUTH_TOKEN={your_api_key}`
@@ -278,6 +268,14 @@ When launching Claude Code, Synclaude automatically sets:
 - `CLAUDE_CODE_SUBAGENT_MODEL={selected_model}`
 
 ## Troubleshooting
+
+### Recent Fixes (v1.6.1)
+
+This version includes:
+- ESM (ES Modules) compatibility - fixed `__dirname is not defined` and `require()` errors
+- Installer script now configures nvm for Node.js v24.12.0 automatically
+- All 227 tests passing across 12 test suites
+- GitHub-only installation (npm registry fallback removed)
 
 ### Common Issues
 
@@ -294,7 +292,7 @@ nvm use 18
 
 #### PATH Issues
 
-If `synclaude` command is not found after installation:
+If `synpick` command is not found after installation:
 
 ```bash
 # Check if local bin directory is in PATH
@@ -317,27 +315,26 @@ export PATH=~/.npm-global/bin:$PATH
 
 ```bash
 # Test API connection
-synclaude doctor
+synpick doctor
 
 # Clear cache and retry
-synclaude cache clear
-synclaude models --refresh
+synpick cache clear
+synpick models --refresh
 ```
 
 ### Get Help
 
 ```bash
 # Show all commands
-synclaude --help
+synpick --help
 
 # Get help for specific command
-synclaude models --help
-synclaude config --help
+synpick models --help
+synpick config --help
 
 # Check system health
-synclaude doctor
+synpick doctor
 ```
-
 
 ## Contributing
 
@@ -364,6 +361,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 - **Usage Guide**: [USAGE.md](USAGE.md) - Comprehensive command reference
-- **Issues**: [GitHub Issues](https://github.com/jeffersonwarrior/synclaude/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/jeffersonwarrior/synclaude/discussions)
+- **Issues**: [GitHub Issues](https://github.com/jeffersonwarrior/synpick/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jeffersonwarrior/synpick/discussions)
 - **Synthetic API**: [https://dev.synthetic.new](https://dev.synthetic.new)

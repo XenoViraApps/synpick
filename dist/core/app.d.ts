@@ -6,7 +6,7 @@ export interface AppOptions {
     thinkingModel?: string;
 }
 /**
- * SyntheticClaudeApp is the main application class for synclaude
+ * SyntheticClaudeApp is the main application class for synpick
  *
  * Orchestrates model management, configuration, and Claude Code launching.
  */
@@ -51,7 +51,7 @@ export declare class SyntheticClaudeApp {
     };
     private getModelManager;
     /**
-     * Runs the main synclaude application
+     * Runs the main synpick application
      *
      * Handles first-time setup, model selection, and Claude Code launching.
      *
@@ -65,7 +65,7 @@ export declare class SyntheticClaudeApp {
      */
     ensureClaudeCodeUpdated(): Promise<void>;
     /**
-     * Update synclaude and Claude Code to the latest version
+     * Update synpick and Claude Code to the latest version
      */
     updateClaudeCode(force?: boolean): Promise<void>;
     /**
@@ -74,11 +74,11 @@ export declare class SyntheticClaudeApp {
      */
     private compareVersions;
     /**
-     * Get latest synclaude version from GitHub repository
+     * Get latest synpick version from GitHub repository
      */
     private getLatestGitHubVersion;
     /**
-     * Update synclaude itself via npm
+     * Update synpick itself via npm
      */
     private updateSynclaudeSelf;
     /**
@@ -175,7 +175,7 @@ export declare class SyntheticClaudeApp {
     private selectModel;
     private selectThinkingModel;
     /**
-     * Install synclaude from local directory to system-wide
+     * Install synpick from local directory to system-wide
      * Builds the project and uses npm link -g for system-wide installation
      */
     localInstall(options: {

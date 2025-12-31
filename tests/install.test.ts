@@ -39,7 +39,7 @@ describe('Install Module', () => {
   describe('addToPathIfNotExists', () => {
     it('should return a success result', async () => {
       // Use a fake home directory for testing to avoid modifying actual config
-      const result = await addToPathIfNotExists('/tmp/test-synclaude-bin', {
+      const result = await addToPathIfNotExists('/tmp/test-synpick-bin', {
         verbose: false,
       });
       expect(result).toHaveProperty('success');

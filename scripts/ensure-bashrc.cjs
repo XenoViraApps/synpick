@@ -34,7 +34,7 @@ try {
 }
 
 // Use npmBinDir if available, otherwise fall back to ~/.local/bin
-const binDir = fs.existsSync(path.join(npmBinDir, 'synclaude')) ? npmBinDir : path.join(homeDir, '.local', 'bin');
+const binDir = fs.existsSync(path.join(npmBinDir, 'synpick')) ? npmBinDir : path.join(homeDir, '.local', 'bin');
 
 const blockStart = '# Synclaude PATH configuration';
 const blockEnd = '# End Synclaude PATH configuration';
@@ -45,7 +45,7 @@ ${blockEnd}`;
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const blockRegex = new RegExp(`${escapeRegExp(blockStart)}[\\s\\S]*?${escapeRegExp(blockEnd)}`, 'm');
 
-const logPrefix = '[synclaude setup]';
+const logPrefix = '[synpick setup]';
 
 // Detect shell and config file
 const shellEnv = process.env.SHELL || '';

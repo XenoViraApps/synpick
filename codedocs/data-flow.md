@@ -15,7 +15,7 @@
 ## Model Selection Flow
 
 ```
-User runs: synclaude model
+User runs: synpick model
          │
          ▼
 ┌─────────────────────────────────────────────┐
@@ -168,7 +168,7 @@ ConfigManager.updateConfig(partial)
 ## Launch Flow
 
 ```
-User runs: synclaude [options]
+User runs: synpick [options]
          │
          ▼
 ┌─────────────────────────────────────────────┐
@@ -248,7 +248,7 @@ User runs: synclaude [options]
 ## Update Flow
 
 ```
-User runs: synclaude update
+User runs: synpick update
          │
          ▼
 ┌─────────────────────────────────────────────┐
@@ -257,7 +257,7 @@ User runs: synclaude update
 │  Update Synclaude (self)                    │
 │  ├─> updateSynclaudeSelf()                 │
 │  │   1. Get current version                │
-│  │       └─> execSync('synclaude --version')│
+│  │       └─> execSync('synpick --version')│
 │  │                                         │
 │  │   2. Get latest version from GitHub     │
 │  │       ├─> axios.get(releases/latest)   │
@@ -295,7 +295,7 @@ User runs: synclaude update
 ## First-Time Setup Flow
 
 ```
-User runs: synclaude (first time)
+User runs: synpick (first time)
          │
          ▼
 ┌─────────────────────────────────────────────┐
@@ -350,7 +350,7 @@ User runs: synclaude (first time)
 ## Doctor Flow
 
 ```
-User runs: synclaude doctor
+User runs: synpick doctor
          │
          ▼
 ┌─────────────────────────────────────────────┐

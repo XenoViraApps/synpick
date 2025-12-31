@@ -1,4 +1,4 @@
-# Dockerfile for Synclaude CLI Testing Environment
+# Dockerfile for Synpick CLI Testing Environment
 FROM node:22-slim
 
 # Set environment variables
@@ -22,9 +22,9 @@ WORKDIR /home/testuser
 # Set up test directories
 RUN mkdir -p /home/testuser/workspace /home/testuser/logs /home/testuser/bin
 
-# Copy the synclaude source to container
-COPY --chown=testuser:testuser . /home/testuser/workspace/synclaude
-WORKDIR /home/testuser/workspace/synclaude
+# Copy the synpick source to container
+COPY --chown=testuser:testuser . /home/testuser/workspace/synpick
+WORKDIR /home/testuser/workspace/synpick
 
 # Set up PATH for the test user
 ENV PATH="/home/testuser/.local/bin:/home/testuser/bin:$PATH"

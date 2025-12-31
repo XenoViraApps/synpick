@@ -14,7 +14,7 @@ export interface UIOptions {
 }
 
 /**
- * UserInterface handles all user interaction for the synclaude CLI
+ * UserInterface handles all user interaction for the synpick CLI
  *
  * Provides methods for displaying messages, progress indicators,
  * user input collection, and interactive model selection.

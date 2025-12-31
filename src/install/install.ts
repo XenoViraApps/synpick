@@ -46,7 +46,7 @@ export interface PathUpdateResult {
 }
 
 /**
- * Check for and clean up stale synclaude symlinks
+ * Check for and clean up stale synpick symlinks
  */
 export async function checkCleanStaleSymlinks(options: { verbose?: boolean } = {}): Promise<{
   cleaned: string[];
@@ -57,7 +57,7 @@ export async function checkCleanStaleSymlinks(options: { verbose?: boolean } = {
   const failed: string[] = [];
 
   // Check common system locations for stale symlinks
-  const stalePaths = ['/usr/local/bin/synclaude', '/usr/bin/synclaude'];
+  const stalePaths = ['/usr/local/bin/synpick', '/usr/bin/synpick'];
 
   for (const checkPath of stalePaths) {
     try {
@@ -128,7 +128,7 @@ export function detectInstallMethod(): InstallMethodEnum {
       // Try to see if we can access npm bin directory
       const npmPrefix = execSync('npm prefix -g', { encoding: 'utf-8' }).trim();
       const npmBin = path.join(npmPrefix, 'bin');
-      const testFile = path.join(npmBin, '.synclaude-test');
+      const testFile = path.join(npmBin, '.synpick-test');
       execSync(`touch "${testFile}"`, { stdio: 'ignore' });
       execSync(`rm -f "${testFile}"`, { stdio: 'ignore' });
       return InstallMethodEnum.NPM_GLOBAL;
@@ -394,18 +394,18 @@ export function getNpmBinDir(): string {
 }
 
 /**
- * Verifies installation by checking if synclaude command is available
+ * Verifies installation by checking if synpick command is available
  */
 export async function verifyInstallation(
   method: InstallMethodEnum
 ): Promise<{ success: boolean; version?: string; commandPath?: string; error?: string }> {
   try {
-    let commandPath = 'synclaude';
+    let commandPath = 'synpick';
 
     // For manual install, we need to use the full path
     if (method === InstallMethodEnum.MANUAL_LOCAL) {
       const binDir = path.join(os.homedir(), '.local', 'bin');
-      commandPath = path.join(binDir, 'synclaude');
+      commandPath = path.join(binDir, 'synpick');
     }
 
     // Try to get version
@@ -467,7 +467,7 @@ export async function installSynclaude(options: InstallOptions = {}): Promise<In
           console.log('Installing via npm global (user prefix)...');
         }
 
-        const npmResult = await runCommand('npm', ['install', '-g', '--unsafe-perm', 'synclaude'], {
+        const npmResult = await runCommand('npm', ['install', '-g', '--unsafe-perm', 'synpick'], {
           verbose,
         });
 
@@ -487,7 +487,7 @@ export async function installSynclaude(options: InstallOptions = {}): Promise<In
 
         const npmGlobalResult = await runCommand(
           'npm',
-          ['install', '-g', '--unsafe-perm', 'synclaude'],
+          ['install', '-g', '--unsafe-perm', 'synpick'],
           {
             verbose,
           }
@@ -515,7 +515,7 @@ export async function installSynclaude(options: InstallOptions = {}): Promise<In
         }
 
         const home = os.homedir();
-        const installDir = path.join(home, '.local', 'share', 'synclaude');
+        const installDir = path.join(home, '.local', 'share', 'synpick');
         const localBin = path.join(home, '.local', 'bin');
 
         // Create directories
@@ -525,7 +525,7 @@ export async function installSynclaude(options: InstallOptions = {}): Promise<In
         // Download and install via npm to install directory
         const npmLocalResult = runCommand(
           'npm',
-          ['install', '-g', '--prefix', installDir, 'synclaude'],
+          ['install', '-g', '--prefix', installDir, 'synpick'],
           {
             verbose,
           }
@@ -541,12 +541,12 @@ export async function installSynclaude(options: InstallOptions = {}): Promise<In
             installDir,
             'lib',
             'node_modules',
-            'synclaude',
+            'synpick',
             'dist',
             'cli',
             'index.js'
           );
-          const linkPath = path.join(localBin, 'synclaude');
+          const linkPath = path.join(localBin, 'synpick');
 
           // Remove existing link
           try {
@@ -601,7 +601,7 @@ export async function uninstallSynclaude(
 
   try {
     // Try npm uninstall first
-    const npmResult = await runCommand('npm', ['uninstall', '-g', 'synclaude'], { verbose });
+    const npmResult = await runCommand('npm', ['uninstall', '-g', 'synpick'], { verbose });
 
     // If npm uninstall fails, try manual cleanup
     if (!npmResult.success) {
@@ -612,8 +612,8 @@ export async function uninstallSynclaude(
       const home = os.homedir();
 
       // Remove local installation
-      const installDir = path.join(home, '.local', 'share', 'synclaude');
-      const localBin = path.join(home, '.local', 'bin', 'synclaude');
+      const installDir = path.join(home, '.local', 'share', 'synpick');
+      const localBin = path.join(home, '.local', 'bin', 'synpick');
 
       try {
         await fsPromises.rm(installDir, { recursive: true, force: true });
@@ -648,7 +648,7 @@ export async function uninstallSynclaude(
       }
 
       // Clean up config
-      const configDir = path.join(home, '.config', 'synclaude');
+      const configDir = path.join(home, '.config', 'synpick');
       try {
         await fsPromises.rm(configDir, { recursive: true, force: true });
       } catch {
@@ -658,7 +658,7 @@ export async function uninstallSynclaude(
       // Clean up npm cache
       const npmLocal = path.join(home, '.npm-local');
       try {
-        const npmModules = path.join(npmLocal, 'lib', 'node_modules', 'synclaude');
+        const npmModules = path.join(npmLocal, 'lib', 'node_modules', 'synpick');
         await fsPromises.rm(npmModules, { recursive: true, force: true });
       } catch {
         // Ignore errors

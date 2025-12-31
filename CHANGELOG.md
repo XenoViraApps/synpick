@@ -11,8 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added comprehensive `USAGE.md` documentation with quick start guide, model selection, configuration, system tools, and troubleshooting
 - Added centralized version management via `version.txt` (CLI and install script now read from this single source of truth)
 - Added `isThinkingModel()` utility function to shared `src/utils/model-utils.ts`
+- Added `nvm use --delete-prefix v24.12.0 --silent` to end of install script for consistent Node.js version
+- Added `tests/installer-script.test.ts` for installer script validation
+- Added `tests/cli-subcommands.test.ts` for comprehensive CLI subcommand testing
 
 ### Fixed
+- Fixed `ReferenceError: __dirname is not defined` in ESM environment (`src/utils/banner.ts`)
+- Fixed all `require()` calls for ESM compatibility:
+  - `src/models/info.ts`: Replaced `require('./types')` with direct import
+  - `src/models/cache.ts`: Replaced `require('path')` with `import { dirname }`
+  - `src/ui/user-interface.tsx`: Replaced `require('readline')` with `import { createInterface }`
+  - `src/core/app.ts`: Replaced `require('../config')` with `import { AppConfigSchema }`
 - Fixed install.sh hardcoded paths - now uses shell variables instead of fixed `/home/agent/` paths
 - Fixed install.sh fish shell syntax handling in PATH entries
 - Fixed install.sh variable name collision in cleanup function
@@ -24,9 +33,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed real `setTimeout` calls from test files to prevent timer leaks
 
 ### Changed
+- Removed npm registry fallback from installer script - now only uses GitHub sources
+- Updated installer to fallback to main branch if version-specific tarball fails
 - Removed dual ESLint configuration (kept modern `eslint.config.js`, removed legacy `.eslintrc.js`)
 - Added `USAGE.md` and `version.txt` to npm package files array
-- Updated README.md version references to 1.6.1
+- Updated README.md with fork note documenting this is a fork of jeffersonwarrior/synclaude
+- Updated CLAUDE.md with fork note for CI/CD context
+- Removed npm registry references from README.md update instructions
 
 ## [1.6.0] - 2025-12-31
 

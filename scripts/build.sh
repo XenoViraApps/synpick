@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Build script that compiles TypeScript to JavaScript
-echo "Building synclaude..."
+echo "Building synpick..."
 
 # Clean and recreate dist directory
 rm -rf dist

@@ -22,7 +22,7 @@ export class ApiClient {
   constructor(options: ApiClientOptions = {}) {
     this.defaultHeaders = {
       'Content-Type': 'application/json',
-      'User-Agent': 'synclaude/1.0.0',
+      'User-Agent': 'synpick/1.0.0',
       ...options.headers,
     };
 

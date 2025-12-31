@@ -19,7 +19,7 @@ export interface AppOptions {
 }
 
 /**
- * SyntheticClaudeApp is the main application class for synclaude
+ * SyntheticClaudeApp is the main application class for synpick
  *
  * Orchestrates model management, configuration, and Claude Code launching.
  */
@@ -75,7 +75,7 @@ export class SyntheticClaudeApp {
   private getModelManager(): ModelManager {
     if (!this.modelManager) {
       const config = this.configManager.config;
-      const cacheFile = join(homedir(), '.config', 'synclaude', 'models_cache.json');
+      const cacheFile = join(homedir(), '.config', 'synpick', 'models_cache.json');
 
       this.modelManager = new ModelManager({
         apiKey: config.apiKey,
@@ -90,7 +90,7 @@ export class SyntheticClaudeApp {
   }
 
   /**
-   * Runs the main synclaude application
+   * Runs the main synpick application
    *
    * Handles first-time setup, model selection, and Claude Code launching.
    *
@@ -167,15 +167,15 @@ export class SyntheticClaudeApp {
     if (updateInfo.hasUpdate && updateInfo.isNpmInstalled) {
       this.ui.info(`\nNew version of Claude Code available: ${updateInfo.latestVersion}`);
       this.ui.info(`Current version: ${updateInfo.currentVersion || 'Not installed'}`);
-      this.ui.info('Run "synclaude update" to update Claude Code\n');
+      this.ui.info('Run "synpick update" to update Claude Code\n');
     }
   }
 
   /**
-   * Update synclaude and Claude Code to the latest version
+   * Update synpick and Claude Code to the latest version
    */
   async updateClaudeCode(force: boolean = false): Promise<void> {
-    // Update synclaude itself first
+    // Update synpick itself first
     await this.updateSynclaudeSelf(force);
 
     // Then update Claude Code
@@ -238,10 +238,10 @@ export class SyntheticClaudeApp {
   }
 
   /**
-   * Get latest synclaude version from GitHub repository
+   * Get latest synpick version from GitHub repository
    */
   private async getLatestGitHubVersion(): Promise<string | null> {
-    const GITHUB_REPO = 'jeffersonwarrior/synclaude';
+    const GITHUB_REPO = 'jeffersonwarrior/synpick';
 
     try {
       // Try GitHub releases API first
@@ -263,15 +263,15 @@ export class SyntheticClaudeApp {
   }
 
   /**
-   * Update synclaude itself via npm
+   * Update synpick itself via npm
    */
   private async updateSynclaudeSelf(force: boolean = false): Promise<void> {
     try {
-      // Get current synclaude version
-      const currentVersion = execSync('synclaude --version', { encoding: 'utf-8' }).trim();
-      this.ui.info(`Current synclaude version: ${currentVersion}`);
+      // Get current synpick version
+      const currentVersion = execSync('synpick --version', { encoding: 'utf-8' }).trim();
+      this.ui.info(`Current synpick version: ${currentVersion}`);
 
-      this.ui.info('Checking for synclaude updates...');
+      this.ui.info('Checking for synpick updates...');
 
       // Check for latest version from GitHub repository
       const latestVersion = await this.getLatestGitHubVersion();
@@ -280,19 +280,19 @@ export class SyntheticClaudeApp {
         this.ui.info('Could not check for updates from GitHub. Using npm registry as fallback...');
         // Fallback to npm registry
         try {
-          const npmVersion = execSync('npm view synclaude version', { encoding: 'utf-8' }).trim();
-          this.ui.info(`Latest synclaude version on npm: ${npmVersion}`);
+          const npmVersion = execSync('npm view synpick version', { encoding: 'utf-8' }).trim();
+          this.ui.info(`Latest synpick version on npm: ${npmVersion}`);
         } catch {
           this.ui.info('Could not check npm registry either');
         }
         this.ui.info('Run the installer manually to update:');
         this.ui.info(
-          '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash'
+          '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash'
         );
         return;
       }
 
-      this.ui.info(`Latest synclaude version: ${latestVersion}`);
+      this.ui.info(`Latest synpick version: ${latestVersion}`);
 
       // Compare versions - only update if latest is newer
       const comparison = this.compareVersions(latestVersion, currentVersion);
@@ -308,13 +308,13 @@ export class SyntheticClaudeApp {
         return;
       }
 
-      // Update synclaude via the install script
-      this.ui.info('Updating synclaude from GitHub...');
+      // Update synpick via the install script
+      this.ui.info('Updating synpick from GitHub...');
 
       try {
         // Download and run the installer from GitHub
         execSync(
-          `curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash`,
+          `curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash`,
           { stdio: 'pipe' }
         );
       } catch {
@@ -324,20 +324,20 @@ export class SyntheticClaudeApp {
         // Note: we can't direct install from GitHub due to npm limitations,
         // but we can try to update if the user has npm access
         try {
-          execSync('npm install -g synclaude@latest', { stdio: 'pipe' });
+          execSync('npm install -g synpick@latest', { stdio: 'pipe' });
         } catch {
           // Final fallback - show manual instructions
           this.ui.info('Automatic update failed');
           this.ui.info('Please update manually:');
           this.ui.info(
-            '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash'
+            '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash'
           );
           throw new Error('Automatic update unavailable');
         }
       }
 
       // Verify the update
-      const newVersion = execSync('synclaude --version', { encoding: 'utf-8' }).trim();
+      const newVersion = execSync('synpick --version', { encoding: 'utf-8' }).trim();
 
       if (newVersion === latestVersion || force) {
         const prevMsg = currentVersion !== newVersion ? ` (was ${currentVersion})` : '';
@@ -347,11 +347,11 @@ export class SyntheticClaudeApp {
       }
     } catch (error) {
       this.ui.error(
-        `Failed to update synclaude: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to update synpick: ${error instanceof Error ? error.message : String(error)}`
       );
       this.ui.info('Try manual installation:');
       this.ui.info(
-        '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash'
+        '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash'
       );
       // Don't exit - continue to try updating Claude Code
     }
@@ -376,7 +376,7 @@ export class SyntheticClaudeApp {
     if (updateInfo.isNpmInstalled) {
       if (updateInfo.hasUpdate) {
         this.ui.coloredSuccess('\nUpdate available!');
-        this.ui.info('Run "synclaude update" to update Claude Code\n');
+        this.ui.info('Run "synpick update" to update Claude Code\n');
       } else {
         this.ui.info('\nClaude Code is up to date\n');
       }
@@ -396,7 +396,7 @@ export class SyntheticClaudeApp {
    */
   async interactiveModelSelection(): Promise<boolean> {
     if (!this.configManager.hasApiKey()) {
-      this.ui.error('No API key configured. Please run "synclaude setup" first.');
+      this.ui.error('No API key configured. Please run "synpick setup" first.');
       return false;
     }
 
@@ -432,8 +432,8 @@ export class SyntheticClaudeApp {
       }
 
       this.ui.highlightInfo(
-        'Now run "synclaude" to start Claude Code with your selected model(s).',
-        ['synclaude']
+        'Now run "synpick" to start Claude Code with your selected model(s).',
+        ['synpick']
       );
       return true;
     } catch (error) {
@@ -452,7 +452,7 @@ export class SyntheticClaudeApp {
    */
   async interactiveThinkingModelSelection(): Promise<boolean> {
     if (!this.configManager.hasApiKey()) {
-      this.ui.error('No API key configured. Please run "synclaude setup" first.');
+      this.ui.error('No API key configured. Please run "synpick setup" first.');
       return false;
     }
 
@@ -477,8 +477,8 @@ export class SyntheticClaudeApp {
       await this.configManager.updateConfig({ selectedThinkingModel: selectedThinkingModel.id });
       this.ui.coloredSuccess(`Thinking model saved: ${selectedThinkingModel.getDisplayName()}`);
       this.ui.highlightInfo(
-        'Now run "synclaude --thinking-model" to start Claude Code with this thinking model.',
-        ['synclaude', '--thinking-model']
+        'Now run "synpick --thinking-model" to start Claude Code with this thinking model.',
+        ['synpick', '--thinking-model']
       );
       return true;
     } catch (error) {
@@ -499,7 +499,7 @@ export class SyntheticClaudeApp {
     log.info('Listing models', { options });
 
     if (!this.configManager.hasApiKey()) {
-      this.ui.error('No API key configured. Run "synclaude setup" to configure.');
+      this.ui.error('No API key configured. Run "synpick setup" to configure.');
       return;
     }
 
@@ -529,7 +529,7 @@ export class SyntheticClaudeApp {
     log.info('Searching models', { query, options });
 
     if (!this.configManager.hasApiKey()) {
-      this.ui.error('No API key configured. Run "synclaude setup" to configure.');
+      this.ui.error('No API key configured. Run "synpick setup" to configure.');
       return;
     }
 
@@ -703,7 +703,7 @@ export class SyntheticClaudeApp {
     await this.configManager.markFirstRunCompleted();
 
     this.ui.coloredSuccess('Setup completed successfully!');
-    this.ui.highlightInfo('You can now run "synclaude" to launch Claude Code', ['synclaude']);
+    this.ui.highlightInfo('You can now run "synpick" to launch Claude Code', ['synpick']);
   }
 
   /**
@@ -738,7 +738,7 @@ export class SyntheticClaudeApp {
             'warning',
             `Update available: ${updateInfo.currentVersion} -> ${updateInfo.latestVersion}`
           );
-          this.ui.info('Run "synclaude update" to update Claude Code');
+          this.ui.info('Run "synpick update" to update Claude Code');
         } else if (updateInfo.currentVersion) {
           this.ui.showStatus('success', `Claude Code is up to date (${updateInfo.currentVersion})`);
         }
@@ -826,7 +826,7 @@ export class SyntheticClaudeApp {
       return this.configManager.getSavedModel();
     }
 
-    this.ui.error('No model selected. Run "synclaude model" to select a model.');
+    this.ui.error('No model selected. Run "synpick model" to select a model.');
     return null;
   }
 
@@ -844,7 +844,7 @@ export class SyntheticClaudeApp {
   }
 
   /**
-   * Install synclaude from local directory to system-wide
+   * Install synpick from local directory to system-wide
    * Builds the project and uses npm link -g for system-wide installation
    */
   async localInstall(options: {
@@ -854,7 +854,7 @@ export class SyntheticClaudeApp {
   }): Promise<void> {
     const { verbose = false, force = false, skipPath = false } = options;
 
-    this.ui.coloredInfo('Installing synclaude from local directory to system-wide...');
+    this.ui.coloredInfo('Installing synpick from local directory to system-wide...');
     this.ui.info('==================================================');
 
     try {
@@ -871,7 +871,7 @@ export class SyntheticClaudeApp {
       if (force) {
         this.ui.info('Step 2/3: Removing existing global installation...');
         try {
-          execSync('npm unlink -g synclaude 2>/dev/null || true', {
+          execSync('npm unlink -g synpick 2>/dev/null || true', {
             stdio: verbose ? 'inherit' : 'pipe',
           });
         } catch {
@@ -890,14 +890,14 @@ export class SyntheticClaudeApp {
 
       // Verify installation
       this.ui.info('Verifying installation...');
-      const version = execSync('synclaude --version', { encoding: 'utf-8' }).trim();
-      this.ui.coloredSuccess(`synclaude v${version} installed successfully!`);
+      const version = execSync('synpick --version', { encoding: 'utf-8' }).trim();
+      this.ui.coloredSuccess(`synpick v${version} installed successfully!`);
 
       // Show installation details
       // Use npm prefix to get global directory (npm bin -g is deprecated)
       const npmPrefix = execSync('npm config get prefix', { encoding: 'utf-8' }).trim();
       const npmBin = `${npmPrefix}/bin`;
-      const commandPath = execSync('which synclaude', { encoding: 'utf-8' }).trim();
+      const commandPath = execSync('which synpick', { encoding: 'utf-8' }).trim();
 
       this.ui.info('');
       this.ui.info('Installation details:');
@@ -915,13 +915,13 @@ export class SyntheticClaudeApp {
 
       this.ui.info('');
       this.ui.highlightInfo('Getting started:', [
-        'synclaude setup',
-        'synclaude model',
-        'synclaude',
+        'synpick setup',
+        'synpick model',
+        'synpick',
       ]);
-      this.ui.info('  synclaude setup    # First-time configuration');
-      this.ui.info('  synclaude          # Launch Claude Code');
-      this.ui.info('  synclaude --help   # Show all commands');
+      this.ui.info('  synpick setup    # First-time configuration');
+      this.ui.info('  synpick          # Launch Claude Code');
+      this.ui.info('  synpick --help   # Show all commands');
     } catch (error) {
       this.ui.error(
         `Installation failed: ${error instanceof Error ? error.message : String(error)}`
@@ -941,10 +941,10 @@ export class SyntheticClaudeApp {
     thinkingModel?: string | null
   ): Promise<void> {
     const launchInfo = thinkingModel
-      ? `Launching with ${model} (thinking: ${thinkingModel}). Use "synclaude model" to change model.`
-      : `Launching with ${model}. Use "synclaude model" to change model.`;
+      ? `Launching with ${model} (thinking: ${thinkingModel}). Use "synpick model" to change model.`
+      : `Launching with ${model}. Use "synpick model" to change model.`;
 
-    this.ui.highlightInfo(launchInfo, [model, 'synclaude model']);
+    this.ui.highlightInfo(launchInfo, [model, 'synpick model']);
 
     const result = await this.launcher.launchClaudeCode({
       model,

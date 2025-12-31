@@ -1,21 +1,21 @@
 /**
  * CLI Subcommands Tests
  *
- * Tests for all synclaude CLI subcommands to ensure they work without errors
+ * Tests for all synpick CLI subcommands to ensure they work without errors
  */
 
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 
-// Path to the built synclaude CLI - tests run from project root
+// Path to the built synpick CLI - tests run from project root
 const SYNTAX_PATH = process.cwd() + '/dist/cli/index.js';
 
 // Temporary config paths for testing
-const TEMP_CONFIG_DIR = tmpdir() + `/.synclaude-test-${Date.now()}`;
+const TEMP_CONFIG_DIR = tmpdir() + `/.synpick-test-${Date.now()}`;
 const TEMP_CONFIG_FILE = TEMP_CONFIG_DIR + '/config.json';
 
-// Helper function to run synclaude command
+// Helper function to run synpick command
 function runSynclaude(args: string[], env: Record<string, string> = {}): {
   stdout: string;
   stderr: string;
@@ -54,7 +54,7 @@ describe('CLI Subcommands', () => {
     it('should display help information', () => {
       const result = runSynclaude(['--help']);
       expect(result.success).toBe(true);
-      expect(result.stdout).toContain('synclaude');
+      expect(result.stdout).toContain('synpick');
       expect(result.stdout).toContain('model');
       expect(result.stdout).toContain('setup');
       expect(result.stdout).toContain('doctor');

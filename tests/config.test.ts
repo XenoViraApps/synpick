@@ -9,8 +9,8 @@ describe('ConfigManager', () => {
 
   beforeEach(async () => {
     // Create a temporary directory for test configuration
-    tempDir = await mkdtemp(join(tmpdir(), 'synclaude-test-'));
-    configManager = new ConfigManager(join(tempDir, '.config', 'synclaude'));
+    tempDir = await mkdtemp(join(tmpdir(), 'synpick-test-'));
+    configManager = new ConfigManager(join(tempDir, '.config', 'synpick'));
   });
 
   afterEach(async () => {
@@ -46,7 +46,7 @@ describe('ConfigManager', () => {
       expect(success).toBe(true);
 
       // Create new instance to test loading
-      const newConfigManager = new ConfigManager(join(tempDir, '.config', 'synclaude'));
+      const newConfigManager = new ConfigManager(join(tempDir, '.config', 'synpick'));
       const config = newConfigManager.config;
 
       expect(config.apiKey).toBe('test-key-123');

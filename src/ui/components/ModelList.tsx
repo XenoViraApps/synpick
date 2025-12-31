@@ -19,7 +19,7 @@ export const ModelList: React.FC<ModelListProps> = ({
       <Box flexDirection="column">
         <Text color="gray">No models available.</Text>
         {'\n'}
-        <Text color="gray">Try running 'synclaude models --refresh' to update the model list.</Text>
+        <Text color="gray">Try running 'synpick models --refresh' to update the model list.</Text>
       </Box>
     );
   }

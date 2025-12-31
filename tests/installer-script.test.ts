@@ -30,10 +30,10 @@ describe('Installer Script', () => {
 
     it('should not contain npm registry fallback', () => {
       const scriptContent = readFileSync(INSTALL_SCRIPT, 'utf8');
-      // Should not have plain npm install -g synclaude (without GitHub URL)
-      const hasNpmRegistryFallback = scriptContent.includes('npm install -g synclaude\n') ||
-        scriptContent.includes('npm install -g synclaude"') ||
-        scriptContent.includes('npm install -g synclaude;');
+      // Should not have plain npm install -g synpick (without GitHub URL)
+      const hasNpmRegistryFallback = scriptContent.includes('npm install -g synpick\n') ||
+        scriptContent.includes('npm install -g synpick"') ||
+        scriptContent.includes('npm install -g synpick;');
       expect(hasNpmRegistryFallback).toBe(false);
     });
 
@@ -162,7 +162,7 @@ describe('Installer Script', () => {
 
     it('should clean up npm global installations', () => {
       const scriptContent = readFileSync(INSTALL_SCRIPT, 'utf8');
-      expect(scriptContent).toContain('lib/node_modules/synclaude');
+      expect(scriptContent).toContain('lib/node_modules/synpick');
     });
 
     it('should clean up symlinks', () => {

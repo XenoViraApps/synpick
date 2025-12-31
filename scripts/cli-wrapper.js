@@ -26,6 +26,6 @@ child.on('exit', (code) => {
 });
 
 child.on('error', (err) => {
-  console.error('Failed to start synclaude:', err);
+  console.error('Failed to start synpick:', err);
   process.exit(1);
 });
