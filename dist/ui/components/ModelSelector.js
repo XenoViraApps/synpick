@@ -1,9 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ModelSelector = void 0;
-const jsx_runtime_1 = require("react/jsx-runtime");
-const react_1 = require("react");
-const ink_1 = require("ink");
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { useState, useEffect } from 'react';
+import { Box, Text, useInput, useApp, useStdout } from 'ink';
+import { BYTES_PER_KB, LIST_VISIBLE_BEFORE, LIST_VISIBLE_AFTER, UI_INDENT_SPACES, UI_MARGIN_BOTTOM, } from '../../utils/constants.js';
 // Helper function to identify thinking-capable models
 function isThinkingModel(modelId) {
     const id = modelId.toLowerCase();
@@ -27,16 +25,16 @@ function isThinkingModel(modelId) {
         return true; // Qwen 3 thinking variants
     return false;
 }
-const ModelSelector = ({ models, onSelect, onCancel, searchPlaceholder = 'Search models...', initialRegularModel = null, initialThinkingModel = null }) => {
-    const [searchQuery, setSearchQuery] = (0, react_1.useState)('');
-    const [selectedIndex, setSelectedIndex] = (0, react_1.useState)(0);
-    const [filteredModels, setFilteredModels] = (0, react_1.useState)(models);
-    const [selectedRegularModel, setSelectedRegularModel] = (0, react_1.useState)(initialRegularModel);
-    const [selectedThinkingModel, setSelectedThinkingModel] = (0, react_1.useState)(initialThinkingModel);
-    const { exit } = (0, ink_1.useApp)();
-    const { write } = (0, ink_1.useStdout)();
+export const ModelSelector = ({ models, onSelect, onCancel, searchPlaceholder: _searchPlaceholder = 'Search models...', initialRegularModel = null, initialThinkingModel = null, }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [filteredModels, setFilteredModels] = useState(models);
+    const [selectedRegularModel] = useState(initialRegularModel);
+    const [selectedThinkingModel, setSelectedThinkingModel] = useState(initialThinkingModel);
+    const { exit } = useApp();
+    useStdout();
     // Filter models based on search query
-    (0, react_1.useEffect)(() => {
+    useEffect(() => {
         if (!searchQuery) {
             setFilteredModels(models);
             return;
@@ -46,7 +44,7 @@ const ModelSelector = ({ models, onSelect, onCancel, searchPlaceholder = 'Search
             const searchText = [
                 model.id.toLowerCase(),
                 model.getProvider().toLowerCase(),
-                model.getModelName().toLowerCase()
+                model.getModelName().toLowerCase(),
             ].join(' ');
             return searchText.includes(query);
         });
@@ -54,11 +52,11 @@ const ModelSelector = ({ models, onSelect, onCancel, searchPlaceholder = 'Search
         setSelectedIndex(0); // Reset selection when filter changes
     }, [searchQuery, models]);
     // Calculate visible range for better scrolling
-    const visibleStartIndex = Math.max(0, selectedIndex - 5);
-    const visibleEndIndex = Math.min(filteredModels.length, selectedIndex + 6);
+    const visibleStartIndex = Math.max(0, selectedIndex - LIST_VISIBLE_BEFORE);
+    const visibleEndIndex = Math.min(filteredModels.length, selectedIndex + LIST_VISIBLE_AFTER);
     const visibleModels = filteredModels.slice(visibleStartIndex, visibleEndIndex);
     // Handle keyboard input
-    (0, ink_1.useInput)((input, key) => {
+    useInput((input, key) => {
         // Handle special 't' key for thinking model selection when no search query exists
         if (input === 't' && !searchQuery && !key.ctrl && !key.meta) {
             if (filteredModels.length > 0 && selectedIndex < filteredModels.length) {
@@ -76,9 +74,20 @@ const ModelSelector = ({ models, onSelect, onCancel, searchPlaceholder = 'Search
             return;
         }
         // Handle text input for search
-        if (input && !key.ctrl && !key.meta && !key.return && !key.escape && !key.tab &&
-            !key.upArrow && !key.downArrow && !key.leftArrow && !key.rightArrow &&
-            !key.delete && !key.backspace && input !== 'q' && !(input === 't' && !searchQuery)) {
+        if (input &&
+            !key.ctrl &&
+            !key.meta &&
+            !key.return &&
+            !key.escape &&
+            !key.tab &&
+            !key.upArrow &&
+            !key.downArrow &&
+            !key.leftArrow &&
+            !key.rightArrow &&
+            !key.delete &&
+            !key.backspace &&
+            input !== 'q' &&
+            !(input === 't' && !searchQuery)) {
             setSearchQuery(prev => prev + input);
             return;
         }
@@ -126,9 +135,9 @@ const ModelSelector = ({ models, onSelect, onCancel, searchPlaceholder = 'Search
         }
     });
     if (models.length === 0) {
-        return ((0, jsx_runtime_1.jsxs)(ink_1.Box, { flexDirection: "column", children: [(0, jsx_runtime_1.jsx)(ink_1.Text, { color: "red", children: "Error: No models available" }), (0, jsx_runtime_1.jsx)(ink_1.Text, { color: "gray", children: "Press 'q' to quit or Escape to cancel" })] }));
+        return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Text, { color: "red", children: "Error: No models available" }), _jsx(Text, { color: "gray", children: "Press 'q' to quit or Escape to cancel" })] }));
     }
-    return ((0, jsx_runtime_1.jsxs)(ink_1.Box, { flexDirection: "column", children: [(0, jsx_runtime_1.jsx)(ink_1.Box, { marginBottom: 1, children: (0, jsx_runtime_1.jsx)(ink_1.Text, { color: "cyan", children: "Select Models:" }) }), (0, jsx_runtime_1.jsx)(ink_1.Box, { marginBottom: 1, children: (0, jsx_runtime_1.jsxs)(ink_1.Text, { color: "gray", children: ["Regular: ", selectedRegularModel ? selectedRegularModel.getDisplayName() : "none", " | Thinking: ", selectedThinkingModel ? selectedThinkingModel.getDisplayName() : "none"] }) }), (0, jsx_runtime_1.jsx)(ink_1.Box, { marginBottom: 1, children: (0, jsx_runtime_1.jsxs)(ink_1.Text, { color: "gray", children: ["Search: ", searchQuery || "(type to search)", " "] }) }), filteredModels.length > 0 ? ((0, jsx_runtime_1.jsxs)(jsx_runtime_1.Fragment, { children: [(0, jsx_runtime_1.jsx)(ink_1.Box, { marginBottom: 1, children: (0, jsx_runtime_1.jsxs)(ink_1.Text, { color: "gray", children: ["Found ", filteredModels.length, " model", filteredModels.length !== 1 ? 's' : ''] }) }), visibleStartIndex > 0 && ((0, jsx_runtime_1.jsx)(ink_1.Box, { marginBottom: 1, children: (0, jsx_runtime_1.jsxs)(ink_1.Text, { color: "gray", children: ["\u25B2 ", visibleStartIndex, " more above"] }) })), visibleModels.map((model, index) => {
+    return (_jsxs(Box, { flexDirection: "column", children: [_jsx(Box, { marginBottom: UI_MARGIN_BOTTOM, children: _jsx(Text, { color: "cyan", children: "Select Models:" }) }), _jsx(Box, { marginBottom: UI_MARGIN_BOTTOM, children: _jsxs(Text, { color: "gray", children: ["Regular: ", selectedRegularModel ? selectedRegularModel.getDisplayName() : 'none', " | Thinking: ", selectedThinkingModel ? selectedThinkingModel.getDisplayName() : 'none'] }) }), _jsx(Box, { marginBottom: UI_MARGIN_BOTTOM, children: _jsxs(Text, { color: "gray", children: ["Search: ", searchQuery || '(type to search)', " "] }) }), filteredModels.length > 0 ? (_jsxs(_Fragment, { children: [_jsx(Box, { marginBottom: UI_MARGIN_BOTTOM, children: _jsxs(Text, { color: "gray", children: ["Found ", filteredModels.length, " model", filteredModels.length !== 1 ? 's' : ''] }) }), visibleStartIndex > 0 && (_jsx(Box, { marginBottom: UI_MARGIN_BOTTOM, children: _jsxs(Text, { color: "gray", children: ["\u25B2 ", visibleStartIndex, " more above"] }) })), visibleModels.map((model, index) => {
                         const actualIndex = visibleStartIndex + index;
                         const isRegularSelected = selectedRegularModel?.id === model.id;
                         const isThinkingSelected = selectedThinkingModel?.id === model.id;
@@ -142,10 +151,14 @@ const ModelSelector = ({ models, onSelect, onCancel, searchPlaceholder = 'Search
                                 return '[T] ';
                             return '    ';
                         };
-                        return ((0, jsx_runtime_1.jsx)(ink_1.Box, { marginBottom: 1, children: (0, jsx_runtime_1.jsxs)(ink_1.Box, { flexDirection: "column", children: [(0, jsx_runtime_1.jsx)(ink_1.Box, { children: (0, jsx_runtime_1.jsxs)(ink_1.Text, { color: actualIndex === selectedIndex ? 'green' :
-                                                isRegularSelected ? 'cyan' :
-                                                    isThinkingSelected ? 'yellow' : 'white', bold: actualIndex === selectedIndex || isRegularSelected || isThinkingSelected, children: [actualIndex === selectedIndex ? '▸ ' : '  ', getSelectionIndicator(), actualIndex + 1, ". ", model.getDisplayName()] }) }), (0, jsx_runtime_1.jsx)(ink_1.Box, { marginLeft: 4, children: (0, jsx_runtime_1.jsxs)(ink_1.Text, { color: "gray", dimColor: true, children: ["Provider: ", model.getProvider(), model.context_length && ` | Context: ${Math.round(model.context_length / 1024)}K`, model.quantization && ` | ${model.quantization}`, isThinkingModel(model.id) && ' | 🤔 Thinking'] }) })] }) }, model.id));
-                    }), visibleEndIndex < filteredModels.length && ((0, jsx_runtime_1.jsx)(ink_1.Box, { marginBottom: 1, children: (0, jsx_runtime_1.jsxs)(ink_1.Text, { color: "gray", children: ["\u25BC ", filteredModels.length - visibleEndIndex, " more below"] }) })), (0, jsx_runtime_1.jsx)(ink_1.Box, { marginTop: 1, children: (0, jsx_runtime_1.jsx)(ink_1.Text, { color: "gray", children: "\u2191\u2193 Navigate | Enter: Regular Model + Launch | t: Toggle Thinking Model | Space: Launch | q: Quit" }) })] })) : ((0, jsx_runtime_1.jsxs)(ink_1.Box, { children: [(0, jsx_runtime_1.jsx)(ink_1.Text, { color: "yellow", children: "No models match your search." }), (0, jsx_runtime_1.jsx)(ink_1.Text, { color: "gray", children: "Try different search terms." })] }))] }));
+                        return (_jsx(Box, { marginBottom: UI_MARGIN_BOTTOM, children: _jsxs(Box, { flexDirection: "column", children: [_jsx(Box, { children: _jsxs(Text, { color: actualIndex === selectedIndex
+                                                ? 'green'
+                                                : isRegularSelected
+                                                    ? 'cyan'
+                                                    : isThinkingSelected
+                                                        ? 'yellow'
+                                                        : 'white', bold: actualIndex === selectedIndex || isRegularSelected || isThinkingSelected, children: [actualIndex === selectedIndex ? '▸ ' : '  ', getSelectionIndicator(), actualIndex + 1, ". ", model.getDisplayName()] }) }), _jsx(Box, { marginLeft: UI_INDENT_SPACES, children: _jsxs(Text, { color: "gray", children: ["Provider: ", model.getProvider(), model.context_length &&
+                                                    ` | Context: ${Math.round(model.context_length / BYTES_PER_KB)}K`, model.quantization && ` | ${model.quantization}`, isThinkingModel(model.id) && ' | 🤔 Thinking'] }) })] }) }, model.id));
+                    }), visibleEndIndex < filteredModels.length && (_jsx(Box, { marginBottom: UI_MARGIN_BOTTOM, children: _jsxs(Text, { color: "gray", children: ["\u25BC ", filteredModels.length - visibleEndIndex, " more below"] }) })), _jsx(Box, { marginTop: 1, children: _jsx(Text, { color: "gray", children: "\u2191\u2193 Navigate | Enter: Regular Model + Launch | t: Toggle Thinking Model | Space: Launch | q: Quit" }) })] })) : (_jsxs(Box, { children: [_jsx(Text, { color: "yellow", children: "No models match your search." }), _jsx(Text, { color: "gray", children: "Try different search terms." })] }))] }));
 };
-exports.ModelSelector = ModelSelector;
 //# sourceMappingURL=ModelSelector.js.map

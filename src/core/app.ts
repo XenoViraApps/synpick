@@ -1,10 +1,11 @@
 import { join } from 'path';
 import { homedir } from 'os';
+import { execSync } from 'child_process';
+import axios from 'axios';
 import { ConfigManager } from '../config';
 import { ModelManager } from '../models';
 import { UserInterface } from '../ui';
 import { ClaudeLauncher, LaunchOptions } from '../launcher';
-import { ModelInfoImpl } from '../models';
 import { setupLogging, log } from '../utils/logger';
 import { createBanner, normalizeDangerousFlags } from '../utils/banner';
 import { ClaudeCodeManager, ClaudeCodeManager as ClaudeCodeManagerClass } from '../claude';
@@ -16,6 +17,11 @@ export interface AppOptions {
   thinkingModel?: string;
 }
 
+/**
+ * SyntheticClaudeApp is the main application class for synclaude
+ *
+ * Orchestrates model management, configuration, and Claude Code launching.
+ */
 export class SyntheticClaudeApp {
   private configManager: ConfigManager;
   private ui: UserInterface;
@@ -23,22 +29,44 @@ export class SyntheticClaudeApp {
   private modelManager: ModelManager | null = null;
   private claudeCodeManager: ClaudeCodeManagerClass;
 
+  /**
+   * Creates a new SyntheticClaudeApp instance
+   *
+   * Initializes config manager, UI, launcher, and Claude Code manager.
+   */
   constructor() {
     this.configManager = new ConfigManager();
+    const config = this.configManager.config;
+
     this.ui = new UserInterface({
       verbose: this.configManager.config.apiKey
         ? this.configManager.config.cacheDurationHours > 0
         : false,
     });
-    this.launcher = new ClaudeLauncher();
-    this.claudeCodeManager = new ClaudeCodeManager();
+    this.launcher = new ClaudeLauncher({
+      timeoutMs: config.commandTimeoutMs,
+    });
+    this.claudeCodeManager = new ClaudeCodeManager({
+      verbose: false,
+      timeoutMs: config.commandTimeoutMs,
+    });
   }
 
+  /**
+   * Sets up logging based on the provided options
+   *
+   * @param options - App options containing verbose and quiet flags
+   */
   async setupLogging(options: AppOptions): Promise<void> {
     setupLogging(options.verbose, options.quiet);
     // Removed verbose startup log
   }
 
+  /**
+   * Gets the current configuration
+   *
+   * @returns The current app configuration object
+   */
   getConfig() {
     return this.configManager.config;
   }
@@ -53,12 +81,21 @@ export class SyntheticClaudeApp {
         modelsApiUrl: config.modelsApiUrl,
         cacheFile,
         cacheDurationHours: config.cacheDurationHours,
+        apiTimeoutMs: config.apiTimeoutMs,
       });
     }
 
     return this.modelManager;
   }
 
+  /**
+   * Runs the main synclaude application
+   *
+   * Handles first-time setup, model selection, and Claude Code launching.
+   *
+   * @param options - App and launch options
+   * @returns Promise that resolves when the application is done
+   */
   async run(options: AppOptions & LaunchOptions): Promise<void> {
     // Normalize dangerous flags first
     if (options.additionalArgs) {
@@ -203,7 +240,6 @@ export class SyntheticClaudeApp {
    * Get latest synclaude version from GitHub repository
    */
   private async getLatestGitHubVersion(): Promise<string | null> {
-    const axios = require('axios');
     const GITHUB_REPO = 'jeffersonwarrior/synclaude';
 
     try {
@@ -229,9 +265,6 @@ export class SyntheticClaudeApp {
    * Update synclaude itself via npm
    */
   private async updateSynclaudeSelf(force: boolean = false): Promise<void> {
-    const { execSync } = require('child_process');
-    const axios = require('axios');
-
     try {
       // Get current synclaude version
       const currentVersion = execSync('synclaude --version', { encoding: 'utf-8' }).trim();
@@ -353,6 +386,13 @@ export class SyntheticClaudeApp {
     }
   }
 
+  /**
+   * Initiates interactive model selection for saving a default model
+   *
+   * Allows selecting both regular and thinking models.
+   *
+   * @returns Promise resolving to true if models were selected and saved, false otherwise
+   */
   async interactiveModelSelection(): Promise<boolean> {
     if (!this.configManager.hasApiKey()) {
       this.ui.error('No API key configured. Please run "synclaude setup" first.');
@@ -396,11 +436,19 @@ export class SyntheticClaudeApp {
       );
       return true;
     } catch (error) {
-      this.ui.error(`Error during model selection: ${error}`);
+      const message = error instanceof Error ? error.message : String(error);
+      this.ui.error(`Failed to select model: ${message}`);
       return false;
     }
   }
 
+  /**
+   * Initiates interactive thinking model selection
+   *
+   * Allows selecting a thinking model for reasoning tasks.
+   *
+   * @returns Promise resolving to true if a thinking model was selected and saved, false otherwise
+   */
   async interactiveThinkingModelSelection(): Promise<boolean> {
     if (!this.configManager.hasApiKey()) {
       this.ui.error('No API key configured. Please run "synclaude setup" first.');
@@ -433,16 +481,24 @@ export class SyntheticClaudeApp {
       );
       return true;
     } catch (error) {
-      this.ui.error(`Error during thinking model selection: ${error}`);
+      const message = error instanceof Error ? error.message : String(error);
+      this.ui.error(`Failed to select thinking model: ${message}`);
       return false;
     }
   }
 
+  /**
+   * Lists all available models
+   *
+   * @param options - Options for model listing
+   * @param options.refresh - If true, forces a refresh from the API
+   * @returns Promise that resolves when models are listed
+   */
   async listModels(options: { refresh?: boolean }): Promise<void> {
     log.info('Listing models', { options });
 
     if (!this.configManager.hasApiKey()) {
-      this.ui.error('No API key configured. Please run "synclaude setup" first.');
+      this.ui.error('No API key configured. Run "synclaude setup" to configure.');
       return;
     }
 
@@ -455,15 +511,24 @@ export class SyntheticClaudeApp {
       const sortedModels = modelManager.getModels(models);
       this.ui.showModelList(sortedModels);
     } catch (error) {
-      this.ui.error(`Error fetching models: ${error}`);
+      const message = error instanceof Error ? error.message : String(error);
+      this.ui.error(`Failed to fetch models: ${message}`);
     }
   }
 
+  /**
+   * Searches for models matching the given query
+   *
+   * @param query - Search query to filter models
+   * @param options - Options for model search
+   * @param options.refresh - If true, forces a refresh from the API
+   * @returns Promise that resolves when models are searched
+   */
   async searchModels(query: string, options: { refresh?: boolean }): Promise<void> {
     log.info('Searching models', { query, options });
 
     if (!this.configManager.hasApiKey()) {
-      this.ui.error('No API key configured. Please run "synclaude setup" first.');
+      this.ui.error('No API key configured. Run "synclaude setup" to configure.');
       return;
     }
 
@@ -482,10 +547,16 @@ export class SyntheticClaudeApp {
       );
       this.ui.showModelList(models);
     } catch (error) {
-      this.ui.error(`Error searching models: ${error}`);
+      const message = error instanceof Error ? error.message : String(error);
+      this.ui.error(`Failed to search models: ${message}`);
     }
   }
 
+  /**
+   * Displays the current configuration
+   *
+   * @returns Promise that resolves when configuration is displayed
+   */
   async showConfig(): Promise<void> {
     const config = this.configManager.config;
 
@@ -503,6 +574,13 @@ export class SyntheticClaudeApp {
     this.ui.info(`Max Token Size: ${config.maxTokenSize}`);
   }
 
+  /**
+   * Sets a configuration value
+   *
+   * @param key - Configuration key to set
+   * @param value - Value to set (will be parsed appropriately based on key)
+   * @returns Promise that resolves when configuration is set
+   */
   async setConfig(key: string, value: string): Promise<void> {
     // Simple key-value config setting
     const updates: Record<string, any> = {};
@@ -548,6 +626,11 @@ export class SyntheticClaudeApp {
     }
   }
 
+  /**
+   * Resets all configuration to defaults
+   *
+   * @returns Promise that resolves when configuration is reset
+   */
   async resetConfig(): Promise<void> {
     const confirmed = await this.ui.confirm(
       'Are you sure you want to reset all configuration to defaults?'
@@ -562,6 +645,13 @@ export class SyntheticClaudeApp {
     this.ui.success('Configuration reset to defaults');
   }
 
+  /**
+   * Runs the first-time setup wizard
+   *
+   * Prompts user for API key and optionally tests connection and selects a model.
+   *
+   * @returns Promise that resolves when setup is complete
+   */
   async setup(): Promise<void> {
     this.ui.coloredInfo("Welcome to Synclaude! Let's set up your configuration.");
     this.ui.info('==============================================');
@@ -596,7 +686,8 @@ export class SyntheticClaudeApp {
         const models = await modelManager.fetchModels(true);
         this.ui.coloredSuccess(`Connection successful! Found ${models.length} models`);
       } catch (error) {
-        this.ui.error(`Connection failed: ${error}`);
+        const message = error instanceof Error ? error.message : String(error);
+        this.ui.error(`Connection test failed: ${message}`);
         return;
       }
     }
@@ -614,6 +705,13 @@ export class SyntheticClaudeApp {
     this.ui.highlightInfo('You can now run "synclaude" to launch Claude Code', ['synclaude']);
   }
 
+  /**
+   * Runs a system health check
+   *
+   * Checks Claude Code installation, version, configuration, and API connectivity.
+   *
+   * @returns Promise that resolves when health check is complete
+   */
   async doctor(): Promise<void> {
     this.ui.info('System Health Check');
     this.ui.info('===================');
@@ -663,7 +761,8 @@ export class SyntheticClaudeApp {
         const models = await modelManager.fetchModels(true);
         this.ui.showStatus('success', `API connection: OK (${models.length} models)`);
       } catch (error) {
-        this.ui.showStatus('error', `API connection: Failed (${error})`);
+        const message = error instanceof Error ? error.message : String(error);
+        this.ui.showStatus('error', `API connection: Failed (${message})`);
       }
     }
 
@@ -675,6 +774,11 @@ export class SyntheticClaudeApp {
     this.ui.info(`Max Token Size: ${config.maxTokenSize}`);
   }
 
+  /**
+   * Clears the model cache
+   *
+   * @returns Promise that resolves when cache is cleared
+   */
   async clearCache(): Promise<void> {
     const modelManager = this.getModelManager();
     const success = await modelManager.clearCache();
@@ -686,6 +790,13 @@ export class SyntheticClaudeApp {
     }
   }
 
+  /**
+   * Displays cache information
+   *
+   * Shows status, size, model count, and modification time of the cache.
+   *
+   * @returns Promise that resolves when cache info is displayed
+   */
   async cacheInfo(): Promise<void> {
     const modelManager = this.getModelManager();
     const cacheInfo = await modelManager.getCacheInfo();
@@ -741,7 +852,6 @@ export class SyntheticClaudeApp {
     skipPath?: boolean;
   }): Promise<void> {
     const { verbose = false, force = false, skipPath = false } = options;
-    const { execSync, spawn } = require('child_process');
 
     this.ui.coloredInfo('Installing synclaude from local directory to system-wide...');
     this.ui.info('==================================================');

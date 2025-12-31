@@ -46,6 +46,20 @@ export const AppConfigSchema = z.object({
     .max(200000)
     .default(128000)
     .describe('Max token size for Claude Code context window'),
+  apiTimeoutMs: z
+    .number()
+    .int()
+    .min(1000)
+    .max(300000)
+    .default(30000)
+    .describe('HTTP API request timeout in milliseconds'),
+  commandTimeoutMs: z
+    .number()
+    .int()
+    .min(1000)
+    .max(60000)
+    .default(5000)
+    .describe('Command execution timeout in milliseconds'),
 });
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;
@@ -53,7 +67,7 @@ export type AppConfig = z.infer<typeof AppConfigSchema>;
 export class ConfigValidationError extends Error {
   constructor(
     message: string,
-    public override cause?: unknown
+    public cause?: unknown
   ) {
     super(message);
     this.name = 'ConfigValidationError';
@@ -63,7 +77,7 @@ export class ConfigValidationError extends Error {
 export class ConfigLoadError extends Error {
   constructor(
     message: string,
-    public override cause?: unknown
+    public cause?: unknown
   ) {
     super(message);
     this.name = 'ConfigLoadError';
@@ -73,7 +87,7 @@ export class ConfigLoadError extends Error {
 export class ConfigSaveError extends Error {
   constructor(
     message: string,
-    public override cause?: unknown
+    public cause?: unknown
   ) {
     super(message);
     this.name = 'ConfigSaveError';

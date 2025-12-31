@@ -28,8 +28,10 @@ export declare class ClaudeCodeManager {
     private static readonly NPM_REGISTRY_URL;
     private static readonly UPDATE_CHECK_INTERVAL_MS;
     private static readonly OFFICIAL_INSTALL_URL;
+    private timeoutMs;
     constructor(options?: {
         verbose?: boolean;
+        timeoutMs?: number;
     });
     /**
      * Check if Claude Code is installed
@@ -100,6 +102,10 @@ export declare class ClaudeCodeManager {
     }>;
     /**
      * Spawn a command and capture output
+     *
+     * @param command - Command to execute
+     * @param args - Command arguments
+     * @returns Promise with command result
      */
     private spawnCommand;
 }

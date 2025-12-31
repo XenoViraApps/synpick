@@ -1,26 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ModelInfoImpl = void 0;
-exports.createModelInfo = createModelInfo;
-class ModelInfoImpl {
-    id;
-    object;
-    created;
-    owned_by;
-    provider;
-    always_on;
-    hugging_face_id;
-    name;
-    input_modalities;
-    output_modalities;
-    context_length;
-    max_output_length;
-    pricing;
-    quantization;
-    supported_sampling_parameters;
-    supported_features;
-    openrouter;
-    datacenters;
+export class ModelInfoImpl {
     constructor(data) {
         const result = require('./types').ModelInfoSchema.safeParse(data);
         if (!result.success) {
@@ -90,8 +68,7 @@ class ModelInfoImpl {
         };
     }
 }
-exports.ModelInfoImpl = ModelInfoImpl;
-function createModelInfo(data) {
+export function createModelInfo(data) {
     return new ModelInfoImpl(data);
 }
 //# sourceMappingURL=info.js.map

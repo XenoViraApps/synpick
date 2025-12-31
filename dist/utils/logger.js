@@ -1,12 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.log = exports.logger = exports.Logger = void 0;
-exports.setupLogging = setupLogging;
-exports.getLogger = getLogger;
-class Logger {
-    level;
-    verbose;
-    quiet;
+export class Logger {
     constructor(options) {
         this.level = options.level;
         this.verbose = options.verbose || false;
@@ -69,9 +61,8 @@ class Logger {
         this.quiet = quiet;
     }
 }
-exports.Logger = Logger;
 let globalLogger = null;
-function setupLogging(verbose = false, quiet = false) {
+export function setupLogging(verbose = false, quiet = false) {
     let level = 'info';
     if (quiet) {
         level = 'error';
@@ -81,15 +72,15 @@ function setupLogging(verbose = false, quiet = false) {
     }
     globalLogger = new Logger({ level, verbose, quiet });
 }
-function getLogger() {
+export function getLogger() {
     if (!globalLogger) {
         globalLogger = new Logger({ level: 'info' });
     }
     return globalLogger;
 }
 // Export convenience functions
-exports.logger = getLogger();
-exports.log = {
+export const logger = getLogger();
+export const log = {
     debug: (message, ...args) => getLogger().debug(message, ...args),
     info: (message, ...args) => getLogger().info(message, ...args),
     warn: (message, ...args) => getLogger().warn(message, ...args),

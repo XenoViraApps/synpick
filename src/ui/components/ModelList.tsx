@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Text, Newline } from 'ink';
+import { Box, Text } from 'ink';
 import { ModelInfoImpl } from '../../models';
+import { BYTES_PER_KB, UI_MARGIN_BOTTOM } from '../../utils/constants';
 
 interface ModelListProps {
   models: ModelInfoImpl[];
@@ -11,13 +12,13 @@ interface ModelListProps {
 export const ModelList: React.FC<ModelListProps> = ({
   models,
   selectedIndex,
-  showCategories = false
+  showCategories: _showCategories = false,
 }) => {
   if (models.length === 0) {
     return (
       <Box flexDirection="column">
         <Text color="gray">No models available.</Text>
-        <Newline />
+        {'\n'}
         <Text color="gray">Try running 'synclaude models --refresh' to update the model list.</Text>
       </Box>
     );
@@ -26,36 +27,36 @@ export const ModelList: React.FC<ModelListProps> = ({
   return (
     <Box flexDirection="column">
       {models.map((model, index) => (
-        <Box key={model.id} marginBottom={1}>
+        <Box key={model.id} marginBottom={UI_MARGIN_BOTTOM}>
           <Text color={selectedIndex === index ? 'blue' : 'white'}>
             {selectedIndex === index ? '➤ ' : '  '}
             {index + 1}. {model.getDisplayName()}
           </Text>
-          <Newline />
-          <Text color="gray" dimColor>
-    {'    '}Provider: {model.getProvider()}
+          {'\n'}
+          <Text color="gray">
+            {'    '}Provider: {model.getProvider()}
           </Text>
           {(model as any).context_length && (
             <>
-              <Newline />
-              <Text color="gray" dimColor>
-        {'    '}Context: {Math.round((model as any).context_length / 1024)}K tokens
+              {'\n'}
+              <Text color="gray">
+                {'    '}Context: {Math.round((model as any).context_length / BYTES_PER_KB)}K tokens
               </Text>
             </>
           )}
           {(model as any).quantization && (
             <>
-              <Newline />
-              <Text color="gray" dimColor>
-        {'    '}Quantization: {(model as any).quantization}
+              {'\n'}
+              <Text color="gray">
+                {'    '}Quantization: {(model as any).quantization}
               </Text>
             </>
           )}
           {model.owned_by && (
             <>
-              <Newline />
-              <Text color="gray" dimColor>
-        {'    '}Owner: {model.owned_by}
+              {'\n'}
+              <Text color="gray">
+                {'    '}Owner: {model.owned_by}
               </Text>
             </>
           )}

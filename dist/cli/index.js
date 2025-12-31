@@ -1,11 +1,8 @@
 #!/usr/bin/env node
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.main = main;
-const commands_1 = require("./commands");
+import { createProgram } from './commands.js';
 async function main() {
     try {
-        const program = (0, commands_1.createProgram)();
+        const program = createProgram();
         // Parse command line arguments
         program.parse(process.argv);
     }
@@ -24,8 +21,7 @@ process.on('uncaughtException', error => {
     console.error('Uncaught Exception:', error);
     process.exit(1);
 });
-// Run main function
-if (require.main === module) {
-    main();
-}
+// Run main function when this file is the entry point
+main();
+export { main };
 //# sourceMappingURL=index.js.map

@@ -1,6 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput, useApp, useStdout } from 'ink';
 import { ModelInfoImpl } from '../../models';
+import {
+  BYTES_PER_KB,
+  LIST_VISIBLE_BEFORE,
+  LIST_VISIBLE_AFTER,
+  UI_INDENT_SPACES,
+  UI_MARGIN_BOTTOM,
+} from '../../utils/constants';
 
 // Helper function to identify thinking-capable models
 function isThinkingModel(modelId: string): boolean {
@@ -9,7 +16,8 @@ function isThinkingModel(modelId: string): boolean {
   if (id.includes('thinking')) return true;
   // Known thinking model patterns
   if (id.includes('minimax') && (id.includes('2') || id.includes('3'))) return true;
-  if (id.includes('deepseek-r1') || id.includes('deepseek-r2') || id.includes('deepseek-r3')) return true;
+  if (id.includes('deepseek-r1') || id.includes('deepseek-r2') || id.includes('deepseek-r3'))
+    return true;
   if (id.includes('deepseek') && (id.includes('3.2') || id.includes('3-2'))) return true;
   if (id.includes('qwq')) return true;
   if (id.includes('o1')) return true; // OpenAI o1 series
@@ -31,18 +39,20 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   models,
   onSelect,
   onCancel,
-  searchPlaceholder = 'Search models...',
+  searchPlaceholder: _searchPlaceholder = 'Search models...',
   initialRegularModel = null,
-  initialThinkingModel = null
+  initialThinkingModel = null,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [filteredModels, setFilteredModels] = useState<ModelInfoImpl[]>(models);
-  const [selectedRegularModel, setSelectedRegularModel] = useState<ModelInfoImpl | null>(initialRegularModel);
-  const [selectedThinkingModel, setSelectedThinkingModel] = useState<ModelInfoImpl | null>(initialThinkingModel);
+  const [selectedRegularModel] = useState<ModelInfoImpl | null>(initialRegularModel);
+  const [selectedThinkingModel, setSelectedThinkingModel] = useState<ModelInfoImpl | null>(
+    initialThinkingModel
+  );
 
   const { exit } = useApp();
-  const { write } = useStdout();
+  useStdout();
 
   // Filter models based on search query
   useEffect(() => {
@@ -56,7 +66,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       const searchText = [
         model.id.toLowerCase(),
         model.getProvider().toLowerCase(),
-        model.getModelName().toLowerCase()
+        model.getModelName().toLowerCase(),
       ].join(' ');
 
       return searchText.includes(query);
@@ -67,8 +77,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   }, [searchQuery, models]);
 
   // Calculate visible range for better scrolling
-  const visibleStartIndex = Math.max(0, selectedIndex - 5);
-  const visibleEndIndex = Math.min(filteredModels.length, selectedIndex + 6);
+  const visibleStartIndex = Math.max(0, selectedIndex - LIST_VISIBLE_BEFORE);
+  const visibleEndIndex = Math.min(filteredModels.length, selectedIndex + LIST_VISIBLE_AFTER);
   const visibleModels = filteredModels.slice(visibleStartIndex, visibleEndIndex);
 
   // Handle keyboard input
@@ -90,9 +100,22 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     }
 
     // Handle text input for search
-    if (input && !key.ctrl && !key.meta && !key.return && !key.escape && !key.tab &&
-        !key.upArrow && !key.downArrow && !key.leftArrow && !key.rightArrow &&
-        !key.delete && !key.backspace && input !== 'q' && !(input === 't' && !searchQuery)) {
+    if (
+      input &&
+      !key.ctrl &&
+      !key.meta &&
+      !key.return &&
+      !key.escape &&
+      !key.tab &&
+      !key.upArrow &&
+      !key.downArrow &&
+      !key.leftArrow &&
+      !key.rightArrow &&
+      !key.delete &&
+      !key.backspace &&
+      input !== 'q' &&
+      !(input === 't' && !searchQuery)
+    ) {
       setSearchQuery(prev => prev + input);
       return;
     }
@@ -140,7 +163,6 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       return;
     }
 
-
     // 'q' to quit
     if (input === 'q') {
       onCancel();
@@ -159,25 +181,25 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
   return (
     <Box flexDirection="column">
-      <Box marginBottom={1}>
+      <Box marginBottom={UI_MARGIN_BOTTOM}>
         <Text color="cyan">Select Models:</Text>
       </Box>
 
       {/* Selection status */}
-      <Box marginBottom={1}>
+      <Box marginBottom={UI_MARGIN_BOTTOM}>
         <Text color="gray">
-          Regular: {selectedRegularModel ? selectedRegularModel.getDisplayName() : "none"} |
-          Thinking: {selectedThinkingModel ? selectedThinkingModel.getDisplayName() : "none"}
+          Regular: {selectedRegularModel ? selectedRegularModel.getDisplayName() : 'none'} |
+          Thinking: {selectedThinkingModel ? selectedThinkingModel.getDisplayName() : 'none'}
         </Text>
       </Box>
 
-      <Box marginBottom={1}>
-        <Text color="gray">Search: {searchQuery || "(type to search)"} </Text>
+      <Box marginBottom={UI_MARGIN_BOTTOM}>
+        <Text color="gray">Search: {searchQuery || '(type to search)'} </Text>
       </Box>
 
       {filteredModels.length > 0 ? (
         <>
-          <Box marginBottom={1}>
+          <Box marginBottom={UI_MARGIN_BOTTOM}>
             <Text color="gray">
               Found {filteredModels.length} model{filteredModels.length !== 1 ? 's' : ''}
             </Text>
@@ -185,7 +207,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
           {/* Show scroll indicators if needed */}
           {visibleStartIndex > 0 && (
-            <Box marginBottom={1}>
+            <Box marginBottom={UI_MARGIN_BOTTOM}>
               <Text color="gray">▲ {visibleStartIndex} more above</Text>
             </Box>
           )}
@@ -204,24 +226,33 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             };
 
             return (
-              <Box key={model.id} marginBottom={1}>
+              <Box key={model.id} marginBottom={UI_MARGIN_BOTTOM}>
                 <Box flexDirection="column">
                   <Box>
                     <Text
-                      color={actualIndex === selectedIndex ? 'green' :
-                             isRegularSelected ? 'cyan' :
-                             isThinkingSelected ? 'yellow' : 'white'}
-                      bold={actualIndex === selectedIndex || isRegularSelected || isThinkingSelected}
+                      color={
+                        actualIndex === selectedIndex
+                          ? 'green'
+                          : isRegularSelected
+                            ? 'cyan'
+                            : isThinkingSelected
+                              ? 'yellow'
+                              : 'white'
+                      }
+                      bold={
+                        actualIndex === selectedIndex || isRegularSelected || isThinkingSelected
+                      }
                     >
                       {actualIndex === selectedIndex ? '▸ ' : '  '}
                       {getSelectionIndicator()}
                       {actualIndex + 1}. {model.getDisplayName()}
                     </Text>
                   </Box>
-                  <Box marginLeft={4}>
-                    <Text color="gray" dimColor>
+                  <Box marginLeft={UI_INDENT_SPACES}>
+                    <Text color="gray">
                       Provider: {model.getProvider()}
-                      {(model as any).context_length && ` | Context: ${Math.round((model as any).context_length / 1024)}K`}
+                      {(model as any).context_length &&
+                        ` | Context: ${Math.round((model as any).context_length / BYTES_PER_KB)}K`}
                       {(model as any).quantization && ` | ${model.quantization}`}
                       {isThinkingModel(model.id) && ' | 🤔 Thinking'}
                     </Text>
@@ -233,14 +264,15 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
           {/* Show scroll indicators if needed */}
           {visibleEndIndex < filteredModels.length && (
-            <Box marginBottom={1}>
+            <Box marginBottom={UI_MARGIN_BOTTOM}>
               <Text color="gray">▼ {filteredModels.length - visibleEndIndex} more below</Text>
             </Box>
           )}
 
           <Box marginTop={1}>
             <Text color="gray">
-              ↑↓ Navigate | Enter: Regular Model + Launch | t: Toggle Thinking Model | Space: Launch | q: Quit
+              ↑↓ Navigate | Enter: Regular Model + Launch | t: Toggle Thinking Model | Space: Launch
+              | q: Quit
             </Text>
           </Box>
         </>

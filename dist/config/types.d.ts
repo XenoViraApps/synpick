@@ -12,6 +12,8 @@ export declare const AppConfigSchema: z.ZodObject<{
     claudeCodeUpdateCheckInterval: z.ZodDefault<z.ZodNumber>;
     lastClaudeCodeUpdateCheck: z.ZodOptional<z.ZodString>;
     maxTokenSize: z.ZodDefault<z.ZodNumber>;
+    apiTimeoutMs: z.ZodDefault<z.ZodNumber>;
+    commandTimeoutMs: z.ZodDefault<z.ZodNumber>;
 }, z.core.$strip>;
 export type AppConfig = z.infer<typeof AppConfigSchema>;
 export declare class ConfigValidationError extends Error {

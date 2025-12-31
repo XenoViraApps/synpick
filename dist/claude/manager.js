@@ -1,21 +1,14 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.claudeCodeManager = exports.ClaudeCodeManager = void 0;
-const child_process_1 = require("child_process");
-const fs_1 = require("fs");
-const os_1 = require("os");
-const path_1 = require("path");
+import { spawn, execSync } from 'child_process';
+import { promises as fs } from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
 /**
  * Manages Claude Code installation, updates, and version checking
  */
-class ClaudeCodeManager {
-    options;
-    static CLAUDE_PACKAGE = '@anthropic-ai/claude-code';
-    static NPM_REGISTRY_URL = 'https://registry.npmjs.org/@anthropic-ai/claude-code';
-    static UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
-    static OFFICIAL_INSTALL_URL = 'https://claude.ai/install.sh';
+export class ClaudeCodeManager {
     constructor(options = {}) {
         this.options = options;
+        this.timeoutMs = options.timeoutMs || 5000;
     }
     /**
      * Check if Claude Code is installed
@@ -23,7 +16,7 @@ class ClaudeCodeManager {
     async checkInstallation() {
         try {
             const claudePath = await this.getClaudePath();
-            await fs_1.promises.access(claudePath);
+            await fs.access(claudePath);
             return true;
         }
         catch {
@@ -36,20 +29,20 @@ class ClaudeCodeManager {
     async getClaudePath() {
         try {
             // Try to get from npm bin directory
-            const npmPrefix = (0, child_process_1.execSync)('npm prefix -g', {
+            const npmPrefix = execSync('npm prefix -g', {
                 encoding: 'utf-8',
                 stdio: 'pipe',
             }).trim();
-            const npmBinDir = (0, path_1.join)(npmPrefix, 'bin');
-            return (0, path_1.join)(npmBinDir, 'claude');
+            const npmBinDir = join(npmPrefix, 'bin');
+            return join(npmBinDir, 'claude');
         }
         catch {
             // Try common npm prefix path
-            const npmPrefix = (0, child_process_1.execSync)('npm config get prefix', {
+            const npmPrefix = execSync('npm config get prefix', {
                 encoding: 'utf-8',
                 stdio: 'pipe',
             }).trim();
-            return (0, path_1.join)(npmPrefix, 'bin', 'claude');
+            return join(npmPrefix, 'bin', 'claude');
         }
     }
     /**
@@ -75,7 +68,7 @@ class ClaudeCodeManager {
      */
     async getNpmInstalledVersion() {
         try {
-            const result = (0, child_process_1.execSync)(`npm list -g --depth=0 ${ClaudeCodeManager.CLAUDE_PACKAGE} 2>&1 || true`, {
+            const result = execSync(`npm list -g --depth=0 ${ClaudeCodeManager.CLAUDE_PACKAGE} 2>&1 || true`, {
                 encoding: 'utf-8',
             });
             // Parse version from npm output
@@ -92,7 +85,7 @@ class ClaudeCodeManager {
     async getLatestVersion() {
         try {
             // Try to get version from npm view
-            const result = (0, child_process_1.execSync)(`npm view ${ClaudeCodeManager.CLAUDE_PACKAGE} version 2>/dev/null || true`, { encoding: 'utf-8' });
+            const result = execSync(`npm view ${ClaudeCodeManager.CLAUDE_PACKAGE} version 2>/dev/null || true`, { encoding: 'utf-8' });
             const version = result.trim();
             if (version && version.match(/^\d+\.\d+\.\d+$/)) {
                 return version;
@@ -196,7 +189,7 @@ class ClaudeCodeManager {
             if (verbose) {
                 console.log(`Running: ${npmCommand} ${npmArgs.join(' ')}`);
             }
-            (0, child_process_1.execSync)(`${npmCommand} ${npmArgs.join(' ')}`, {
+            execSync(`${npmCommand} ${npmArgs.join(' ')}`, {
                 stdio: verbose ? 'inherit' : 'pipe',
                 encoding: 'utf-8',
             });
@@ -244,7 +237,7 @@ class ClaudeCodeManager {
             }
             // Download and run the official installer
             const cmd = `curl -fsSL ${ClaudeCodeManager.OFFICIAL_INSTALL_URL} | bash`;
-            (0, child_process_1.execSync)(cmd, {
+            execSync(cmd, {
                 stdio: this.options.verbose ? 'inherit' : 'pipe',
                 encoding: 'utf-8',
             });
@@ -311,14 +304,14 @@ class ClaudeCodeManager {
     async getInstallationInfo() {
         try {
             const claudePath = await this.getClaudePath();
-            const stats = await fs_1.promises.lstat(claudePath);
+            const stats = await fs.lstat(claudePath);
             const isSymlink = stats.isSymbolicLink();
             let symlinkTarget;
             if (isSymlink) {
-                symlinkTarget = await fs_1.promises.readlink(claudePath);
+                symlinkTarget = await fs.readlink(claudePath);
             }
             // Check if this is a global npm installation
-            const isGlobal = claudePath.includes((0, os_1.homedir)())
+            const isGlobal = claudePath.includes(homedir())
                 ? claudePath.includes('.npm') || claudePath.includes('.nvm')
                 : claudePath.startsWith('/usr/local') || claudePath.startsWith('/usr');
             const version = await this.getCurrentVersion();
@@ -340,13 +333,20 @@ class ClaudeCodeManager {
     }
     /**
      * Spawn a command and capture output
+     *
+     * @param command - Command to execute
+     * @param args - Command arguments
+     * @returns Promise with command result
      */
     spawnCommand(command, args) {
         return new Promise(resolve => {
             let stdout = '';
             let stderr = '';
             let resolved = false;
-            const child = (0, child_process_1.spawn)(command, args, {
+            // Declare timeoutId before setting up event listeners
+            // so doResolve can properly clear it when process completes
+            let timeoutId;
+            const child = spawn(command, args, {
                 stdio: this.options.verbose ? 'inherit' : 'pipe',
                 shell: true,
             });
@@ -362,7 +362,9 @@ class ClaudeCodeManager {
                 if (!resolved) {
                     resolved = true;
                     // Clean up timeout if it exists
-                    clearTimeout(timeoutId);
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                    }
                     resolve(result);
                 }
             };
@@ -372,21 +374,25 @@ class ClaudeCodeManager {
             child.on('error', () => {
                 doResolve({ success: false, stdout, stderr, code: -1 });
             });
-            const timeoutId = setTimeout(() => {
+            // Set timeout after event listeners so it can be properly cleared
+            timeoutId = setTimeout(() => {
                 try {
                     child.kill('SIGKILL');
                 }
                 catch {
-                    // Ignore errors when killing
+                    // Ignore errors when killing (process may already be dead)
                 }
                 doResolve({ success: false, stdout, stderr, code: null });
-            }, 5000);
+            }, this.timeoutMs);
         });
     }
 }
-exports.ClaudeCodeManager = ClaudeCodeManager;
+ClaudeCodeManager.CLAUDE_PACKAGE = '@anthropic-ai/claude-code';
+ClaudeCodeManager.NPM_REGISTRY_URL = 'https://registry.npmjs.org/@anthropic-ai/claude-code';
+ClaudeCodeManager.UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+ClaudeCodeManager.OFFICIAL_INSTALL_URL = 'https://claude.ai/install.sh';
 /**
  * Default singleton instance
  */
-exports.claudeCodeManager = new ClaudeCodeManager();
+export const claudeCodeManager = new ClaudeCodeManager();
 //# sourceMappingURL=manager.js.map

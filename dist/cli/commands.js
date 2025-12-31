@@ -1,16 +1,17 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createProgram = createProgram;
-const commander_1 = require("commander");
-const app_1 = require("../core/app");
-const fs_1 = require("fs");
-const path_1 = require("path");
-const banner_1 = require("../utils/banner");
+import { Command } from 'commander';
+import { SyntheticClaudeApp } from '../core/app.js';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { normalizeDangerousFlags } from '../utils/banner.js';
+// ESM equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 function getVersion() {
     // Read version from version.txt first, fallback to package.json
-    const versionTxtPath = (0, path_1.join)(__dirname, '../../version.txt');
+    const versionTxtPath = join(__dirname, '../../version.txt');
     try {
-        const version = (0, fs_1.readFileSync)(versionTxtPath, 'utf8').trim();
+        const version = readFileSync(versionTxtPath, 'utf8').trim();
         if (version)
             return version;
     }
@@ -18,11 +19,11 @@ function getVersion() {
         // version.txt not found, fall through to package.json
     }
     // Fallback to package.json
-    const packageJsonPath = (0, path_1.join)(__dirname, '../../package.json');
-    return JSON.parse((0, fs_1.readFileSync)(packageJsonPath, 'utf8')).version;
+    const packageJsonPath = join(__dirname, '../../package.json');
+    return JSON.parse(readFileSync(packageJsonPath, 'utf8')).version;
 }
-function createProgram() {
-    const program = new commander_1.Command();
+export function createProgram() {
+    const program = new Command();
     program
         .name('synclaude')
         .description('Interactive model selection tool for Claude Code with Synthetic AI models\n\nAdditional Claude Code flags (e.g., --dangerously-skip-permissions) are passed through to Claude Code.')
@@ -36,7 +37,7 @@ function createProgram() {
         .passThroughOptions(true);
     // Main command (launch Claude Code)
     program.action(async (_options, _command) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         // Get all raw args from process.argv and extract unknown options
         const rawArgs = process.argv.slice(2);
         const additionalArgs = [];
@@ -73,7 +74,7 @@ function createProgram() {
             }
         }
         // Normalize dangerous flags
-        const normalizedArgs = (0, banner_1.normalizeDangerousFlags)(additionalArgs);
+        const normalizedArgs = normalizeDangerousFlags(additionalArgs);
         await app.run({ ..._options, additionalArgs: normalizedArgs });
     });
     // Model selection command (launches after selection)
@@ -83,7 +84,7 @@ function createProgram() {
         .option('-v, --verbose', 'Enable verbose logging')
         .option('-q, --quiet', 'Suppress non-error output')
         .action(async (options) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.interactiveModelSelection();
         // After successful model selection, launch Claude Code
         const config = app.getConfig();
@@ -101,7 +102,7 @@ function createProgram() {
         .description('Interactive thinking model selection and save to config')
         .option('-v, --verbose', 'Enable verbose logging')
         .action(async (_options) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.interactiveThinkingModelSelection();
     });
     // List models command
@@ -110,7 +111,7 @@ function createProgram() {
         .description('List available models')
         .option('--refresh', 'Force refresh model cache')
         .action(async (options) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.listModels(options);
     });
     // Search models command
@@ -119,7 +120,7 @@ function createProgram() {
         .description('Search models by name or provider')
         .option('--refresh', 'Force refresh model cache')
         .action(async (query, options) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.searchModels(query, options);
     });
     // Configuration commands
@@ -128,21 +129,21 @@ function createProgram() {
         .command('show')
         .description('Show current configuration')
         .action(async () => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.showConfig();
     });
     configCmd
         .command('set <key> <value>')
         .description('Set configuration value (keys: apiKey, baseUrl, modelsApiUrl, cacheDurationHours, selectedModel, selectedThinkingModel, autoUpdateClaudeCode, claudeCodeUpdateCheckInterval, maxTokenSize)')
         .action(async (key, value) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.setConfig(key, value);
     });
     configCmd
         .command('reset')
         .description('Reset configuration to defaults')
         .action(async () => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.resetConfig();
     });
     // Setup command
@@ -150,7 +151,7 @@ function createProgram() {
         .command('setup')
         .description('Run initial setup')
         .action(async () => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.setup();
     });
     // Doctor command - check system health
@@ -158,7 +159,7 @@ function createProgram() {
         .command('doctor')
         .description('Check system health and configuration')
         .action(async () => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.doctor();
     });
     // Update command - update Claude Code
@@ -167,7 +168,7 @@ function createProgram() {
         .description('Update Claude Code to the latest version')
         .option('-f, --force', 'Force update even if already up to date')
         .action(async (options) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.updateClaudeCode(options.force);
     });
     // Check update command - check for available updates
@@ -175,7 +176,7 @@ function createProgram() {
         .command('check-update')
         .description('Check if there are Claude Code updates available')
         .action(async () => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.checkForUpdates();
     });
     // Dangerous command - launch Claude Code with --dangerously-skip-permissions
@@ -189,7 +190,7 @@ function createProgram() {
         .option('-q, --quiet', 'Suppress non-error output')
         .option('-f, --force', 'Force model selection even if last used provider is available')
         .action(async (options) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         const config = app.getConfig();
         // Check if we have saved models and user didn't force selection
         if (!options.force && (config.selectedModel || config.selectedThinkingModel)) {
@@ -222,14 +223,14 @@ function createProgram() {
         .command('clear')
         .description('Clear model cache')
         .action(async () => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.clearCache();
     });
     cacheCmd
         .command('info')
         .description('Show cache information')
         .action(async () => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.cacheInfo();
     });
     // Install command - install synclaude from local directory to system-wide
@@ -240,7 +241,7 @@ function createProgram() {
         .option('-f, --force', 'Force reinstallation even if already installed')
         .option('--skip-path', 'Skip PATH updates')
         .action(async (options) => {
-        const app = new app_1.SyntheticClaudeApp();
+        const app = new SyntheticClaudeApp();
         await app.localInstall(options);
     });
     return program;

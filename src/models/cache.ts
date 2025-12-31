@@ -1,6 +1,5 @@
 import { readFile, writeFile, mkdir, stat, unlink } from 'fs/promises';
-import { join } from 'path';
-import { ModelInfo, CacheInfo } from './types';
+import { CacheInfo } from './types';
 import { ModelInfoImpl } from './info';
 
 export interface ModelCacheOptions {
@@ -25,7 +24,7 @@ export class ModelCache {
       const age = now.getTime() - mtime.getTime();
 
       return age < this.cacheDurationMs;
-    } catch (error) {
+    } catch {
       // File doesn't exist or can't be accessed
       return false;
     }

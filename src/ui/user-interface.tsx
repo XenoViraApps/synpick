@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import { ModelInfoImpl } from '../models';
 import { ModelSelector } from './components/ModelSelector';
 import { StatusMessage } from './components/StatusMessage';
-import { ProgressBar } from './components/ProgressBar';
+import { BYTES_PER_KB, PERCENTAGE_MAX, DEFAULT_PROGRESS_BAR_LENGTH } from '../utils/constants';
 
 // Helper function to identify thinking-capable models
 function isThinkingModel(modelId: string): boolean {
@@ -13,7 +13,8 @@ function isThinkingModel(modelId: string): boolean {
   if (id.includes('thinking')) return true;
   // Known thinking model patterns
   if (id.includes('minimax') && (id.includes('2') || id.includes('3'))) return true;
-  if (id.includes('deepseek-r1') || id.includes('deepseek-r2') || id.includes('deepseek-r3')) return true;
+  if (id.includes('deepseek-r1') || id.includes('deepseek-r2') || id.includes('deepseek-r3'))
+    return true;
   if (id.includes('deepseek') && (id.includes('3.2') || id.includes('3-2'))) return true;
   if (id.includes('qwq')) return true;
   if (id.includes('o1')) return true; // OpenAI o1 series
@@ -27,43 +28,82 @@ export interface UIOptions {
   quiet?: boolean;
 }
 
+/**
+ * UserInterface handles all user interaction for the synclaude CLI
+ *
+ * Provides methods for displaying messages, progress indicators,
+ * user input collection, and interactive model selection.
+ */
 export class UserInterface {
   private verbose: boolean;
   private quiet: boolean;
 
+  /**
+   * Creates a new UserInterface instance
+   *
+   * @param options - Configuration options for the UI
+   * @param options.verbose - If true, enables debug output
+   * @param options.quiet - If true, suppresses non-error output
+   */
   constructor(options: UIOptions = {}) {
     this.verbose = options.verbose || false;
     this.quiet = options.quiet || false;
   }
 
-  // Simple console output methods
+  /**
+   * Displays an informational message
+   *
+   * @param message - The message to display
+   * @param args - Additional arguments to log
+   */
   info(message: string, ...args: any[]): void {
     if (!this.quiet) {
       console.log(`ℹ ${message}`, ...args);
     }
   }
 
+  /**
+   * Displays a success message
+   *
+   * @param message - The message to display
+   * @param args - Additional arguments to log
+   */
   success(message: string, ...args: any[]): void {
     if (!this.quiet) {
       console.log(`✓ ${message}`, ...args);
     }
   }
 
-  // Colored success message for important notifications
+  /**
+   * Displays a colored success message for important notifications
+   *
+   * @param message - The message to display
+   * @param args - Additional arguments to log
+   */
   coloredSuccess(message: string, ...args: any[]): void {
     if (!this.quiet) {
       console.log(chalk.green(`✓ ${message}`), ...args);
     }
   }
 
-  // Colored info message for important notifications
+  /**
+   * Displays a colored info message for important notifications
+   *
+   * @param message - The message to display
+   * @param args - Additional arguments to log
+   */
   coloredInfo(message: string, ...args: any[]): void {
     if (!this.quiet) {
       console.log(chalk.blue(`ℹ ${message}`), ...args);
     }
   }
 
-  // Highlighted message with colored elements within
+  /**
+   * Displays a message with highlighted text
+   *
+   * @param message - The message to display
+   * @param highlights - Strings within the message to highlight with cyan color
+   */
   highlightInfo(message: string, highlights: string[] = []): void {
     if (!this.quiet) {
       let output = chalk.blue('ℹ ');
@@ -80,23 +120,50 @@ export class UserInterface {
     }
   }
 
+  /**
+   * Displays a warning message
+   *
+   * @param message - The message to display
+   * @param args - Additional arguments to log
+   */
   warning(message: string, ...args: any[]): void {
     if (!this.quiet) {
       console.warn(`⚠ ${message}`, ...args);
     }
   }
 
+  /**
+   * Displays an error message
+   *
+   * Always displays, even in quiet mode.
+   *
+   * @param message - The message to display
+   * @param args - Additional arguments to log
+   */
   error(message: string, ...args: any[]): void {
     console.error(`✗ ${message}`, ...args);
   }
 
+  /**
+   * Displays a debug message
+   *
+   * Only displays when verbose mode is enabled.
+   *
+   * @param message - The message to display
+   * @param args - Additional arguments to log
+   */
   debug(message: string, ...args: any[]): void {
     if (this.verbose) {
       console.debug(`🐛 ${message}`, ...args);
     }
   }
 
-  // Show a simple list of models
+  /**
+   * Displays a simple list of models
+   *
+   * @param models - The models to display
+   * @param selectedIndex - Optional index of the currently selected model
+   */
   showModelList(models: ModelInfoImpl[], selectedIndex?: number): void {
     if (models.length === 0) {
       this.info('No models available');
@@ -114,7 +181,7 @@ export class UserInterface {
       console.log(`${marker} ${index + 1}. ${chalk.cyan(displayName)}${thoughtsuffix}`);
       console.log(`    ${chalk.gray('Provider:')} ${model.getProvider()}`);
       if ((model as any).context_length) {
-        const contextK = Math.round((model as any).context_length / 1024);
+        const contextK = Math.round((model as any).context_length / BYTES_PER_KB);
         console.log(`    ${chalk.gray('Context:')} ${contextK}K tokens`);
       }
       if ((model as any).quantization) {
@@ -125,7 +192,14 @@ export class UserInterface {
     });
   }
 
-  // Interactive model selection using Ink (single model - for backward compatibility)
+  /**
+   * Interactive model selection using Ink
+   *
+   * For backward compatibility - returns a single model (regular or thinking).
+   *
+   * @param models - The models to select from
+   * @returns Promise resolving to the selected model, or null if cancelled
+   */
   async selectModel(models: ModelInfoImpl[]): Promise<ModelInfoImpl | null> {
     if (models.length === 0) {
       this.error('No models available for selection');
@@ -159,8 +233,17 @@ export class UserInterface {
     });
   }
 
-  // Interactive dual model selection using Ink
-  async selectDualModels(models: ModelInfoImpl[]): Promise<{regular: ModelInfoImpl | null, thinking: ModelInfoImpl | null}> {
+  /**
+   * Interactive dual model selection using Ink
+   *
+   * Allows selecting both regular and thinking models.
+   *
+   * @param models - The models to select from
+   * @returns Promise resolving to an object with regular and thinking models (may be null)
+   */
+  async selectDualModels(
+    models: ModelInfoImpl[]
+  ): Promise<{ regular: ModelInfoImpl | null; thinking: ModelInfoImpl | null }> {
     if (models.length === 0) {
       this.error('No models available for selection');
       return { regular: null, thinking: null };
@@ -192,13 +275,19 @@ export class UserInterface {
     });
   }
 
-  // Show progress (simple console version)
+  /**
+   * Shows a progress bar on the console
+   *
+   * @param current - Current progress value
+   * @param total - Total value for completion
+   * @param label - Optional label to display before the progress bar
+   */
   showProgress(current: number, total: number, label?: string): void {
     if (this.quiet) return;
 
-    const percentage = Math.round((current / total) * 100);
-    const barLength = 20;
-    const filledLength = Math.round((percentage / 100) * barLength);
+    const percentage = Math.round((current / total) * PERCENTAGE_MAX);
+    const barLength = DEFAULT_PROGRESS_BAR_LENGTH;
+    const filledLength = Math.round((percentage / PERCENTAGE_MAX) * barLength);
     const bar = '█'.repeat(filledLength) + '░'.repeat(barLength - filledLength);
 
     const labelStr = label ? `${label} ` : '';
@@ -209,11 +298,16 @@ export class UserInterface {
     }
   }
 
-  // Ask for user input (simple)
+  /**
+   * Asks a question and waits for user input
+   *
+   * @param question - The question to ask
+   * @param defaultValue - Optional default value
+   * @returns Promise resolving to the user's answer
+   */
   async askQuestion(question: string, defaultValue?: string): Promise<string> {
     return new Promise(resolve => {
-      const readline = require('readline');
-      const rl = readline.createInterface({
+      const rl = require('readline').createInterface({
         input: process.stdin,
         output: process.stdout,
       });
@@ -226,11 +320,17 @@ export class UserInterface {
     });
   }
 
-  // Ask for password input (masked with asterisks)
+  /**
+   * Asks for password input with masking
+   *
+   * Password input is masked with asterisks for security.
+   * Press Enter to submit, Ctrl+C to cancel.
+   *
+   * @param question - The prompt question
+   * @returns Promise resolving to the entered password (empty if cancelled)
+   */
   async askPassword(question: string): Promise<string> {
     return new Promise(resolve => {
-      const readline = require('readline');
-
       // Store original settings
       const stdin = process.stdin;
       const stdout = process.stdout;
@@ -288,20 +388,33 @@ export class UserInterface {
     });
   }
 
-  // Confirm action
+  /**
+   * Asks the user to confirm an action
+   *
+   * @param message - The confirmation message
+   * @param defaultValue - Default value if user just presses Enter
+   * @returns Promise resolving to true if user confirmed, false otherwise
+   */
   async confirm(message: string, defaultValue = false): Promise<boolean> {
     const defaultStr = defaultValue ? 'Y/n' : 'y/N';
     const answer = await this.askQuestion(`${message} (${defaultStr})`, defaultValue ? 'y' : 'n');
     return answer.toLowerCase().startsWith('y');
   }
 
-  // Show status message using Ink component
+  /**
+   * Shows a status message using the Ink StatusMessage component
+   *
+   * @param type - The type of status message (info, success, warning, error)
+   * @param message - The message to display
+   */
   showStatus(type: 'info' | 'success' | 'warning' | 'error', message: string): void {
     const { waitUntilExit } = render(<StatusMessage type={type} message={message} />);
     waitUntilExit();
   }
 
-  // Clear terminal
+  /**
+   * Clears the terminal screen
+   */
   clear(): void {
     console.clear();
   }

@@ -1,26 +1,11 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.InstallMethodEnum = void 0;
-exports.checkCleanStaleSymlinks = checkCleanStaleSymlinks;
-exports.detectInstallMethod = detectInstallMethod;
-exports.configureNpmUserPrefix = configureNpmUserPrefix;
-exports.isPathInPath = isPathInPath;
-exports.addToPathIfNotExists = addToPathIfNotExists;
-exports.getNpmBinDir = getNpmBinDir;
-exports.verifyInstallation = verifyInstallation;
-exports.installSynclaude = installSynclaude;
-exports.uninstallSynclaude = uninstallSynclaude;
-const child_process_1 = require("child_process");
-const fs_1 = require("fs");
-const path_1 = __importDefault(require("path"));
-const os_1 = __importDefault(require("os"));
+import { spawn, execSync } from 'child_process';
+import { promises as fsPromises, statSync } from 'fs';
+import path from 'path';
+import os from 'os';
 /**
  * Installation method that will be used
  */
-var InstallMethodEnum;
+export var InstallMethodEnum;
 (function (InstallMethodEnum) {
     /** npm global install with user prefix (non-sudo) */
     InstallMethodEnum["NPM_USER_PREFIX"] = "npm-user-prefix";
@@ -28,11 +13,11 @@ var InstallMethodEnum;
     InstallMethodEnum["NPM_GLOBAL"] = "npm-global";
     /** Manual local install */
     InstallMethodEnum["MANUAL_LOCAL"] = "manual-local";
-})(InstallMethodEnum || (exports.InstallMethodEnum = InstallMethodEnum = {}));
+})(InstallMethodEnum || (InstallMethodEnum = {}));
 /**
  * Check for and clean up stale synclaude symlinks
  */
-async function checkCleanStaleSymlinks(options = {}) {
+export async function checkCleanStaleSymlinks(options = {}) {
     const { verbose = false } = options;
     const cleaned = [];
     const failed = [];
@@ -41,29 +26,29 @@ async function checkCleanStaleSymlinks(options = {}) {
     for (const checkPath of stalePaths) {
         try {
             // Check if path exists as a symlink
-            const stat = await fs_1.promises.lstat(checkPath);
+            const stat = await fsPromises.lstat(checkPath);
             if (stat.isSymbolicLink()) {
                 // Check if the symlink target exists (broken link check)
                 try {
-                    await fs_1.promises.stat(checkPath);
+                    await fsPromises.stat(checkPath);
                     // File exists, not a stale link
                     continue;
                 }
                 catch {
                     // Target doesn't exist, this is a stale symlink
-                    const target = await fs_1.promises.readlink(checkPath);
+                    const target = await fsPromises.readlink(checkPath);
                     if (verbose) {
                         console.log(`Found stale symlink: ${checkPath} -> ${target}`);
                     }
                     // Try to remove it
                     try {
-                        await fs_1.promises.unlink(checkPath);
+                        await fsPromises.unlink(checkPath);
                         cleaned.push(checkPath);
                         if (verbose) {
                             console.log(`Removed stale symlink: ${checkPath}`);
                         }
                     }
-                    catch (unlinkError) {
+                    catch {
                         failed.push(checkPath);
                         console.warn(`Could not remove stale symlink: ${checkPath}`);
                         console.warn(`  Please run: sudo rm -f ${checkPath}`);
@@ -84,27 +69,27 @@ async function checkCleanStaleSymlinks(options = {}) {
 /**
  * Detects the best installation method for the current environment
  */
-function detectInstallMethod() {
+export function detectInstallMethod() {
     try {
         // Get npm prefix
-        const npmPrefix = (0, child_process_1.execSync)('npm config get prefix', {
+        const npmPrefix = execSync('npm config get prefix', {
             encoding: 'utf-8',
         }).trim();
         // Check if prefix is in home directory (user-level, no sudo needed)
-        const home = os_1.default.homedir();
+        const home = os.homedir();
         if (npmPrefix.startsWith(home) || npmPrefix.startsWith('/home/')) {
             return InstallMethodEnum.NPM_USER_PREFIX;
         }
         // Check if we can write to npm prefix
-        const prefixStat = fs_1.promises.stat(npmPrefix).catch(() => ({ mode: 0o755 }));
+        fsPromises.stat(npmPrefix).catch(() => ({ mode: 0o755 }));
         // On Unix, check write permissions via a test
         try {
             // Try to see if we can access npm bin directory
-            const npmPrefix = (0, child_process_1.execSync)('npm prefix -g', { encoding: 'utf-8' }).trim();
-            const npmBin = path_1.default.join(npmPrefix, 'bin');
-            const testFile = path_1.default.join(npmBin, '.synclaude-test');
-            (0, child_process_1.execSync)(`touch "${testFile}"`, { stdio: 'ignore' });
-            (0, child_process_1.execSync)(`rm -f "${testFile}"`, { stdio: 'ignore' });
+            const npmPrefix = execSync('npm prefix -g', { encoding: 'utf-8' }).trim();
+            const npmBin = path.join(npmPrefix, 'bin');
+            const testFile = path.join(npmBin, '.synclaude-test');
+            execSync(`touch "${testFile}"`, { stdio: 'ignore' });
+            execSync(`rm -f "${testFile}"`, { stdio: 'ignore' });
             return InstallMethodEnum.NPM_GLOBAL;
         }
         catch {
@@ -112,23 +97,23 @@ function detectInstallMethod() {
             return InstallMethodEnum.MANUAL_LOCAL;
         }
     }
-    catch (error) {
+    catch {
         return InstallMethodEnum.MANUAL_LOCAL;
     }
 }
 /**
  * Configures npm user prefix for non-sudo installation
  */
-async function configureNpmUserPrefix() {
+export async function configureNpmUserPrefix() {
     try {
-        const home = os_1.default.homedir();
-        const localPrefix = path_1.default.join(home, '.npm-local');
+        const home = os.homedir();
+        const localPrefix = path.join(home, '.npm-local');
         // Ensure the directory exists
-        await fs_1.promises.mkdir(localPrefix, { recursive: true });
+        await fsPromises.mkdir(localPrefix, { recursive: true });
         // Configure npm to use the custom prefix
-        (0, child_process_1.execSync)(`npm config set prefix "${localPrefix}"`, { stdio: 'pipe' });
+        execSync(`npm config set prefix "${localPrefix}"`, { stdio: 'pipe' });
         // Add to PATH if not already there
-        const localBin = path_1.default.join(localPrefix, 'bin');
+        const localBin = path.join(localPrefix, 'bin');
         await addToPathIfNotExists(localBin);
         return true;
     }
@@ -142,7 +127,7 @@ async function configureNpmUserPrefix() {
  */
 function runCommand(command, args, options = {}) {
     return new Promise(resolve => {
-        const child = (0, child_process_1.spawn)(command, args, {
+        const child = spawn(command, args, {
             stdio: options.verbose ? 'inherit' : 'pipe',
             shell: true, // Ensure shell is available for proper command execution
         });
@@ -174,25 +159,25 @@ function runCommand(command, args, options = {}) {
  */
 function getShellInfo() {
     const shellEnv = process.env.SHELL || '';
-    const shellName = path_1.default.basename(shellEnv);
-    const home = os_1.default.homedir();
+    const shellName = path.basename(shellEnv);
+    const home = os.homedir();
     if (shellName === 'zsh') {
-        return { shell: 'zsh', configFile: path_1.default.join(home, '.zshrc') };
+        return { shell: 'zsh', configFile: path.join(home, '.zshrc') };
     }
     if (shellName === 'fish') {
         return {
             shell: 'fish',
-            configFile: path_1.default.join(home, '.config', 'fish', 'config.fish'),
+            configFile: path.join(home, '.config', 'fish', 'config.fish'),
         };
     }
     // Default to bash
     if (shellName === 'bash') {
         // Check for bash_profile (login shell) or bashrc
-        const bashProfile = path_1.default.join(home, '.bash_profile');
-        const bashrc = path_1.default.join(home, '.bashrc');
+        const bashProfile = path.join(home, '.bash_profile');
+        const bashrc = path.join(home, '.bashrc');
         // Use existence check instead of async access
         try {
-            (0, fs_1.statSync)(bashProfile);
+            statSync(bashProfile);
             return { shell: 'bash', configFile: bashProfile };
         }
         catch {
@@ -200,26 +185,26 @@ function getShellInfo() {
         }
     }
     // Default to bashrc for unknown shells
-    return { shell: 'bash', configFile: path_1.default.join(home, '.bashrc') };
+    return { shell: 'bash', configFile: path.join(home, '.bashrc') };
 }
 /**
  * Gets current PATH environment variable
  */
 function getPathValue() {
-    return (process.env.PATH || '').split(path_1.default.delimiter).filter(Boolean);
+    return (process.env.PATH || '').split(path.delimiter).filter(Boolean);
 }
 /**
  * Checks if a directory is already in PATH
  */
-function isPathInPath(directory) {
-    const normalizedDir = path_1.default.resolve(directory);
-    return getPathValue().some(p => path_1.default.resolve(p) === normalizedDir);
+export function isPathInPath(directory) {
+    const normalizedDir = path.resolve(directory);
+    return getPathValue().some(p => path.resolve(p) === normalizedDir);
 }
 /**
  * Adds a directory to PATH in shell config
  */
-async function addToPathIfNotExists(directory, options = {}) {
-    const normalizedDir = path_1.default.resolve(directory);
+export async function addToPathIfNotExists(directory, options = {}) {
+    const normalizedDir = path.resolve(directory);
     // Check if already in PATH
     if (isPathInPath(normalizedDir)) {
         return {
@@ -229,16 +214,16 @@ async function addToPathIfNotExists(directory, options = {}) {
             needsReload: false,
         };
     }
-    const { shell, configFile } = getShellInfo();
+    const { configFile } = getShellInfo();
     const configFiles = [];
     try {
         // Ensure config directory exists
-        const configDir = path_1.default.dirname(configFile);
-        await fs_1.promises.mkdir(configDir, { recursive: true });
+        const configDir = path.dirname(configFile);
+        await fsPromises.mkdir(configDir, { recursive: true });
         // Read existing config
         let config = '';
         try {
-            config = await fs_1.promises.readFile(configFile, 'utf-8');
+            config = await fsPromises.readFile(configFile, 'utf-8');
         }
         catch {
             // File doesn't exist, start empty
@@ -293,7 +278,7 @@ async function addToPathIfNotExists(directory, options = {}) {
             config += `${separator}${guardStart}\nexport PATH="$PATH:${normalizedDir}"\n${guardEnd}\n`;
         }
         // Write back
-        await fs_1.promises.writeFile(configFile, config, 'utf-8');
+        await fsPromises.writeFile(configFile, config, 'utf-8');
         configFiles.push(configFile);
         if (options.verbose) {
             console.log(`Added ${normalizedDir} to PATH in ${configFile}`);
@@ -318,27 +303,27 @@ async function addToPathIfNotExists(directory, options = {}) {
 /**
  * Gets the npm bin directory
  */
-function getNpmBinDir() {
+export function getNpmBinDir() {
     try {
-        const prefix = (0, child_process_1.execSync)('npm prefix -g', { encoding: 'utf-8' }).trim();
-        return path_1.default.join(prefix, 'bin');
+        const prefix = execSync('npm prefix -g', { encoding: 'utf-8' }).trim();
+        return path.join(prefix, 'bin');
     }
     catch {
         // Fallback calculation
-        const prefix = (0, child_process_1.execSync)('npm config get prefix', { encoding: 'utf-8' }).trim();
-        return path_1.default.join(prefix, 'bin');
+        const prefix = execSync('npm config get prefix', { encoding: 'utf-8' }).trim();
+        return path.join(prefix, 'bin');
     }
 }
 /**
  * Verifies installation by checking if synclaude command is available
  */
-async function verifyInstallation(method) {
+export async function verifyInstallation(method) {
     try {
         let commandPath = 'synclaude';
         // For manual install, we need to use the full path
         if (method === InstallMethodEnum.MANUAL_LOCAL) {
-            const binDir = path_1.default.join(os_1.default.homedir(), '.local', 'bin');
-            commandPath = path_1.default.join(binDir, 'synclaude');
+            const binDir = path.join(os.homedir(), '.local', 'bin');
+            commandPath = path.join(binDir, 'synclaude');
         }
         // Try to get version
         const result = await runCommand(commandPath, ['--version']);
@@ -365,8 +350,8 @@ async function verifyInstallation(method) {
 /**
  * Main installation function
  */
-async function installSynclaude(options = {}) {
-    const { verbose = false, force = false, skipPathUpdate = false } = options;
+export async function installSynclaude(options = {}) {
+    const { verbose = false, skipPathUpdate = false } = options;
     // Detect or use specified install method
     const method = options.installMethod || detectInstallMethod();
     if (verbose) {
@@ -397,7 +382,7 @@ async function installSynclaude(options = {}) {
                     throw new Error(`npm install failed: ${npmResult.stderr}`);
                 }
                 binPath = getNpmBinDir();
-                result.installedPath = (0, child_process_1.execSync)('npm root -g', { encoding: 'utf-8' }).trim();
+                result.installedPath = execSync('npm root -g', { encoding: 'utf-8' }).trim();
                 break;
             case InstallMethodEnum.NPM_GLOBAL:
                 // Direct npm global install
@@ -411,7 +396,7 @@ async function installSynclaude(options = {}) {
                     throw new Error(`npm install failed: ${npmGlobalResult.stderr}`);
                 }
                 binPath = getNpmBinDir();
-                result.installedPath = (0, child_process_1.execSync)('npm root -g', { encoding: 'utf-8' }).trim();
+                result.installedPath = execSync('npm root -g', { encoding: 'utf-8' }).trim();
                 // Update PATH if npm bin is not in PATH
                 if (!skipPathUpdate && !isPathInPath(binPath)) {
                     const pathResult = await addToPathIfNotExists(binPath, { verbose });
@@ -424,12 +409,12 @@ async function installSynclaude(options = {}) {
                 if (verbose) {
                     console.log('Installing via manual local install...');
                 }
-                const home = os_1.default.homedir();
-                const installDir = path_1.default.join(home, '.local', 'share', 'synclaude');
-                const localBin = path_1.default.join(home, '.local', 'bin');
+                const home = os.homedir();
+                const installDir = path.join(home, '.local', 'share', 'synclaude');
+                const localBin = path.join(home, '.local', 'bin');
                 // Create directories
-                await fs_1.promises.mkdir(installDir, { recursive: true });
-                await fs_1.promises.mkdir(localBin, { recursive: true });
+                await fsPromises.mkdir(installDir, { recursive: true });
+                await fsPromises.mkdir(localBin, { recursive: true });
                 // Download and install via npm to install directory
                 const npmLocalResult = runCommand('npm', ['install', '-g', '--prefix', installDir, 'synclaude'], {
                     verbose,
@@ -439,18 +424,18 @@ async function installSynclaude(options = {}) {
                         throw new Error(`npm install failed: ${res.stderr}`);
                     }
                     // Create symlink
-                    const execPath = path_1.default.join(installDir, 'lib', 'node_modules', 'synclaude', 'dist', 'cli', 'index.js');
-                    const linkPath = path_1.default.join(localBin, 'synclaude');
+                    const execPath = path.join(installDir, 'lib', 'node_modules', 'synclaude', 'dist', 'cli', 'index.js');
+                    const linkPath = path.join(localBin, 'synclaude');
                     // Remove existing link
                     try {
-                        await fs_1.promises.unlink(linkPath);
+                        await fsPromises.unlink(linkPath);
                     }
                     catch {
                         // Ignore if doesn't exist
                     }
                     // Create new symlink
-                    await fs_1.promises.symlink(execPath, linkPath, 'file');
-                    await fs_1.promises.chmod(execPath, 0o755);
+                    await fsPromises.symlink(execPath, linkPath, 'file');
+                    await fsPromises.chmod(execPath, 0o755);
                     result.installedPath = execPath;
                     binPath = localBin;
                 });
@@ -480,7 +465,7 @@ async function installSynclaude(options = {}) {
 /**
  * Uninstall function
  */
-async function uninstallSynclaude(options = {}) {
+export async function uninstallSynclaude(options = {}) {
     const { verbose = false } = options;
     try {
         // Try npm uninstall first
@@ -490,18 +475,18 @@ async function uninstallSynclaude(options = {}) {
             if (verbose) {
                 console.log('npm uninstall failed, trying manual cleanup...');
             }
-            const home = os_1.default.homedir();
+            const home = os.homedir();
             // Remove local installation
-            const installDir = path_1.default.join(home, '.local', 'share', 'synclaude');
-            const localBin = path_1.default.join(home, '.local', 'bin', 'synclaude');
+            const installDir = path.join(home, '.local', 'share', 'synclaude');
+            const localBin = path.join(home, '.local', 'bin', 'synclaude');
             try {
-                await fs_1.promises.rm(installDir, { recursive: true, force: true });
+                await fsPromises.rm(installDir, { recursive: true, force: true });
             }
             catch {
                 // Ignore errors
             }
             try {
-                await fs_1.promises.unlink(localBin);
+                await fsPromises.unlink(localBin);
             }
             catch {
                 // Ignore errors
@@ -509,14 +494,14 @@ async function uninstallSynclaude(options = {}) {
             // Clean up PATH entries
             const { configFile } = getShellInfo();
             try {
-                let config = await fs_1.promises.readFile(configFile, 'utf-8');
+                let config = await fsPromises.readFile(configFile, 'utf-8');
                 const guardStart = '# Synclaude PATH configuration';
                 const guardEnd = '# End Synclaude PATH configuration';
                 if (config.includes(guardStart) && config.includes(guardEnd)) {
                     const beforeGuard = config.substring(0, config.indexOf(guardStart));
                     const afterGuard = config.substring(config.indexOf(guardEnd) + guardEnd.length);
                     config = `${beforeGuard.trim()}\n${afterGuard.trim()}\n`;
-                    await fs_1.promises.writeFile(configFile, config.trim() + '\n', 'utf-8');
+                    await fsPromises.writeFile(configFile, config.trim() + '\n', 'utf-8');
                     if (verbose) {
                         console.log(`Cleaned up PATH entries in ${configFile}`);
                     }
@@ -526,18 +511,18 @@ async function uninstallSynclaude(options = {}) {
                 // Ignore errors
             }
             // Clean up config
-            const configDir = path_1.default.join(home, '.config', 'synclaude');
+            const configDir = path.join(home, '.config', 'synclaude');
             try {
-                await fs_1.promises.rm(configDir, { recursive: true, force: true });
+                await fsPromises.rm(configDir, { recursive: true, force: true });
             }
             catch {
                 // Ignore errors
             }
             // Clean up npm cache
-            const npmLocal = path_1.default.join(home, '.npm-local');
+            const npmLocal = path.join(home, '.npm-local');
             try {
-                const npmModules = path_1.default.join(npmLocal, 'lib', 'node_modules', 'synclaude');
-                await fs_1.promises.rm(npmModules, { recursive: true, force: true });
+                const npmModules = path.join(npmLocal, 'lib', 'node_modules', 'synclaude');
+                await fsPromises.rm(npmModules, { recursive: true, force: true });
             }
             catch {
                 // Ignore errors

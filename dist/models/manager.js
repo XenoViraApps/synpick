@@ -1,25 +1,35 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ModelManager = void 0;
-const axios_1 = __importDefault(require("axios"));
-const types_1 = require("./types");
-const info_1 = require("./info");
-const cache_1 = require("./cache");
-class ModelManager {
-    apiKey;
-    modelsApiUrl;
-    cache;
+import axios from 'axios';
+import { ApiError } from './types.js';
+import { ModelInfoImpl } from './info.js';
+import { ModelCache } from './cache.js';
+export class ModelManager {
+    /**
+     * Creates a new ModelManager instance
+     *
+     * @param options - Configuration options for the model manager
+     * @param options.apiKey - API key for authentication
+     * @param options.modelsApiUrl - URL of the models API endpoint
+     * @param options.cacheFile - Path to the cache file
+     * @param options.cacheDurationHours - Cache duration in hours (default: 24)
+     * @param options.apiTimeoutMs - API request timeout in milliseconds (default: 30000)
+     */
     constructor(options) {
         this.apiKey = options.apiKey;
         this.modelsApiUrl = options.modelsApiUrl;
-        this.cache = new cache_1.ModelCache({
+        this.apiTimeoutMs = options.apiTimeoutMs || 30000;
+        this.cache = new ModelCache({
             cacheFile: options.cacheFile,
             cacheDurationHours: options.cacheDurationHours || 24,
         });
     }
+    /**
+     * Fetches models from the API or cache
+     *
+     * Uses cached models if available and valid, otherwise fetches from API.
+     *
+     * @param forceRefresh - If true, bypasses cache and fetches from API
+     * @returns Promise resolving to the list of models
+     */
     async fetchModels(forceRefresh = false) {
         if (!forceRefresh && (await this.cache.isValid())) {
             console.info('Loading models from cache');
@@ -46,9 +56,9 @@ class ModelManager {
                 Authorization: `Bearer ${this.apiKey}`,
                 'Content-Type': 'application/json',
             };
-            const response = await axios_1.default.get(this.modelsApiUrl, {
+            const response = await axios.get(this.modelsApiUrl, {
                 headers,
-                timeout: 30000,
+                timeout: this.apiTimeoutMs,
             });
             if (response.status === 200) {
                 const modelsData = response.data.data || [];
@@ -56,7 +66,7 @@ class ModelManager {
                 const models = [];
                 for (const modelData of modelsData) {
                     try {
-                        const model = new info_1.ModelInfoImpl(modelData);
+                        const model = new ModelInfoImpl(modelData);
                         models.push(model);
                     }
                     catch (error) {
@@ -66,24 +76,31 @@ class ModelManager {
                 return models;
             }
             else {
-                throw new types_1.ApiError(`API error: ${response.status} - ${response.statusText}`, response.status, response.data);
+                throw new ApiError(`API error: ${response.status} - ${response.statusText}`, response.status, response.data);
             }
         }
         catch (error) {
-            if (axios_1.default.isAxiosError(error)) {
+            if (axios.isAxiosError(error)) {
                 if (error.response) {
-                    throw new types_1.ApiError(`API error: ${error.response.status} - ${error.response.statusText}`, error.response.status, error.response.data);
+                    throw new ApiError(`API error: ${error.response.status} - ${error.response.statusText}`, error.response.status, error.response.data);
                 }
                 else if (error.request) {
-                    throw new types_1.ApiError('Network error: No response received from API');
+                    throw new ApiError('Network error: No response received from API');
                 }
                 else {
-                    throw new types_1.ApiError(`Network error: ${error.message}`);
+                    throw new ApiError(`Network error: ${error.message}`);
                 }
             }
-            throw new types_1.ApiError(`Error fetching models: ${error.message}`);
+            throw new ApiError(`Error fetching models: ${error.message}`);
         }
     }
+    /**
+     * Gets a sorted list of models
+     *
+     * @param models - Optional list of models to sort. If not provided, throws error
+     * @returns Sorted list of models by ID
+     * @throws Error if models parameter is not provided
+     */
     getModels(models) {
         if (!models) {
             throw new Error('Models must be provided or fetched first');
@@ -91,6 +108,16 @@ class ModelManager {
         // Sort models by ID for consistent display
         return [...models].sort((a, b) => a.id.localeCompare(b.id));
     }
+    /**
+     * Searches for models matching the query
+     *
+     * Searches across model ID, provider, and model name.
+     * If no models are provided, fetches them first.
+     *
+     * @param query - Search query string
+     * @param models - Optional list of models to search. If not provided, fetches from cache/API
+     * @returns Promise resolving to matching models sorted by ID
+     */
     async searchModels(query, models) {
         if (!models) {
             models = await this.fetchModels();
@@ -114,18 +141,34 @@ class ModelManager {
         // Sort results by ID
         return matchingModels.sort((a, b) => a.id.localeCompare(b.id));
     }
+    /**
+     * Finds a model by its ID
+     *
+     * @param modelId - The model ID to search for
+     * @param models - Optional list of models to search. If not provided, fetches from cache/API
+     * @returns Promise resolving to the model, or null if not found
+     */
     async getModelById(modelId, models) {
         if (!models) {
             models = await this.fetchModels();
         }
         return models.find(model => model.id === modelId) || null;
     }
+    /**
+     * Clears the model cache
+     *
+     * @returns Promise resolving to true if cache was cleared successfully
+     */
     async clearCache() {
         return this.cache.clear();
     }
+    /**
+     * Gets information about the cache
+     *
+     * @returns Promise resolving to cache info object with details like age, size, etc.
+     */
     async getCacheInfo() {
         return this.cache.getInfo();
     }
 }
-exports.ModelManager = ModelManager;
 //# sourceMappingURL=manager.js.map

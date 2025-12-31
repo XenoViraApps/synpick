@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { ModelInfo, ApiModelsResponse, ApiError } from './types';
+import { ApiModelsResponse, ApiError } from './types';
 import { ModelInfoImpl } from './info';
 import { ModelCache } from './cache';
 
@@ -8,22 +8,44 @@ export interface ModelManagerOptions {
   modelsApiUrl: string;
   cacheFile: string;
   cacheDurationHours?: number;
+  /** API request timeout in milliseconds (default: 30000) */
+  apiTimeoutMs?: number;
 }
 
 export class ModelManager {
   private apiKey: string;
   private modelsApiUrl: string;
   private cache: ModelCache;
+  private apiTimeoutMs: number;
 
+  /**
+   * Creates a new ModelManager instance
+   *
+   * @param options - Configuration options for the model manager
+   * @param options.apiKey - API key for authentication
+   * @param options.modelsApiUrl - URL of the models API endpoint
+   * @param options.cacheFile - Path to the cache file
+   * @param options.cacheDurationHours - Cache duration in hours (default: 24)
+   * @param options.apiTimeoutMs - API request timeout in milliseconds (default: 30000)
+   */
   constructor(options: ModelManagerOptions) {
     this.apiKey = options.apiKey;
     this.modelsApiUrl = options.modelsApiUrl;
+    this.apiTimeoutMs = options.apiTimeoutMs || 30000;
     this.cache = new ModelCache({
       cacheFile: options.cacheFile,
       cacheDurationHours: options.cacheDurationHours || 24,
     });
   }
 
+  /**
+   * Fetches models from the API or cache
+   *
+   * Uses cached models if available and valid, otherwise fetches from API.
+   *
+   * @param forceRefresh - If true, bypasses cache and fetches from API
+   * @returns Promise resolving to the list of models
+   */
   async fetchModels(forceRefresh = false): Promise<ModelInfoImpl[]> {
     if (!forceRefresh && (await this.cache.isValid())) {
       console.info('Loading models from cache');
@@ -57,7 +79,7 @@ export class ModelManager {
 
       const response: AxiosResponse<ApiModelsResponse> = await axios.get(this.modelsApiUrl, {
         headers,
-        timeout: 30000,
+        timeout: this.apiTimeoutMs,
       });
 
       if (response.status === 200) {
@@ -100,6 +122,13 @@ export class ModelManager {
     }
   }
 
+  /**
+   * Gets a sorted list of models
+   *
+   * @param models - Optional list of models to sort. If not provided, throws error
+   * @returns Sorted list of models by ID
+   * @throws Error if models parameter is not provided
+   */
   getModels(models?: ModelInfoImpl[]): ModelInfoImpl[] {
     if (!models) {
       throw new Error('Models must be provided or fetched first');
@@ -109,6 +138,16 @@ export class ModelManager {
     return [...models].sort((a, b) => a.id.localeCompare(b.id));
   }
 
+  /**
+   * Searches for models matching the query
+   *
+   * Searches across model ID, provider, and model name.
+   * If no models are provided, fetches them first.
+   *
+   * @param query - Search query string
+   * @param models - Optional list of models to search. If not provided, fetches from cache/API
+   * @returns Promise resolving to matching models sorted by ID
+   */
   async searchModels(query: string, models?: ModelInfoImpl[]): Promise<ModelInfoImpl[]> {
     if (!models) {
       models = await this.fetchModels();
@@ -138,6 +177,13 @@ export class ModelManager {
     return matchingModels.sort((a, b) => a.id.localeCompare(b.id));
   }
 
+  /**
+   * Finds a model by its ID
+   *
+   * @param modelId - The model ID to search for
+   * @param models - Optional list of models to search. If not provided, fetches from cache/API
+   * @returns Promise resolving to the model, or null if not found
+   */
   async getModelById(modelId: string, models?: ModelInfoImpl[]): Promise<ModelInfoImpl | null> {
     if (!models) {
       models = await this.fetchModels();
@@ -146,10 +192,20 @@ export class ModelManager {
     return models.find(model => model.id === modelId) || null;
   }
 
+  /**
+   * Clears the model cache
+   *
+   * @returns Promise resolving to true if cache was cleared successfully
+   */
   async clearCache(): Promise<boolean> {
     return this.cache.clear();
   }
 
+  /**
+   * Gets information about the cache
+   *
+   * @returns Promise resolving to cache info object with details like age, size, etc.
+   */
   async getCacheInfo(): Promise<Record<string, any>> {
     return this.cache.getInfo();
   }

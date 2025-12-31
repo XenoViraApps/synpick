@@ -1,8 +1,13 @@
 import { Command } from 'commander';
 import { SyntheticClaudeApp } from '../core/app';
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { normalizeDangerousFlags } from '../utils/banner';
+
+// ESM equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 function getVersion(): string {
   // Read version from version.txt first, fallback to package.json

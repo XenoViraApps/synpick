@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Box, Text } from 'ink';
+import {
+  PERCENTAGE_MIN,
+  PERCENTAGE_MAX,
+  DEFAULT_PROGRESS_BAR_WIDTH,
+  UI_MARGIN_BOTTOM,
+} from '../../utils/constants';
 
 interface ProgressBarProps {
   current: number;
@@ -15,33 +21,32 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   current,
   total,
   label,
-  width = 40,
+  width = DEFAULT_PROGRESS_BAR_WIDTH,
   character = '█',
   backgroundColor = 'gray',
-  fillColor = 'green'
+  fillColor = 'green',
 }) => {
-  const percentage = Math.min(100, Math.max(0, (current / total) * 100));
-  const filledChars = Math.round((percentage / 100) * width);
+  const percentage = Math.min(
+    PERCENTAGE_MAX,
+    Math.max(PERCENTAGE_MIN, (current / total) * PERCENTAGE_MAX)
+  );
+  const filledChars = Math.round((percentage / PERCENTAGE_MAX) * width);
   const emptyChars = width - filledChars;
 
   return (
     <Box flexDirection="column">
       {label && (
-        <Box marginBottom={1}>
+        <Box marginBottom={UI_MARGIN_BOTTOM}>
           <Text>{label}</Text>
         </Box>
       )}
       <Box>
-        <Text color={fillColor}>
-          {character.repeat(filledChars)}
-        </Text>
-        <Text color={backgroundColor} dimColor>
-          {character.repeat(emptyChars)}
-        </Text>
+        <Text color={fillColor}>{character.repeat(filledChars)}</Text>
+        <Text color={backgroundColor}>{character.repeat(emptyChars)}</Text>
         <Text> {percentage.toFixed(1)}%</Text>
       </Box>
       {total > 0 && (
-        <Text color="gray" dimColor>
+        <Text color="gray">
           {current} / {total}
         </Text>
       )}

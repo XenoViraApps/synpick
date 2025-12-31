@@ -16,11 +16,7 @@ const statusConfig = {
   error: { color: 'red', icon: '✗' },
 };
 
-export const StatusMessage: React.FC<StatusMessageProps> = ({
-  type,
-  message,
-  icon
-}) => {
+export const StatusMessage: React.FC<StatusMessageProps> = ({ type, message, icon }) => {
   const config = statusConfig[type];
   const displayIcon = icon || config.icon;
 

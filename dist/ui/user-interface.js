@@ -1,14 +1,9 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserInterface = void 0;
-const jsx_runtime_1 = require("react/jsx-runtime");
-const ink_1 = require("ink");
-const chalk_1 = __importDefault(require("chalk"));
-const ModelSelector_1 = require("./components/ModelSelector");
-const StatusMessage_1 = require("./components/StatusMessage");
+import { jsx as _jsx } from "react/jsx-runtime";
+import { render } from 'ink';
+import chalk from 'chalk';
+import { ModelSelector } from './components/ModelSelector.js';
+import { StatusMessage } from './components/StatusMessage.js';
+import { BYTES_PER_KB, PERCENTAGE_MAX, DEFAULT_PROGRESS_BAR_LENGTH } from '../utils/constants.js';
 // Helper function to identify thinking-capable models
 function isThinkingModel(modelId) {
     const id = modelId.toLowerCase();
@@ -32,64 +27,128 @@ function isThinkingModel(modelId) {
         return true; // Qwen 3 thinking variants
     return false;
 }
-class UserInterface {
-    verbose;
-    quiet;
+/**
+ * UserInterface handles all user interaction for the synclaude CLI
+ *
+ * Provides methods for displaying messages, progress indicators,
+ * user input collection, and interactive model selection.
+ */
+export class UserInterface {
+    /**
+     * Creates a new UserInterface instance
+     *
+     * @param options - Configuration options for the UI
+     * @param options.verbose - If true, enables debug output
+     * @param options.quiet - If true, suppresses non-error output
+     */
     constructor(options = {}) {
         this.verbose = options.verbose || false;
         this.quiet = options.quiet || false;
     }
-    // Simple console output methods
+    /**
+     * Displays an informational message
+     *
+     * @param message - The message to display
+     * @param args - Additional arguments to log
+     */
     info(message, ...args) {
         if (!this.quiet) {
             console.log(`ℹ ${message}`, ...args);
         }
     }
+    /**
+     * Displays a success message
+     *
+     * @param message - The message to display
+     * @param args - Additional arguments to log
+     */
     success(message, ...args) {
         if (!this.quiet) {
             console.log(`✓ ${message}`, ...args);
         }
     }
-    // Colored success message for important notifications
+    /**
+     * Displays a colored success message for important notifications
+     *
+     * @param message - The message to display
+     * @param args - Additional arguments to log
+     */
     coloredSuccess(message, ...args) {
         if (!this.quiet) {
-            console.log(chalk_1.default.green(`✓ ${message}`), ...args);
+            console.log(chalk.green(`✓ ${message}`), ...args);
         }
     }
-    // Colored info message for important notifications
+    /**
+     * Displays a colored info message for important notifications
+     *
+     * @param message - The message to display
+     * @param args - Additional arguments to log
+     */
     coloredInfo(message, ...args) {
         if (!this.quiet) {
-            console.log(chalk_1.default.blue(`ℹ ${message}`), ...args);
+            console.log(chalk.blue(`ℹ ${message}`), ...args);
         }
     }
-    // Highlighted message with colored elements within
+    /**
+     * Displays a message with highlighted text
+     *
+     * @param message - The message to display
+     * @param highlights - Strings within the message to highlight with cyan color
+     */
     highlightInfo(message, highlights = []) {
         if (!this.quiet) {
-            let output = chalk_1.default.blue('ℹ ');
+            let output = chalk.blue('ℹ ');
             let processedMessage = message;
             // Color each highlighted occurrence
             highlights.forEach(highlight => {
                 const regex = new RegExp(`(${highlight})`, 'g');
-                processedMessage = processedMessage.replace(regex, chalk_1.default.cyan('$1'));
+                processedMessage = processedMessage.replace(regex, chalk.cyan('$1'));
             });
             output += processedMessage;
             console.log(output);
         }
     }
+    /**
+     * Displays a warning message
+     *
+     * @param message - The message to display
+     * @param args - Additional arguments to log
+     */
     warning(message, ...args) {
         if (!this.quiet) {
             console.warn(`⚠ ${message}`, ...args);
         }
     }
+    /**
+     * Displays an error message
+     *
+     * Always displays, even in quiet mode.
+     *
+     * @param message - The message to display
+     * @param args - Additional arguments to log
+     */
     error(message, ...args) {
         console.error(`✗ ${message}`, ...args);
     }
+    /**
+     * Displays a debug message
+     *
+     * Only displays when verbose mode is enabled.
+     *
+     * @param message - The message to display
+     * @param args - Additional arguments to log
+     */
     debug(message, ...args) {
         if (this.verbose) {
             console.debug(`🐛 ${message}`, ...args);
         }
     }
-    // Show a simple list of models
+    /**
+     * Displays a simple list of models
+     *
+     * @param models - The models to display
+     * @param selectedIndex - Optional index of the currently selected model
+     */
     showModelList(models, selectedIndex) {
         if (models.length === 0) {
             this.info('No models available');
@@ -100,28 +159,35 @@ class UserInterface {
         models.forEach((model, index) => {
             const marker = selectedIndex === index ? '➤' : ' ';
             const displayName = model.getDisplayName();
-            const thoughtsuffix = isThinkingModel(model.id) ? ' ' + chalk_1.default.yellow('🤔 Thinking') : '';
-            console.log(`${marker} ${index + 1}. ${chalk_1.default.cyan(displayName)}${thoughtsuffix}`);
-            console.log(`    ${chalk_1.default.gray('Provider:')} ${model.getProvider()}`);
+            const thoughtsuffix = isThinkingModel(model.id) ? ' ' + chalk.yellow('🤔 Thinking') : '';
+            console.log(`${marker} ${index + 1}. ${chalk.cyan(displayName)}${thoughtsuffix}`);
+            console.log(`    ${chalk.gray('Provider:')} ${model.getProvider()}`);
             if (model.context_length) {
-                const contextK = Math.round(model.context_length / 1024);
-                console.log(`    ${chalk_1.default.gray('Context:')} ${contextK}K tokens`);
+                const contextK = Math.round(model.context_length / BYTES_PER_KB);
+                console.log(`    ${chalk.gray('Context:')} ${contextK}K tokens`);
             }
             if (model.quantization) {
-                console.log(`    ${chalk_1.default.gray('Quantization:')} ${model.quantization}`);
+                console.log(`    ${chalk.gray('Quantization:')} ${model.quantization}`);
             }
-            console.log(`    ${chalk_1.default.gray('ID:')} ${model.id}`);
+            console.log(`    ${chalk.gray('ID:')} ${model.id}`);
             console.log('');
         });
     }
-    // Interactive model selection using Ink (single model - for backward compatibility)
+    /**
+     * Interactive model selection using Ink
+     *
+     * For backward compatibility - returns a single model (regular or thinking).
+     *
+     * @param models - The models to select from
+     * @returns Promise resolving to the selected model, or null if cancelled
+     */
     async selectModel(models) {
         if (models.length === 0) {
             this.error('No models available for selection');
             return null;
         }
         return new Promise(resolve => {
-            const { waitUntilExit } = (0, ink_1.render)((0, jsx_runtime_1.jsx)(ModelSelector_1.ModelSelector, { models: models, onSelect: (regularModel, thinkingModel) => {
+            const { waitUntilExit } = render(_jsx(ModelSelector, { models: models, onSelect: (regularModel, thinkingModel) => {
                     const selected = regularModel || thinkingModel;
                     if (selected) {
                         this.success(`Selected model: ${selected.getDisplayName()}`);
@@ -140,14 +206,21 @@ class UserInterface {
             });
         });
     }
-    // Interactive dual model selection using Ink
+    /**
+     * Interactive dual model selection using Ink
+     *
+     * Allows selecting both regular and thinking models.
+     *
+     * @param models - The models to select from
+     * @returns Promise resolving to an object with regular and thinking models (may be null)
+     */
     async selectDualModels(models) {
         if (models.length === 0) {
             this.error('No models available for selection');
             return { regular: null, thinking: null };
         }
         return new Promise(resolve => {
-            const { waitUntilExit } = (0, ink_1.render)((0, jsx_runtime_1.jsx)(ModelSelector_1.ModelSelector, { models: models, onSelect: (regularModel, thinkingModel) => {
+            const { waitUntilExit } = render(_jsx(ModelSelector, { models: models, onSelect: (regularModel, thinkingModel) => {
                     if (regularModel || thinkingModel) {
                         if (regularModel)
                             this.success(`Regular model: ${regularModel.getDisplayName()}`);
@@ -167,13 +240,19 @@ class UserInterface {
             });
         });
     }
-    // Show progress (simple console version)
+    /**
+     * Shows a progress bar on the console
+     *
+     * @param current - Current progress value
+     * @param total - Total value for completion
+     * @param label - Optional label to display before the progress bar
+     */
     showProgress(current, total, label) {
         if (this.quiet)
             return;
-        const percentage = Math.round((current / total) * 100);
-        const barLength = 20;
-        const filledLength = Math.round((percentage / 100) * barLength);
+        const percentage = Math.round((current / total) * PERCENTAGE_MAX);
+        const barLength = DEFAULT_PROGRESS_BAR_LENGTH;
+        const filledLength = Math.round((percentage / PERCENTAGE_MAX) * barLength);
         const bar = '█'.repeat(filledLength) + '░'.repeat(barLength - filledLength);
         const labelStr = label ? `${label} ` : '';
         process.stdout.write(`\r${labelStr}[${bar}] ${percentage}% (${current}/${total})`);
@@ -181,11 +260,16 @@ class UserInterface {
             console.log(''); // New line when complete
         }
     }
-    // Ask for user input (simple)
+    /**
+     * Asks a question and waits for user input
+     *
+     * @param question - The question to ask
+     * @param defaultValue - Optional default value
+     * @returns Promise resolving to the user's answer
+     */
     async askQuestion(question, defaultValue) {
         return new Promise(resolve => {
-            const readline = require('readline');
-            const rl = readline.createInterface({
+            const rl = require('readline').createInterface({
                 input: process.stdin,
                 output: process.stdout,
             });
@@ -196,10 +280,17 @@ class UserInterface {
             });
         });
     }
-    // Ask for password input (masked with asterisks)
+    /**
+     * Asks for password input with masking
+     *
+     * Password input is masked with asterisks for security.
+     * Press Enter to submit, Ctrl+C to cancel.
+     *
+     * @param question - The prompt question
+     * @returns Promise resolving to the entered password (empty if cancelled)
+     */
     async askPassword(question) {
         return new Promise(resolve => {
-            const readline = require('readline');
             // Store original settings
             const stdin = process.stdin;
             const stdout = process.stdout;
@@ -252,21 +343,33 @@ class UserInterface {
             stdin.on('data', onData);
         });
     }
-    // Confirm action
+    /**
+     * Asks the user to confirm an action
+     *
+     * @param message - The confirmation message
+     * @param defaultValue - Default value if user just presses Enter
+     * @returns Promise resolving to true if user confirmed, false otherwise
+     */
     async confirm(message, defaultValue = false) {
         const defaultStr = defaultValue ? 'Y/n' : 'y/N';
         const answer = await this.askQuestion(`${message} (${defaultStr})`, defaultValue ? 'y' : 'n');
         return answer.toLowerCase().startsWith('y');
     }
-    // Show status message using Ink component
+    /**
+     * Shows a status message using the Ink StatusMessage component
+     *
+     * @param type - The type of status message (info, success, warning, error)
+     * @param message - The message to display
+     */
     showStatus(type, message) {
-        const { waitUntilExit } = (0, ink_1.render)((0, jsx_runtime_1.jsx)(StatusMessage_1.StatusMessage, { type: type, message: message }));
+        const { waitUntilExit } = render(_jsx(StatusMessage, { type: type, message: message }));
         waitUntilExit();
     }
-    // Clear terminal
+    /**
+     * Clears the terminal screen
+     */
     clear() {
         console.clear();
     }
 }
-exports.UserInterface = UserInterface;
 //# sourceMappingURL=user-interface.js.map

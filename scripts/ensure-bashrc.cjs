@@ -72,7 +72,7 @@ function getConfigFile() {
 
 function getFishPathBlock() {
   return `${blockStart}
-set -gx PATH \$PATH ${binDir}
+set -gx PATH $PATH ${binDir}
 ${blockEnd}`;
 }
 

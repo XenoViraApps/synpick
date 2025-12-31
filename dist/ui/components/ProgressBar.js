@@ -1,13 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProgressBar = void 0;
-const jsx_runtime_1 = require("react/jsx-runtime");
-const ink_1 = require("ink");
-const ProgressBar = ({ current, total, label, width = 40, character = '█', backgroundColor = 'gray', fillColor = 'green' }) => {
-    const percentage = Math.min(100, Math.max(0, (current / total) * 100));
-    const filledChars = Math.round((percentage / 100) * width);
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Box, Text } from 'ink';
+import { PERCENTAGE_MIN, PERCENTAGE_MAX, DEFAULT_PROGRESS_BAR_WIDTH, UI_MARGIN_BOTTOM, } from '../../utils/constants.js';
+export const ProgressBar = ({ current, total, label, width = DEFAULT_PROGRESS_BAR_WIDTH, character = '█', backgroundColor = 'gray', fillColor = 'green', }) => {
+    const percentage = Math.min(PERCENTAGE_MAX, Math.max(PERCENTAGE_MIN, (current / total) * PERCENTAGE_MAX));
+    const filledChars = Math.round((percentage / PERCENTAGE_MAX) * width);
     const emptyChars = width - filledChars;
-    return ((0, jsx_runtime_1.jsxs)(ink_1.Box, { flexDirection: "column", children: [label && ((0, jsx_runtime_1.jsx)(ink_1.Box, { marginBottom: 1, children: (0, jsx_runtime_1.jsx)(ink_1.Text, { children: label }) })), (0, jsx_runtime_1.jsxs)(ink_1.Box, { children: [(0, jsx_runtime_1.jsx)(ink_1.Text, { color: fillColor, children: character.repeat(filledChars) }), (0, jsx_runtime_1.jsx)(ink_1.Text, { color: backgroundColor, dimColor: true, children: character.repeat(emptyChars) }), (0, jsx_runtime_1.jsxs)(ink_1.Text, { children: [" ", percentage.toFixed(1), "%"] })] }), total > 0 && ((0, jsx_runtime_1.jsxs)(ink_1.Text, { color: "gray", dimColor: true, children: [current, " / ", total] }))] }));
+    return (_jsxs(Box, { flexDirection: "column", children: [label && (_jsx(Box, { marginBottom: UI_MARGIN_BOTTOM, children: _jsx(Text, { children: label }) })), _jsxs(Box, { children: [_jsx(Text, { color: fillColor, children: character.repeat(filledChars) }), _jsx(Text, { color: backgroundColor, children: character.repeat(emptyChars) }), _jsxs(Text, { children: [" ", percentage.toFixed(1), "%"] })] }), total > 0 && (_jsxs(Text, { color: "gray", children: [current, " / ", total] }))] }));
 };
-exports.ProgressBar = ProgressBar;
 //# sourceMappingURL=ProgressBar.js.map

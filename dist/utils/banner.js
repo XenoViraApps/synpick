@@ -1,15 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.normalizeDangerousFlags = normalizeDangerousFlags;
-exports.createBanner = createBanner;
-const fs_1 = require("fs");
-const path_1 = require("path");
-const config_1 = require("../config");
-const chalk_1 = __importDefault(require("chalk"));
-function normalizeDangerousFlags(args) {
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { ConfigManager } from '../config/index.js';
+import chalk from 'chalk';
+export function normalizeDangerousFlags(args) {
     const dangerousPatterns = [
         /^--dangerously-skip-permissions$/, // correct
         /^--dangerously-skip-permission$/, // missing s
@@ -32,12 +25,12 @@ function normalizeDangerousFlags(args) {
     });
     return processedArgs;
 }
-function createBanner(options = {}) {
+export function createBanner(options = {}) {
     // Read version from package.json
-    const packageJsonPath = (0, path_1.join)(__dirname, '../../package.json');
-    const version = JSON.parse((0, fs_1.readFileSync)(packageJsonPath, 'utf8')).version;
+    const packageJsonPath = join(__dirname, '../../package.json');
+    const version = JSON.parse(readFileSync(packageJsonPath, 'utf8')).version;
     // Get current config for models
-    const configManager = new config_1.ConfigManager();
+    const configManager = new ConfigManager();
     const config = configManager.config;
     // Determine options
     const activeOptions = [];
@@ -54,12 +47,12 @@ function createBanner(options = {}) {
     const thinkingModel = config.selectedThinkingModel || 'None';
     const optionsStr = activeOptions.length > 0 ? activeOptions.join(', ') : 'None';
     return [
-        chalk_1.default.cyan.bold('SynClaude') + chalk_1.default.gray(` v${version}`),
-        chalk_1.default.gray('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'),
-        `${chalk_1.default.blue('Model:')}     ${chalk_1.default.cyan(defaultModel)}`,
-        `${chalk_1.default.magenta('Thinking:')}  ${chalk_1.default.magenta(thinkingModel)}`,
-        `${chalk_1.default.green('Network:')}    ${chalk_1.default.green('Synthetic.New')}`,
-        `${chalk_1.default.yellow('Options:')}    ${chalk_1.default.yellow(optionsStr)}`,
+        chalk.cyan.bold('SynClaude') + chalk.gray(` v${version}`),
+        chalk.gray('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'),
+        `${chalk.blue('Model:')}     ${chalk.cyan(defaultModel)}`,
+        `${chalk.magenta('Thinking:')}  ${chalk.magenta(thinkingModel)}`,
+        `${chalk.green('Network:')}    ${chalk.green('Synthetic.New')}`,
+        `${chalk.yellow('Options:')}    ${chalk.yellow(optionsStr)}`,
         '',
     ].join('\n');
 }

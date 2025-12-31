@@ -66,7 +66,7 @@ export interface ApiModelsResponse {
 export class ModelValidationError extends Error {
   constructor(
     message: string,
-    public override cause?: unknown
+    public cause?: unknown
   ) {
     super(message);
     this.name = 'ModelValidationError';

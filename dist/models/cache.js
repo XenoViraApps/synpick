@@ -1,24 +1,19 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ModelCache = void 0;
-const promises_1 = require("fs/promises");
-const info_1 = require("./info");
-class ModelCache {
-    cacheFile;
-    cacheDurationMs;
+import { readFile, writeFile, mkdir, stat, unlink } from 'fs/promises';
+import { ModelInfoImpl } from './info.js';
+export class ModelCache {
     constructor(options) {
         this.cacheFile = options.cacheFile;
         this.cacheDurationMs = options.cacheDurationHours * 60 * 60 * 1000;
     }
     async isValid() {
         try {
-            const stats = await (0, promises_1.stat)(this.cacheFile);
+            const stats = await stat(this.cacheFile);
             const mtime = stats.mtime;
             const now = new Date();
             const age = now.getTime() - mtime.getTime();
             return age < this.cacheDurationMs;
         }
-        catch (error) {
+        catch {
             // File doesn't exist or can't be accessed
             return false;
         }
@@ -28,10 +23,10 @@ class ModelCache {
             return [];
         }
         try {
-            const data = await (0, promises_1.readFile)(this.cacheFile, 'utf-8');
+            const data = await readFile(this.cacheFile, 'utf-8');
             const cacheData = JSON.parse(data);
             const modelsData = cacheData.models || [];
-            return modelsData.map((modelData) => new info_1.ModelInfoImpl(modelData));
+            return modelsData.map((modelData) => new ModelInfoImpl(modelData));
         }
         catch (error) {
             console.error('Error loading cache:', error);
@@ -42,14 +37,14 @@ class ModelCache {
         try {
             // Ensure parent directory exists
             const parentDir = require('path').dirname(this.cacheFile);
-            await (0, promises_1.mkdir)(parentDir, { recursive: true });
+            await mkdir(parentDir, { recursive: true });
             const cacheData = {
                 models: models.map(model => model.toJSON()),
                 timestamp: new Date().toISOString(),
                 count: models.length,
             };
             const data = JSON.stringify(cacheData, null, 2);
-            await (0, promises_1.writeFile)(this.cacheFile, data, 'utf-8');
+            await writeFile(this.cacheFile, data, 'utf-8');
             console.debug(`Cached ${models.length} models to ${this.cacheFile}`);
             return true;
         }
@@ -60,7 +55,7 @@ class ModelCache {
     }
     async clear() {
         try {
-            await (0, promises_1.unlink)(this.cacheFile);
+            await unlink(this.cacheFile);
             console.debug('Cache cleared');
             return true;
         }
@@ -71,7 +66,7 @@ class ModelCache {
     }
     async getInfo() {
         try {
-            const stats = await (0, promises_1.stat)(this.cacheFile);
+            const stats = await stat(this.cacheFile);
             const models = await this.load();
             return {
                 exists: true,
@@ -90,5 +85,4 @@ class ModelCache {
         }
     }
 }
-exports.ModelCache = ModelCache;
 //# sourceMappingURL=cache.js.map

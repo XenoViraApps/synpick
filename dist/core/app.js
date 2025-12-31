@@ -1,60 +1,90 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SyntheticClaudeApp = void 0;
-const path_1 = require("path");
-const os_1 = require("os");
-const config_1 = require("../config");
-const models_1 = require("../models");
-const ui_1 = require("../ui");
-const launcher_1 = require("../launcher");
-const logger_1 = require("../utils/logger");
-const banner_1 = require("../utils/banner");
-const claude_1 = require("../claude");
-class SyntheticClaudeApp {
-    configManager;
-    ui;
-    launcher;
-    modelManager = null;
-    claudeCodeManager;
+import { join } from 'path';
+import { homedir } from 'os';
+import { execSync } from 'child_process';
+import axios from 'axios';
+import { ConfigManager } from '../config/index.js';
+import { ModelManager } from '../models/index.js';
+import { UserInterface } from '../ui/index.js';
+import { ClaudeLauncher } from '../launcher/index.js';
+import { setupLogging, log } from '../utils/logger.js';
+import { createBanner, normalizeDangerousFlags } from '../utils/banner.js';
+import { ClaudeCodeManager } from '../claude/index.js';
+/**
+ * SyntheticClaudeApp is the main application class for synclaude
+ *
+ * Orchestrates model management, configuration, and Claude Code launching.
+ */
+export class SyntheticClaudeApp {
+    /**
+     * Creates a new SyntheticClaudeApp instance
+     *
+     * Initializes config manager, UI, launcher, and Claude Code manager.
+     */
     constructor() {
-        this.configManager = new config_1.ConfigManager();
-        this.ui = new ui_1.UserInterface({
+        this.modelManager = null;
+        this.configManager = new ConfigManager();
+        const config = this.configManager.config;
+        this.ui = new UserInterface({
             verbose: this.configManager.config.apiKey
                 ? this.configManager.config.cacheDurationHours > 0
                 : false,
         });
-        this.launcher = new launcher_1.ClaudeLauncher();
-        this.claudeCodeManager = new claude_1.ClaudeCodeManager();
+        this.launcher = new ClaudeLauncher({
+            timeoutMs: config.commandTimeoutMs,
+        });
+        this.claudeCodeManager = new ClaudeCodeManager({
+            verbose: false,
+            timeoutMs: config.commandTimeoutMs,
+        });
     }
+    /**
+     * Sets up logging based on the provided options
+     *
+     * @param options - App options containing verbose and quiet flags
+     */
     async setupLogging(options) {
-        (0, logger_1.setupLogging)(options.verbose, options.quiet);
+        setupLogging(options.verbose, options.quiet);
         // Removed verbose startup log
     }
+    /**
+     * Gets the current configuration
+     *
+     * @returns The current app configuration object
+     */
     getConfig() {
         return this.configManager.config;
     }
     getModelManager() {
         if (!this.modelManager) {
             const config = this.configManager.config;
-            const cacheFile = (0, path_1.join)((0, os_1.homedir)(), '.config', 'synclaude', 'models_cache.json');
-            this.modelManager = new models_1.ModelManager({
+            const cacheFile = join(homedir(), '.config', 'synclaude', 'models_cache.json');
+            this.modelManager = new ModelManager({
                 apiKey: config.apiKey,
                 modelsApiUrl: config.modelsApiUrl,
                 cacheFile,
                 cacheDurationHours: config.cacheDurationHours,
+                apiTimeoutMs: config.apiTimeoutMs,
             });
         }
         return this.modelManager;
     }
+    /**
+     * Runs the main synclaude application
+     *
+     * Handles first-time setup, model selection, and Claude Code launching.
+     *
+     * @param options - App and launch options
+     * @returns Promise that resolves when the application is done
+     */
     async run(options) {
         // Normalize dangerous flags first
         if (options.additionalArgs) {
-            options.additionalArgs = (0, banner_1.normalizeDangerousFlags)(options.additionalArgs);
+            options.additionalArgs = normalizeDangerousFlags(options.additionalArgs);
         }
         await this.setupLogging(options);
         // Display banner unless quiet mode
         if (!options.quiet) {
-            console.log((0, banner_1.createBanner)(options));
+            console.log(createBanner(options));
         }
         // Check for Claude Code updates if enabled
         await this.ensureClaudeCodeUpdated();
@@ -93,7 +123,7 @@ class SyntheticClaudeApp {
         const updateInfo = await this.claudeCodeManager.checkForUpdates();
         // Update the last check timestamp
         await this.configManager.updateConfig({
-            lastClaudeCodeUpdateCheck: claude_1.ClaudeCodeManager.getCurrentTimestamp(),
+            lastClaudeCodeUpdateCheck: ClaudeCodeManager.getCurrentTimestamp(),
         });
         // Show update message if available
         if (updateInfo.hasUpdate && updateInfo.isNpmInstalled) {
@@ -168,7 +198,6 @@ class SyntheticClaudeApp {
      * Get latest synclaude version from GitHub repository
      */
     async getLatestGitHubVersion() {
-        const axios = require('axios');
         const GITHUB_REPO = 'jeffersonwarrior/synclaude';
         try {
             // Try GitHub releases API first
@@ -190,8 +219,6 @@ class SyntheticClaudeApp {
      * Update synclaude itself via npm
      */
     async updateSynclaudeSelf(force = false) {
-        const { execSync } = require('child_process');
-        const axios = require('axios');
         try {
             // Get current synclaude version
             const currentVersion = execSync('synclaude --version', { encoding: 'utf-8' }).trim();
@@ -291,6 +318,13 @@ class SyntheticClaudeApp {
             this.ui.info('Or reinstall using the method you originally used.\n');
         }
     }
+    /**
+     * Initiates interactive model selection for saving a default model
+     *
+     * Allows selecting both regular and thinking models.
+     *
+     * @returns Promise resolving to true if models were selected and saved, false otherwise
+     */
     async interactiveModelSelection() {
         if (!this.configManager.hasApiKey()) {
             this.ui.error('No API key configured. Please run "synclaude setup" first.');
@@ -324,10 +358,18 @@ class SyntheticClaudeApp {
             return true;
         }
         catch (error) {
-            this.ui.error(`Error during model selection: ${error}`);
+            const message = error instanceof Error ? error.message : String(error);
+            this.ui.error(`Failed to select model: ${message}`);
             return false;
         }
     }
+    /**
+     * Initiates interactive thinking model selection
+     *
+     * Allows selecting a thinking model for reasoning tasks.
+     *
+     * @returns Promise resolving to true if a thinking model was selected and saved, false otherwise
+     */
     async interactiveThinkingModelSelection() {
         if (!this.configManager.hasApiKey()) {
             this.ui.error('No API key configured. Please run "synclaude setup" first.');
@@ -354,14 +396,22 @@ class SyntheticClaudeApp {
             return true;
         }
         catch (error) {
-            this.ui.error(`Error during thinking model selection: ${error}`);
+            const message = error instanceof Error ? error.message : String(error);
+            this.ui.error(`Failed to select thinking model: ${message}`);
             return false;
         }
     }
+    /**
+     * Lists all available models
+     *
+     * @param options - Options for model listing
+     * @param options.refresh - If true, forces a refresh from the API
+     * @returns Promise that resolves when models are listed
+     */
     async listModels(options) {
-        logger_1.log.info('Listing models', { options });
+        log.info('Listing models', { options });
         if (!this.configManager.hasApiKey()) {
-            this.ui.error('No API key configured. Please run "synclaude setup" first.');
+            this.ui.error('No API key configured. Run "synclaude setup" to configure.');
             return;
         }
         try {
@@ -373,13 +423,22 @@ class SyntheticClaudeApp {
             this.ui.showModelList(sortedModels);
         }
         catch (error) {
-            this.ui.error(`Error fetching models: ${error}`);
+            const message = error instanceof Error ? error.message : String(error);
+            this.ui.error(`Failed to fetch models: ${message}`);
         }
     }
+    /**
+     * Searches for models matching the given query
+     *
+     * @param query - Search query to filter models
+     * @param options - Options for model search
+     * @param options.refresh - If true, forces a refresh from the API
+     * @returns Promise that resolves when models are searched
+     */
     async searchModels(query, options) {
-        logger_1.log.info('Searching models', { query, options });
+        log.info('Searching models', { query, options });
         if (!this.configManager.hasApiKey()) {
-            this.ui.error('No API key configured. Please run "synclaude setup" first.');
+            this.ui.error('No API key configured. Run "synclaude setup" to configure.');
             return;
         }
         try {
@@ -394,9 +453,15 @@ class SyntheticClaudeApp {
             this.ui.showModelList(models);
         }
         catch (error) {
-            this.ui.error(`Error searching models: ${error}`);
+            const message = error instanceof Error ? error.message : String(error);
+            this.ui.error(`Failed to search models: ${message}`);
         }
     }
+    /**
+     * Displays the current configuration
+     *
+     * @returns Promise that resolves when configuration is displayed
+     */
     async showConfig() {
         const config = this.configManager.config;
         this.ui.info('Current Configuration:');
@@ -412,6 +477,13 @@ class SyntheticClaudeApp {
         this.ui.info(`Update Check Interval: ${config.claudeCodeUpdateCheckInterval} hours`);
         this.ui.info(`Max Token Size: ${config.maxTokenSize}`);
     }
+    /**
+     * Sets a configuration value
+     *
+     * @param key - Configuration key to set
+     * @param value - Value to set (will be parsed appropriately based on key)
+     * @returns Promise that resolves when configuration is set
+     */
     async setConfig(key, value) {
         // Simple key-value config setting
         const updates = {};
@@ -455,6 +527,11 @@ class SyntheticClaudeApp {
             this.ui.error(`Failed to update configuration: ${key}`);
         }
     }
+    /**
+     * Resets all configuration to defaults
+     *
+     * @returns Promise that resolves when configuration is reset
+     */
     async resetConfig() {
         const confirmed = await this.ui.confirm('Are you sure you want to reset all configuration to defaults?');
         if (!confirmed) {
@@ -465,6 +542,13 @@ class SyntheticClaudeApp {
         await this.configManager.saveConfig(require('../config').AppConfigSchema.parse({}));
         this.ui.success('Configuration reset to defaults');
     }
+    /**
+     * Runs the first-time setup wizard
+     *
+     * Prompts user for API key and optionally tests connection and selects a model.
+     *
+     * @returns Promise that resolves when setup is complete
+     */
     async setup() {
         this.ui.coloredInfo("Welcome to Synclaude! Let's set up your configuration.");
         this.ui.info('==============================================');
@@ -495,7 +579,8 @@ class SyntheticClaudeApp {
                 this.ui.coloredSuccess(`Connection successful! Found ${models.length} models`);
             }
             catch (error) {
-                this.ui.error(`Connection failed: ${error}`);
+                const message = error instanceof Error ? error.message : String(error);
+                this.ui.error(`Connection test failed: ${message}`);
                 return;
             }
         }
@@ -509,6 +594,13 @@ class SyntheticClaudeApp {
         this.ui.coloredSuccess('Setup completed successfully!');
         this.ui.highlightInfo('You can now run "synclaude" to launch Claude Code', ['synclaude']);
     }
+    /**
+     * Runs a system health check
+     *
+     * Checks Claude Code installation, version, configuration, and API connectivity.
+     *
+     * @returns Promise that resolves when health check is complete
+     */
     async doctor() {
         this.ui.info('System Health Check');
         this.ui.info('===================');
@@ -545,7 +637,8 @@ class SyntheticClaudeApp {
                 this.ui.showStatus('success', `API connection: OK (${models.length} models)`);
             }
             catch (error) {
-                this.ui.showStatus('error', `API connection: Failed (${error})`);
+                const message = error instanceof Error ? error.message : String(error);
+                this.ui.showStatus('error', `API connection: Failed (${message})`);
             }
         }
         // Configuration summary
@@ -553,6 +646,11 @@ class SyntheticClaudeApp {
         this.ui.info(`Auto-update Claude Code: ${config.autoUpdateClaudeCode ? 'Enabled' : 'Disabled'}`);
         this.ui.info(`Max Token Size: ${config.maxTokenSize}`);
     }
+    /**
+     * Clears the model cache
+     *
+     * @returns Promise that resolves when cache is cleared
+     */
     async clearCache() {
         const modelManager = this.getModelManager();
         const success = await modelManager.clearCache();
@@ -563,6 +661,13 @@ class SyntheticClaudeApp {
             this.ui.error('Failed to clear cache');
         }
     }
+    /**
+     * Displays cache information
+     *
+     * Shows status, size, model count, and modification time of the cache.
+     *
+     * @returns Promise that resolves when cache info is displayed
+     */
     async cacheInfo() {
         const modelManager = this.getModelManager();
         const cacheInfo = await modelManager.getCacheInfo();
@@ -606,7 +711,6 @@ class SyntheticClaudeApp {
      */
     async localInstall(options) {
         const { verbose = false, force = false, skipPath = false } = options;
-        const { execSync, spawn } = require('child_process');
         this.ui.coloredInfo('Installing synclaude from local directory to system-wide...');
         this.ui.info('==================================================');
         try {
@@ -700,5 +804,4 @@ class SyntheticClaudeApp {
         }
     }
 }
-exports.SyntheticClaudeApp = SyntheticClaudeApp;
 //# sourceMappingURL=app.js.map

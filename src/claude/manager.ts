@@ -1,7 +1,7 @@
 import { spawn, execSync } from 'child_process';
 import { promises as fs, Stats } from 'fs';
 import { homedir } from 'os';
-import { join, dirname } from 'path';
+import { join } from 'path';
 
 /**
  * Result of a Claude Code update operation
@@ -34,8 +34,11 @@ export class ClaudeCodeManager {
   private static readonly NPM_REGISTRY_URL = 'https://registry.npmjs.org/@anthropic-ai/claude-code';
   private static readonly UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
   private static readonly OFFICIAL_INSTALL_URL = 'https://claude.ai/install.sh';
+  private timeoutMs: number;
 
-  constructor(private options: { verbose?: boolean } = {}) {}
+  constructor(private options: { verbose?: boolean; timeoutMs?: number } = {}) {
+    this.timeoutMs = options.timeoutMs || 5000;
+  }
 
   /**
    * Check if Claude Code is installed
@@ -416,6 +419,10 @@ export class ClaudeCodeManager {
 
   /**
    * Spawn a command and capture output
+   *
+   * @param command - Command to execute
+   * @param args - Command arguments
+   * @returns Promise with command result
    */
   private spawnCommand(
     command: string,
@@ -425,6 +432,9 @@ export class ClaudeCodeManager {
       let stdout = '';
       let stderr = '';
       let resolved = false;
+      // Declare timeoutId before setting up event listeners
+      // so doResolve can properly clear it when process completes
+      let timeoutId: NodeJS.Timeout | undefined;
 
       const child = spawn(command, args, {
         stdio: this.options.verbose ? 'inherit' : 'pipe',
@@ -450,7 +460,9 @@ export class ClaudeCodeManager {
         if (!resolved) {
           resolved = true;
           // Clean up timeout if it exists
-          clearTimeout(timeoutId);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
           resolve(result);
         }
       };
@@ -463,14 +475,15 @@ export class ClaudeCodeManager {
         doResolve({ success: false, stdout, stderr, code: -1 });
       });
 
-      const timeoutId = setTimeout(() => {
+      // Set timeout after event listeners so it can be properly cleared
+      timeoutId = setTimeout(() => {
         try {
           child.kill('SIGKILL');
         } catch {
-          // Ignore errors when killing
+          // Ignore errors when killing (process may already be dead)
         }
         doResolve({ success: false, stdout, stderr, code: null });
-      }, 5000);
+      }, this.timeoutMs);
     });
   }
 }

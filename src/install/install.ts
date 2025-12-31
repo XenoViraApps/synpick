@@ -84,7 +84,7 @@ export async function checkCleanStaleSymlinks(options: { verbose?: boolean } = {
             if (verbose) {
               console.log(`Removed stale symlink: ${checkPath}`);
             }
-          } catch (unlinkError) {
+          } catch {
             failed.push(checkPath);
             console.warn(`Could not remove stale symlink: ${checkPath}`);
             console.warn(`  Please run: sudo rm -f ${checkPath}`);
@@ -129,7 +129,7 @@ export function detectInstallMethod(): InstallMethodEnum {
     }
 
     // Check if we can write to npm prefix
-    const prefixStat = fsPromises.stat(npmPrefix).catch(() => ({ mode: 0o755 }));
+    fsPromises.stat(npmPrefix).catch(() => ({ mode: 0o755 }));
 
     // On Unix, check write permissions via a test
     try {
@@ -144,7 +144,7 @@ export function detectInstallMethod(): InstallMethodEnum {
       // Fall back to manual local install
       return InstallMethodEnum.MANUAL_LOCAL;
     }
-  } catch (error) {
+  } catch {
     return InstallMethodEnum.MANUAL_LOCAL;
   }
 }
@@ -293,7 +293,7 @@ export async function addToPathIfNotExists(
     };
   }
 
-  const { shell, configFile } = getShellInfo();
+  const { configFile } = getShellInfo();
   const configFiles: string[] = [];
 
   try {
@@ -444,7 +444,7 @@ export async function verifyInstallation(
  * Main installation function
  */
 export async function installSynclaude(options: InstallOptions = {}): Promise<InstallResult> {
-  const { verbose = false, force = false, skipPathUpdate = false } = options;
+  const { verbose = false, skipPathUpdate = false } = options;
 
   // Detect or use specified install method
   const method = options.installMethod || detectInstallMethod();

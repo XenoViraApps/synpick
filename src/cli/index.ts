@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { createProgram } from './commands';
-import { setupLogging } from '../utils/logger';
 
 async function main() {
   try {
@@ -27,9 +26,7 @@ process.on('uncaughtException', error => {
   process.exit(1);
 });
 
-// Run main function
-if (require.main === module) {
-  main();
-}
+// Run main function when this file is the entry point
+main();
 
 export { main };

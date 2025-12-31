@@ -1,5 +1,4 @@
-import { spawn, ChildProcess } from 'child_process';
-import { AppConfig } from '../config';
+import { spawn } from 'child_process';
 
 export interface LaunchOptions {
   model: string;
@@ -10,19 +9,55 @@ export interface LaunchOptions {
   maxTokenSize?: number;
 }
 
+export interface LauncherOptions {
+  claudePath?: string;
+  /** Timeout for command execution in milliseconds (default: 5000) */
+  timeoutMs?: number;
+}
+
 export interface LaunchResult {
   success: boolean;
   pid?: number;
   error?: string;
 }
 
+/**
+ * ClaudeLauncher handles launching and managing Claude Code processes
+ *
+ * Provides methods to launch Claude Code with custom models,
+ * check installation status, and retrieve version information.
+ */
 export class ClaudeLauncher {
   private claudePath: string;
+  private timeoutMs: number;
 
-  constructor(claudePath?: string) {
-    this.claudePath = claudePath || 'claude';
+  /**
+   * Creates a new ClaudeLauncher instance
+   *
+   * @param options - Configuration options for the launcher
+   * @param options.claudePath - Path to the claude executable (default: 'claude')
+   * @param options.timeoutMs - Timeout for command execution in milliseconds (default: 5000)
+   */
+  constructor(options?: LauncherOptions) {
+    this.claudePath = options?.claudePath || 'claude';
+    this.timeoutMs = options?.timeoutMs || 5000;
   }
 
+  /**
+   * Launches Claude Code with the specified options
+   *
+   * Sets up environment variables for custom model integration
+   * and spawns a new Claude Code process.
+   *
+   * @param options - Launch options for Claude Code
+   * @param options.model - The model to use
+   * @param options.claudePath - Optional custom path to claude executable
+   * @param options.additionalArgs - Additional command-line arguments to pass
+   * @param options.env - Additional environment variables
+   * @param options.thinkingModel - Optional thinking model for reasoning tasks
+   * @param options.maxTokenSize - Optional max token size (default: 128000)
+   * @returns Promise resolving to the launch result
+   */
   async launchClaudeCode(options: LaunchOptions): Promise<LaunchResult> {
     try {
       // Set up environment variables for Claude Code
@@ -35,8 +70,11 @@ export class ClaudeLauncher {
       // Prepare command arguments
       const args = [...(options.additionalArgs || [])];
 
+      // Use claudePath from options if provided, otherwise use instance path
+      const claudePath = options.claudePath || this.claudePath;
+
       return new Promise(resolve => {
-        const child = spawn(this.claudePath, args, {
+        const child = spawn(claudePath, args, {
           stdio: 'inherit',
           env,
           // Remove detached mode to maintain proper terminal interactivity
@@ -101,6 +139,13 @@ export class ClaudeLauncher {
     return env;
   }
 
+  /**
+   * Checks if Claude Code is installed and accessible
+   *
+   * Attempts to spawn Claude Code with --version flag.
+   *
+   * @returns Promise resolving to true if Claude is installed, false otherwise
+   */
   async checkClaudeInstallation(): Promise<boolean> {
     return new Promise(resolve => {
       const child = spawn(this.claudePath, ['--version'], {
@@ -116,61 +161,83 @@ export class ClaudeLauncher {
       });
 
       // Force resolution after timeout
-      setTimeout(() => resolve(false), 5000);
+      setTimeout(() => resolve(false), this.timeoutMs);
     });
   }
 
+  /**
+   * Gets the installed Claude Code version
+   *
+   * Attempts to retrieve the version string by running Claude Code
+   * with the --version flag and parsing the output.
+   *
+   * @returns Promise resolving to version string (e.g., "2.0.76"), or null if unavailable
+   */
   async getClaudeVersion(): Promise<string | null> {
-    return new Promise(resolve => {
-      const child = spawn(this.claudePath, ['--version'], {
-        stdio: 'pipe',
-      });
+    try {
+      return new Promise(resolve => {
+        const child = spawn(this.claudePath, ['--version'], {
+          stdio: 'pipe',
+        });
 
-      let output = '';
-      let resolved = false;
+        let output = '';
+        let resolved = false;
 
-      child.stdout?.on('data', data => {
-        output += data.toString();
-      });
+        child.stdout?.on('data', data => {
+          output += data.toString();
+        });
 
-      child.on('close', code => {
-        if (!resolved && code === 0) {
-          resolved = true;
-          // Parse version from output like "claude 2.0.76" or "2.0.76"
-          const match = output.trim().match(/(\d+\.\d+\.\d+)/);
-          resolve(match?.[1] ?? null);
-        } else if (!resolved) {
-          resolved = true;
-          resolve(null);
-        }
-      });
-
-      child.on('error', () => {
-        if (!resolved) {
-          resolved = true;
-          resolve(null);
-        }
-      });
-
-      // Force resolution after timeout
-      setTimeout(() => {
-        if (!resolved) {
-          resolved = true;
-          try {
-            child.kill();
-          } catch {
-            // Ignore
+        child.on('close', code => {
+          if (!resolved && code === 0) {
+            resolved = true;
+            // Parse version from output like "claude 2.0.76" or "2.0.76"
+            const match = output.trim().match(/(\d+\.\d+\.\d+)/);
+            resolve(match?.[1] ?? null);
+          } else if (!resolved) {
+            resolved = true;
+            resolve(null);
           }
-          resolve(null);
-        }
-      }, 5000);
-    });
+        });
+
+        child.on('error', () => {
+          if (!resolved) {
+            resolved = true;
+            resolve(null);
+          }
+        });
+
+        // Force resolution after timeout
+        setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            try {
+              child.kill();
+            } catch {
+              // Ignore
+            }
+            resolve(null);
+          }
+        }, this.timeoutMs);
+      });
+    } catch {
+      return null;
+    }
   }
 
+  /**
+   * Sets the path to the Claude executable
+   *
+   * @param path - The path to the claude executable
+   */
   setClaudePath(path: string): void {
     this.claudePath = path;
   }
 
+  /**
+   * Gets the current path to the Claude executable
+   *
+   * @returns The current claude path
+   */
   getClaudePath(): string {
     return this.claudePath;
   }
