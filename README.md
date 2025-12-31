@@ -122,65 +122,25 @@ This will guide you through:
 
 ### Basic Usage
 
-#### Launch Claude Code with Model Selection
+After setup, you can start using Synclaude:
 
 ```bash
-# Interactive model selection
+# Launch with interactive model selection
 synclaude
 
-# Use specific model
+# Launch with a specific model
 synclaude --model "openai:gpt-4"
 
-# Or use saved model
-synclaude model  # Select and save a model
-synclaude         # Launch with saved model
-```
-
-#### Model Management
-
-```bash
-# List all available models
-synclaude models
-
-# Search for specific models
-synclaude search "gpt"
-
-# Force refresh model cache
-synclaude models --refresh
-
-# Interactive model selection
+# Browse and save a default model
 synclaude model
-```
 
-#### Configuration
-
-```bash
-# Show current configuration
-synclaude config show
-
-# Set configuration values
-synclaude config set apiKey "your-api-key"
-synclaude config set cacheDurationHours 12
-
-# Reset to defaults
-synclaude config reset
-```
-
-#### System Tools
-
-```bash
-# Check system health and configuration
+# Check system health
 synclaude doctor
-
-# Update synclaude to latest version from GitHub
-synclaude update
-
-# Clear model cache
-synclaude cache clear
-
-# Show cache information
-synclaude cache info
 ```
+
+**See [USAGE.md](USAGE.md) for comprehensive usage documentation.**
+
+---
 
 ## Advanced Usage
 
@@ -400,7 +360,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
+- **Usage Guide**: [USAGE.md](USAGE.md) - Comprehensive command reference
 - **Issues**: [GitHub Issues](https://github.com/jeffersonwarrior/synclaude/issues)
-- **Documentation**: [GitHub Wiki](https://github.com/jeffersonwarrior/synclaude/wiki)
 - **Discussions**: [GitHub Discussions](https://github.com/jeffersonwarrior/synclaude/discussions)
 - **Synthetic API**: [https://dev.synthetic.new](https://dev.synthetic.new)
