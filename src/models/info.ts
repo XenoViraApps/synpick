@@ -63,21 +63,27 @@ export class ModelInfoImpl implements ModelInfo {
   }
 
   getProvider(): string {
-    return this.provider || (() => {
-      if (this.id.includes(':')) {
-        return this.id.split(':', 1)[0] || 'unknown';
-      }
-      return 'unknown';
-    })();
+    return (
+      this.provider ||
+      (() => {
+        if (this.id.includes(':')) {
+          return this.id.split(':', 1)[0] || 'unknown';
+        }
+        return 'unknown';
+      })()
+    );
   }
 
   getModelName(): string {
-    return this.name || (() => {
-      if (this.id.includes(':')) {
-        return this.id.split(':', 2)[1] || this.id;
-      }
-      return this.id;
-    })();
+    return (
+      this.name ||
+      (() => {
+        if (this.id.includes(':')) {
+          return this.id.split(':', 2)[1] || this.id;
+        }
+        return this.id;
+      })()
+    );
   }
 
   toJSON(): ModelInfo {

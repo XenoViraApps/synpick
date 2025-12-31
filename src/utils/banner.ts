@@ -10,15 +10,15 @@ interface BannerOptions {
 
 export function normalizeDangerousFlags(args: string[]): string[] {
   const dangerousPatterns = [
-    /^--dangerously-skip-permissions$/,      // correct
-    /^--dangerously-skip-permission$/,       // missing s
-    /^--dangerous-skip-permissions$/,        // missing ly
-    /^--dangerous-skip-permission$/,         // missing ly + s
-    /^--dangerously skip-permissions$/,      // space instead of dash
-    /^--dangerously_skip_permissions$/,      // underscores
-    /^--dangerous(ly)?$/,                    // shortened
-    /^--skip-permissions$/,                  // incomplete
-    /^--skip-permission$/                    // incomplete + missing s
+    /^--dangerously-skip-permissions$/, // correct
+    /^--dangerously-skip-permission$/, // missing s
+    /^--dangerous-skip-permissions$/, // missing ly
+    /^--dangerous-skip-permission$/, // missing ly + s
+    /^--dangerously skip-permissions$/, // space instead of dash
+    /^--dangerously_skip_permissions$/, // underscores
+    /^--dangerous(ly)?$/, // shortened
+    /^--skip-permissions$/, // incomplete
+    /^--skip-permission$/, // incomplete + missing s
   ];
 
   const processedArgs = args.map(arg => {
@@ -63,11 +63,13 @@ export function createBanner(options: BannerOptions = {}): string {
 
   return [
     chalk.cyan.bold('SynClaude') + chalk.gray(` v${version}`),
-    chalk.gray('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'),
+    chalk.gray(
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    ),
     `${chalk.blue('Model:')}     ${chalk.cyan(defaultModel)}`,
     `${chalk.magenta('Thinking:')}  ${chalk.magenta(thinkingModel)}`,
     `${chalk.green('Network:')}    ${chalk.green('Synthetic.New')}`,
     `${chalk.yellow('Options:')}    ${chalk.yellow(optionsStr)}`,
-    ''
+    '',
   ].join('\n');
 }

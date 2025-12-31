@@ -16,7 +16,6 @@ export interface AppOptions {
   thinkingModel?: string;
 }
 
-
 export class SyntheticClaudeApp {
   private configManager: ConfigManager;
   private ui: UserInterface;
@@ -27,7 +26,9 @@ export class SyntheticClaudeApp {
   constructor() {
     this.configManager = new ConfigManager();
     this.ui = new UserInterface({
-      verbose: this.configManager.config.apiKey ? this.configManager.config.cacheDurationHours > 0 : false,
+      verbose: this.configManager.config.apiKey
+        ? this.configManager.config.cacheDurationHours > 0
+        : false,
     });
     this.launcher = new ClaudeLauncher();
     this.claudeCodeManager = new ClaudeCodeManager();
@@ -143,8 +144,8 @@ export class SyntheticClaudeApp {
     this.ui.info('Checking for Claude Code updates...');
 
     // Check if Claude Code is installed via npm
-    const isNpmInstalled = await this.claudeCodeManager.getNpmInstalledVersion() !== null;
-    let updateInfo = await this.claudeCodeManager.checkForUpdates({ useActualVersion: true });
+    const isNpmInstalled = (await this.claudeCodeManager.getNpmInstalledVersion()) !== null;
+    const updateInfo = await this.claudeCodeManager.checkForUpdates({ useActualVersion: true });
 
     // Check if update is needed
     if (!force && !updateInfo.hasUpdate) {
@@ -167,9 +168,7 @@ export class SyntheticClaudeApp {
           this.ui.coloredSuccess(`Claude Code installed: ${result.newVersion}`);
           break;
         case 'updated':
-          const prevMsg = result.previousVersion
-            ? ` (was ${result.previousVersion})`
-            : '';
+          const prevMsg = result.previousVersion ? ` (was ${result.previousVersion})` : '';
           this.ui.coloredSuccess(`Claude Code updated to ${result.newVersion}${prevMsg}`);
           break;
         case 'none':
@@ -253,7 +252,9 @@ export class SyntheticClaudeApp {
           this.ui.info('Could not check npm registry either');
         }
         this.ui.info('Run the installer manually to update:');
-        this.ui.info('  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash');
+        this.ui.info(
+          '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash'
+        );
         return;
       }
 
@@ -266,7 +267,9 @@ export class SyntheticClaudeApp {
         if (comparison === 0) {
           this.ui.info('Synclaude is already up to date');
         } else {
-          this.ui.info(`Current version (${currentVersion}) is newer than available (${latestVersion})`);
+          this.ui.info(
+            `Current version (${currentVersion}) is newer than available (${latestVersion})`
+          );
         }
         return;
       }
@@ -292,7 +295,9 @@ export class SyntheticClaudeApp {
           // Final fallback - show manual instructions
           this.ui.info('Automatic update failed');
           this.ui.info('Please update manually:');
-          this.ui.info('  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash');
+          this.ui.info(
+            '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash'
+          );
           throw new Error('Automatic update unavailable');
         }
       }
@@ -307,9 +312,13 @@ export class SyntheticClaudeApp {
         this.ui.info(`Synclaude is now ${newVersion}, latest available is ${latestVersion}`);
       }
     } catch (error) {
-      this.ui.error(`Failed to update synclaude: ${error instanceof Error ? error.message : String(error)}`);
+      this.ui.error(
+        `Failed to update synclaude: ${error instanceof Error ? error.message : String(error)}`
+      );
       this.ui.info('Try manual installation:');
-      this.ui.info('  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash');
+      this.ui.info(
+        '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synclaude/main/scripts/install.sh | bash'
+      );
       // Don't exit - continue to try updating Claude Code
     }
   }
@@ -362,7 +371,8 @@ export class SyntheticClaudeApp {
 
       // Sort models for consistent display
       const sortedModels = modelManager.getModels(models);
-      const { regular: selectedRegularModel, thinking: selectedThinkingModel } = await this.ui.selectDualModels(sortedModels);
+      const { regular: selectedRegularModel, thinking: selectedThinkingModel } =
+        await this.ui.selectDualModels(sortedModels);
 
       if (!selectedRegularModel && !selectedThinkingModel) {
         this.ui.info('Model selection cancelled');
@@ -380,7 +390,10 @@ export class SyntheticClaudeApp {
         this.ui.coloredSuccess(`Thinking model saved: ${selectedThinkingModel.getDisplayName()}`);
       }
 
-      this.ui.highlightInfo('Now run "synclaude" to start Claude Code with your selected model(s).', ['synclaude']);
+      this.ui.highlightInfo(
+        'Now run "synclaude" to start Claude Code with your selected model(s).',
+        ['synclaude']
+      );
       return true;
     } catch (error) {
       this.ui.error(`Error during model selection: ${error}`);
@@ -414,7 +427,10 @@ export class SyntheticClaudeApp {
 
       await this.configManager.updateConfig({ selectedThinkingModel: selectedThinkingModel.id });
       this.ui.coloredSuccess(`Thinking model saved: ${selectedThinkingModel.getDisplayName()}`);
-      this.ui.highlightInfo('Now run "synclaude --thinking-model" to start Claude Code with this thinking model.', ['synclaude', '--thinking-model']);
+      this.ui.highlightInfo(
+        'Now run "synclaude --thinking-model" to start Claude Code with this thinking model.',
+        ['synclaude', '--thinking-model']
+      );
       return true;
     } catch (error) {
       this.ui.error(`Error during thinking model selection: ${error}`);
@@ -461,7 +477,9 @@ export class SyntheticClaudeApp {
         return;
       }
 
-      this.ui.coloredInfo(`Found ${models.length} model${models.length === 1 ? '' : 's'} matching "${query}":`);
+      this.ui.coloredInfo(
+        `Found ${models.length} model${models.length === 1 ? '' : 's'} matching "${query}":`
+      );
       this.ui.showModelList(models);
     } catch (error) {
       this.ui.error(`Error searching models: ${error}`);
@@ -531,7 +549,9 @@ export class SyntheticClaudeApp {
   }
 
   async resetConfig(): Promise<void> {
-    const confirmed = await this.ui.confirm('Are you sure you want to reset all configuration to defaults?');
+    const confirmed = await this.ui.confirm(
+      'Are you sure you want to reset all configuration to defaults?'
+    );
     if (!confirmed) {
       this.ui.info('Configuration reset cancelled');
       return;
@@ -543,7 +563,7 @@ export class SyntheticClaudeApp {
   }
 
   async setup(): Promise<void> {
-    this.ui.coloredInfo('Welcome to Synclaude! Let\'s set up your configuration.');
+    this.ui.coloredInfo("Welcome to Synclaude! Let's set up your configuration.");
     this.ui.info('==============================================');
 
     const config = this.configManager.config;
@@ -600,8 +620,10 @@ export class SyntheticClaudeApp {
 
     // Check Claude Code installation
     const claudeInstalled = await this.launcher.checkClaudeInstallation();
-    this.ui.showStatus(claudeInstalled ? 'success' : 'error',
-                      `Claude Code: ${claudeInstalled ? 'Installed' : 'Not found'}`);
+    this.ui.showStatus(
+      claudeInstalled ? 'success' : 'error',
+      `Claude Code: ${claudeInstalled ? 'Installed' : 'Not found'}`
+    );
 
     if (claudeInstalled) {
       const version = await this.launcher.getClaudeVersion();
@@ -613,19 +635,26 @@ export class SyntheticClaudeApp {
       const updateInfo = await this.claudeCodeManager.checkForUpdates({ useActualVersion: true });
       if (updateInfo.isNpmInstalled) {
         if (updateInfo.hasUpdate) {
-          this.ui.showStatus('warning', `Update available: ${updateInfo.currentVersion} -> ${updateInfo.latestVersion}`);
+          this.ui.showStatus(
+            'warning',
+            `Update available: ${updateInfo.currentVersion} -> ${updateInfo.latestVersion}`
+          );
           this.ui.info('Run "synclaude update" to update Claude Code');
         } else if (updateInfo.currentVersion) {
           this.ui.showStatus('success', `Claude Code is up to date (${updateInfo.currentVersion})`);
         }
       } else {
-        this.ui.info('Claude Code is not installed via npm - use your original install method to update');
+        this.ui.info(
+          'Claude Code is not installed via npm - use your original install method to update'
+        );
       }
     }
 
     // Check configuration
-    this.ui.showStatus(this.configManager.hasApiKey() ? 'success' : 'error',
-                      'Configuration: API key ' + (this.configManager.hasApiKey() ? 'configured' : 'missing'));
+    this.ui.showStatus(
+      this.configManager.hasApiKey() ? 'success' : 'error',
+      'Configuration: API key ' + (this.configManager.hasApiKey() ? 'configured' : 'missing')
+    );
 
     // Check API connection
     if (this.configManager.hasApiKey()) {
@@ -640,7 +669,9 @@ export class SyntheticClaudeApp {
 
     // Configuration summary
     const config = this.configManager.config;
-    this.ui.info(`Auto-update Claude Code: ${config.autoUpdateClaudeCode ? 'Enabled' : 'Disabled'}`);
+    this.ui.info(
+      `Auto-update Claude Code: ${config.autoUpdateClaudeCode ? 'Enabled' : 'Disabled'}`
+    );
     this.ui.info(`Max Token Size: ${config.maxTokenSize}`);
   }
 
@@ -704,7 +735,11 @@ export class SyntheticClaudeApp {
    * Install synclaude from local directory to system-wide
    * Builds the project and uses npm link -g for system-wide installation
    */
-  async localInstall(options: { verbose?: boolean; force?: boolean; skipPath?: boolean }): Promise<void> {
+  async localInstall(options: {
+    verbose?: boolean;
+    force?: boolean;
+    skipPath?: boolean;
+  }): Promise<void> {
     const { verbose = false, force = false, skipPath = false } = options;
     const { execSync, spawn } = require('child_process');
 
@@ -725,7 +760,9 @@ export class SyntheticClaudeApp {
       if (force) {
         this.ui.info('Step 2/3: Removing existing global installation...');
         try {
-          execSync('npm unlink -g synclaude 2>/dev/null || true', { stdio: verbose ? 'inherit' : 'pipe' });
+          execSync('npm unlink -g synclaude 2>/dev/null || true', {
+            stdio: verbose ? 'inherit' : 'pipe',
+          });
         } catch {
           // Ignore errors if not installed
         }
@@ -766,13 +803,18 @@ export class SyntheticClaudeApp {
       }
 
       this.ui.info('');
-      this.ui.highlightInfo('Getting started:', ['synclaude setup', 'synclaude model', 'synclaude']);
+      this.ui.highlightInfo('Getting started:', [
+        'synclaude setup',
+        'synclaude model',
+        'synclaude',
+      ]);
       this.ui.info('  synclaude setup    # First-time configuration');
       this.ui.info('  synclaude          # Launch Claude Code');
       this.ui.info('  synclaude --help   # Show all commands');
-
     } catch (error) {
-      this.ui.error(`Installation failed: ${error instanceof Error ? error.message : String(error)}`);
+      this.ui.error(
+        `Installation failed: ${error instanceof Error ? error.message : String(error)}`
+      );
       this.ui.info('');
       this.ui.info('Troubleshooting tips:');
       this.ui.info('1. Ensure you have write permissions for npm global install');
@@ -782,7 +824,11 @@ export class SyntheticClaudeApp {
     }
   }
 
-  private async launchClaudeCode(model: string, options: LaunchOptions, thinkingModel?: string | null): Promise<void> {
+  private async launchClaudeCode(
+    model: string,
+    options: LaunchOptions,
+    thinkingModel?: string | null
+  ): Promise<void> {
     const launchInfo = thinkingModel
       ? `Launching with ${model} (thinking: ${thinkingModel}). Use "synclaude model" to change model.`
       : `Launching with ${model}. Use "synclaude model" to change model.`;
@@ -803,5 +849,4 @@ export class SyntheticClaudeApp {
       this.ui.error(`Failed to launch Claude Code: ${result.error}`);
     }
   }
-
 }

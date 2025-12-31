@@ -16,8 +16,10 @@ NC='\033[0m' # No Color
 INSTALL_DIR="$HOME/.local/share/synclaude"
 BIN_DIR="$HOME/.local/bin"
 REPO_URL="https://github.com/jeffersonwarrior/synclaude"
-# Use direct codeload URL to avoid redirect issues
-TARBALL_URL="https://codeload.github.com/jeffersonwarrior/synclaude/tar.gz/refs/heads/main"
+# Specify version to install from GitHub releases
+SYNCLAUDE_VERSION="${SYNCLAUDE_VERSION:-1.6.0}"
+# Use GitHub releases instead of main branch to get specific version
+TARBALL_URL="https://github.com/jeffersonwarrior/synclaude/archive/refs/tags/v${SYNCLAUDE_VERSION}.tar.gz"
 
 # Script variables
 VERBOSE="${VERBOSE:-false}"
@@ -108,34 +110,81 @@ create_directories() {
     mkdir -p "$BIN_DIR"
 }
 
-# Clean up old synclaude installations from NVM
+# Clean up old synclaude installations from NVM and other locations
 cleanup_old_installations() {
-    log "Cleaning up old synclaude installations..."
+    info "Cleaning up old synclaude installations..."
+
+    local found_old=0
 
     # Remove from NVM versions
     if [ -d "$HOME/.nvm" ]; then
-        # Iterate with nullglob-like behavior - only process if directories exist
         for NVM_DIR in "$HOME/.nvm/versions/node"/*/lib/node_modules/synclaude; do
             if [ -d "$NVM_DIR" ]; then
-                log "Removing old installation: $NVM_DIR"
+                info "Removing NVM installation: $NVM_DIR"
                 rm -rf "$NVM_DIR" || true
+                found_old=1
             fi
         done
-        # Also remove stale symlinks from all nvm bin directories
         for SYMLINK in "$HOME/.nvm/versions/node"/*/bin/synclaude; do
             if [ -L "$SYMLINK" ]; then
-                log "Removing stale symlink: $SYMLINK"
+                info "Removing NVM symlink: $SYMLINK"
                 rm -f "$SYMLINK" || true
             fi
         done
     fi
 
+    # Remove from npm global locations
+    NPM_PREFIX=$(npm config get prefix 2>/dev/null || echo "")
+    if [ -n "$NPM_PREFIX" ]; then
+        for DIR in \
+            "$NPM_PREFIX/lib/node_modules/synclaude" \
+            "$NPM_PREFIX/bin/synclaude"
+        do
+            if [ -e "$DIR" ]; then
+                info "Removing npm global: $DIR"
+                rm -rf "$DIR" 2>/dev/null || true
+                found_old=1
+            fi
+        done
+    fi
+
+    # Remove from common local bin directories
+    for BIN_DIR in \
+        "$HOME/.local/bin/synclaude" \
+        "$HOME/.npm-local/bin/synclaude" \
+        "/usr/local/bin/synclaude" \
+        "/usr/bin/synclaude"
+    do
+        if [ -e "$BIN_DIR" ]; then
+            info "Removing from bin dir: $BIN_DIR"
+            rm -f "$BIN_DIR" 2>/dev/null || sudo rm -f "$BIN_DIR" 2>/dev/null || true
+            found_old=1
+        fi
+    done
+
+    # Find and remove all synclaude executables from PATH directories
+    IFS=':' read -ra PATHDirs <<< "$PATH"
+    for PDIR in "${PATHDirs[@]}"; do
+        if [ -e "$PDIR/synclaude" ]; then
+            info "Found synclaude in PATH: $PDIR/synclaude"
+            rm -f "$PDIR/synclaude" 2>/dev/null || sudo rm -f "$PDIR/synclaude" 2>/dev/null || true
+        fi
+    done
+
     # Clear any old PATH entries in shell configs
     SED_PATTERN='/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d'
-    sed -i "$SED_PATTERN" "$HOME/.bashrc" 2>/dev/null || true
-    sed -i "$SED_PATTERN" "$HOME/.bash_profile" 2>/dev/null || true
-    sed -i "$SED_PATTERN" "$HOME/.zshrc" 2>/dev/null || true
-    sed -i "$SED_PATTERN" "$HOME/.config/fish/config.fish" 2>/dev/null || true
+    for CONFIG in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.zshrc" "$HOME/.config/fish/config.fish"; do
+        if [ -f "$CONFIG" ]; then
+            sed -i "$SED_PATTERN" "$CONFIG" 2>/dev/null || true
+        fi
+    done
+
+    if [ "$found_old" = "1" ]; then
+        info "Removed old synclaude installations"
+    else
+        info "No old installations found"
+    fi
+
     return 0
 }
 
@@ -326,26 +375,57 @@ update_path() {
             SHELL_NAME=$(basename "$SHELL")
             case "$SHELL_NAME" in
                 bash)
-                    if [ -f "$HOME/.bashrc" ]; then
+                    local BASHRC="$HOME/.bashrc"
+                    if [ -f "$BASHRC" ]; then
                         # Remove old synclaude PATH entries first
-                        sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$HOME/.bashrc" 2>/dev/null || true
-                        echo "export PATH=\"$NPM_BIN_DIR:\$PATH\"" >> "$HOME/.bashrc"
-                        SHELL_CONFIG="$HOME/.bashrc"
+                        sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$BASHRC" 2>/dev/null || true
+                        # Add new PATH entry with clear markers
+                        cat >> "$BASHRC" << 'EOF'
+
+# Synclaude PATH configuration
+export PATH="/home/agent/.npm-local/bin:$PATH"
+# End Synclaude PATH configuration
+EOF
+                        # Fix the hardcoded path to use actual npm bin dir
+                        sed -i "s|=\"/home/agent/.npm-local/bin:\$PATH\"|=\"$NPM_BIN_DIR:\$PATH\"|" "$BASHRC"
+                        SHELL_CONFIG="$BASHRC"
                     elif [ -f "$HOME/.bash_profile" ]; then
-                        sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$HOME/.bash_profile" 2>/dev/null || true
-                        echo "export PATH=\"$NPM_BIN_DIR:\$PATH\"" >> "$HOME/.bash_profile"
-                        SHELL_CONFIG="$HOME/.bash_profile"
+                        local BASH_PROFILE="$HOME/.bash_profile"
+                        sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$BASH_PROFILE" 2>/dev/null || true
+                        cat >> "$BASH_PROFILE" << 'EOF'
+
+# Synclaude PATH configuration
+export PATH="/home/agent/.npm-local/bin:$PATH"
+# End Synclaude PATH configuration
+EOF
+                        sed -i "s|=\"/home/agent/.npm-local/bin:\$PATH\"|=\"$NPM_BIN_DIR:\$PATH\"|" "$BASH_PROFILE"
+                        SHELL_CONFIG="$BASH_PROFILE"
                     fi
                     ;;
                 zsh)
-                    sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$HOME/.zshrc" 2>/dev/null || true
-                    echo "export PATH=\"$NPM_BIN_DIR:\$PATH\"" >> "$HOME/.zshrc"
-                    SHELL_CONFIG="$HOME/.zshrc"
+                    local ZSHRC="$HOME/.zshrc"
+                    sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$ZSHRC" 2>/dev/null || true
+                    cat >> "$ZSHRC" << 'EOF'
+
+# Synclaude PATH configuration
+export PATH="/home/agent/.npm-local/bin:$PATH"
+# End Synclaude PATH configuration
+EOF
+                    sed -i "s|=\"/home/agent/.npm-local/bin:\$PATH\"|=\"$NPM_BIN_DIR:\$PATH\"|" "$ZSHRC"
+                    SHELL_CONFIG="$ZSHRC"
                     ;;
                 fish)
-                    sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$HOME/.config/fish/config.fish" 2>/dev/null || true
-                    echo "set -gx PATH $NPM_BIN_DIR \$PATH" >> "$HOME/.config/fish/config.fish"
-                    SHELL_CONFIG="$HOME/.config/fish/config.fish"
+                    local FISH_CONFIG="$HOME/.config/fish/config.fish"
+                    mkdir -p "$(dirname "$FISH_CONFIG")" 2>/dev/null || true
+                    sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$FISH_CONFIG" 2>/dev/null || true
+                    cat >> "$FISH_CONFIG" << 'EOF'
+
+# Synclaude PATH configuration
+set -gx PATH /home/agent/.npm-local/bin $PATH
+# End Synclaude PATH configuration
+EOF
+                    sed -i "s|/home/agent/.npm-local/bin|$NPM_BIN_DIR|" "$FISH_CONFIG"
+                    SHELL_CONFIG="$FISH_CONFIG"
                     ;;
                 *)
                     warn "Unsupported shell: $SHELL_NAME"
@@ -369,25 +449,54 @@ update_path() {
             SHELL_NAME=$(basename "$SHELL")
             case "$SHELL_NAME" in
                 bash)
-                    if [ -f "$HOME/.bashrc" ]; then
-                        sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$HOME/.bashrc" 2>/dev/null || true
-                        echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$HOME/.bashrc"
-                        SHELL_CONFIG="$HOME/.bashrc"
+                    local BASHRC="$HOME/.bashrc"
+                    if [ -f "$BASHRC" ]; then
+                        sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$BASHRC" 2>/dev/null || true
+                        cat >> "$BASHRC" << 'EOF'
+
+# Synclaude PATH configuration
+export PATH="/home/agent/.local/bin:$PATH"
+# End Synclaude PATH configuration
+EOF
+                        sed -i "s|=\"/home/agent/.local/bin:\$PATH\"|=\"$BIN_DIR:\$PATH\"|" "$BASHRC"
+                        SHELL_CONFIG="$BASHRC"
                     elif [ -f "$HOME/.bash_profile" ]; then
-                        sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$HOME/.bash_profile" 2>/dev/null || true
-                        echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$HOME/.bash_profile"
-                        SHELL_CONFIG="$HOME/.bash_profile"
+                        local BASH_PROFILE="$HOME/.bash_profile"
+                        sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$BASH_PROFILE" 2>/dev/null || true
+                        cat >> "$BASH_PROFILE" << 'EOF'
+
+# Synclaude PATH configuration
+export PATH="/home/agent/.local/bin:$PATH"
+# End Synclaude PATH configuration
+EOF
+                        sed -i "s|=\"/home/agent/.local/bin:\$PATH\"|=\"$BIN_DIR:\$PATH\"|" "$BASH_PROFILE"
+                        SHELL_CONFIG="$BASH_PROFILE"
                     fi
                     ;;
                 zsh)
-                    sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$HOME/.zshrc" 2>/dev/null || true
-                    echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$HOME/.zshrc"
-                    SHELL_CONFIG="$HOME/.zshrc"
+                    local ZSHRC="$HOME/.zshrc"
+                    sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$ZSHRC" 2>/dev/null || true
+                    cat >> "$ZSHRC" << 'EOF'
+
+# Synclaude PATH configuration
+export PATH="/home/agent/.local/bin:$PATH"
+# End Synclaude PATH configuration
+EOF
+                    sed -i "s|=\"/home/agent/.local/bin:\$PATH\"|=\"$BIN_DIR:\$PATH\"|" "$ZSHRC"
+                    SHELL_CONFIG="$ZSHRC"
                     ;;
                 fish)
-                    sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$HOME/.config/fish/config.fish" 2>/dev/null || true
-                    echo "set -gx PATH $BIN_DIR \$PATH" >> "$HOME/.config/fish/config.fish"
-                    SHELL_CONFIG="$HOME/.config/fish/config.fish"
+                    local FISH_CONFIG="$HOME/.config/fish/config.fish"
+                    mkdir -p "$(dirname "$FISH_CONFIG")" 2>/dev/null || true
+                    sed -i '/# Synclaude PATH configuration/,/# End Synclaude PATH configuration/d' "$FISH_CONFIG" 2>/dev/null || true
+                    cat >> "$FISH_CONFIG" << 'EOF'
+
+# Synclaude PATH configuration
+set -gx PATH /home/agent/.local/bin $PATH
+# End Synclaude PATH configuration
+EOF
+                    sed -i "s|/home/agent/.local/bin|$BIN_DIR|" "$FISH_CONFIG"
+                    SHELL_CONFIG="$FISH_CONFIG"
                     ;;
                 *)
                     warn "Unsupported shell: $SHELL_NAME"
@@ -461,16 +570,32 @@ show_final_message() {
         fi
         NPM_BIN_DIR_USED=${NPM_BIN_DIR_USED:-"$(npm config get prefix)/bin"}
         if [ "$PATH_UPDATED" = "true" ]; then
-            echo "⚠️  Please restart your terminal or run 'source $SHELL_CONFIG'"
-            echo "   Added $NPM_BIN_DIR_USED to PATH"
+            echo ""
+            echo "=================================================================="
+            warn "IMPORTANT: PATH was updated. Please run:"
+            warn ""
+            warn "  source ${SHELL_CONFIG}"
+            warn ""
+            warn "Or restart your terminal to use the new PATH."
+            warn ""
+            warn "Path added: $NPM_BIN_DIR_USED"
+            warn "=================================================================="
         fi
         echo ""
         echo "synclaude command location: $NPM_BIN_DIR_USED/synclaude"
     else
         echo "Installation method: manual install"
         if [ "$PATH_UPDATED" = "true" ]; then
-            echo "⚠️  Please restart your terminal or run 'source $SHELL_CONFIG'"
-            echo "   Added $BIN_DIR to PATH"
+            echo ""
+            echo "=================================================================="
+            warn "IMPORTANT: PATH was updated. Please run:"
+            warn ""
+            warn "  source ${SHELL_CONFIG}"
+            warn ""
+            warn "Or restart your terminal to use the new PATH."
+            warn ""
+            warn "Path added: $BIN_DIR"
+            warn "=================================================================="
         fi
         echo ""
         echo "synclaude command location: $BIN_DIR/synclaude"

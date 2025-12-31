@@ -95,9 +95,12 @@ export class ClaudeCodeManager {
    */
   async getNpmInstalledVersion(): Promise<string | null> {
     try {
-      const result = execSync(`npm list -g --depth=0 ${ClaudeCodeManager.CLAUDE_PACKAGE} 2>&1 || true`, {
-        encoding: 'utf-8',
-      });
+      const result = execSync(
+        `npm list -g --depth=0 ${ClaudeCodeManager.CLAUDE_PACKAGE} 2>&1 || true`,
+        {
+          encoding: 'utf-8',
+        }
+      );
 
       // Parse version from npm output
       const match = result.match(/@anthropic-ai\/claude-code@(\d+\.\d+\.\d+)/);
@@ -418,7 +421,7 @@ export class ClaudeCodeManager {
     command: string,
     args: string[]
   ): Promise<{ success: boolean; stdout: string; stderr: string; code: number | null }> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let stdout = '';
       let stderr = '';
       let resolved = false;
@@ -429,16 +432,21 @@ export class ClaudeCodeManager {
       });
 
       if (!this.options.verbose) {
-        child.stdout?.on('data', (data) => {
+        child.stdout?.on('data', data => {
           stdout += data.toString();
         });
 
-        child.stderr?.on('data', (data) => {
+        child.stderr?.on('data', data => {
           stderr += data.toString();
         });
       }
 
-      const doResolve = (result: { success: boolean; stdout: string; stderr: string; code: number | null }) => {
+      const doResolve = (result: {
+        success: boolean;
+        stdout: string;
+        stderr: string;
+        code: number | null;
+      }) => {
         if (!resolved) {
           resolved = true;
           // Clean up timeout if it exists
@@ -447,7 +455,7 @@ export class ClaudeCodeManager {
         }
       };
 
-      child.on('close', (code) => {
+      child.on('close', code => {
         doResolve({ success: code === 0, stdout, stderr, code });
       });
 

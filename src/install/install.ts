@@ -186,7 +186,7 @@ function runCommand(
   args: string[],
   options: { verbose?: boolean } = {}
 ): Promise<{ success: boolean; stdout: string; stderr: string; code: number | null }> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const child = spawn(command, args, {
       stdio: options.verbose ? 'inherit' : 'pipe',
       shell: true, // Ensure shell is available for proper command execution
@@ -196,16 +196,16 @@ function runCommand(
     let stderr = '';
 
     if (!options.verbose) {
-      child.stdout?.on('data', (data) => {
+      child.stdout?.on('data', data => {
         stdout += data.toString();
       });
 
-      child.stderr?.on('data', (data) => {
+      child.stderr?.on('data', data => {
         stderr += data.toString();
       });
     }
 
-    child.on('close', (code) => {
+    child.on('close', code => {
       resolve({ success: code === 0, stdout, stderr, code });
     });
 
@@ -271,7 +271,7 @@ function getPathValue(): string[] {
  */
 export function isPathInPath(directory: string): boolean {
   const normalizedDir = path.resolve(directory);
-  return getPathValue().some((p) => path.resolve(p) === normalizedDir);
+  return getPathValue().some(p => path.resolve(p) === normalizedDir);
 }
 
 /**
@@ -493,9 +493,13 @@ export async function installSynclaude(options: InstallOptions = {}): Promise<In
           console.log('Installing via npm global (system-wide)...');
         }
 
-        const npmGlobalResult = await runCommand('npm', ['install', '-g', '--unsafe-perm', 'synclaude'], {
-          verbose,
-        });
+        const npmGlobalResult = await runCommand(
+          'npm',
+          ['install', '-g', '--unsafe-perm', 'synclaude'],
+          {
+            verbose,
+          }
+        );
 
         if (!npmGlobalResult.success) {
           throw new Error(`npm install failed: ${npmGlobalResult.stderr}`);
@@ -527,17 +531,29 @@ export async function installSynclaude(options: InstallOptions = {}): Promise<In
         await fsPromises.mkdir(localBin, { recursive: true });
 
         // Download and install via npm to install directory
-        const npmLocalResult = runCommand('npm', ['install', '-g', '--prefix', installDir, 'synclaude'], {
-          verbose,
-        });
+        const npmLocalResult = runCommand(
+          'npm',
+          ['install', '-g', '--prefix', installDir, 'synclaude'],
+          {
+            verbose,
+          }
+        );
 
-        await npmLocalResult.then(async (res) => {
+        await npmLocalResult.then(async res => {
           if (!res.success) {
             throw new Error(`npm install failed: ${res.stderr}`);
           }
 
           // Create symlink
-          const execPath = path.join(installDir, 'lib', 'node_modules', 'synclaude', 'dist', 'cli', 'index.js');
+          const execPath = path.join(
+            installDir,
+            'lib',
+            'node_modules',
+            'synclaude',
+            'dist',
+            'cli',
+            'index.js'
+          );
           const linkPath = path.join(localBin, 'synclaude');
 
           // Remove existing link

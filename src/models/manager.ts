@@ -55,13 +55,10 @@ export class ModelManager {
         'Content-Type': 'application/json',
       };
 
-      const response: AxiosResponse<ApiModelsResponse> = await axios.get(
-        this.modelsApiUrl,
-        {
-          headers,
-          timeout: 30000,
-        }
-      );
+      const response: AxiosResponse<ApiModelsResponse> = await axios.get(this.modelsApiUrl, {
+        headers,
+        timeout: 30000,
+      });
 
       if (response.status === 200) {
         const modelsData = response.data.data || [];

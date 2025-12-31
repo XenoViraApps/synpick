@@ -1,7 +1,13 @@
 import { readFile, writeFile, mkdir, chmod } from 'fs/promises';
 import { join } from 'path';
 import { homedir } from 'os';
-import { AppConfigSchema, AppConfig, ConfigValidationError, ConfigLoadError, ConfigSaveError } from './types';
+import {
+  AppConfigSchema,
+  AppConfig,
+  ConfigValidationError,
+  ConfigLoadError,
+  ConfigSaveError,
+} from './types';
 
 export class ConfigManager {
   private configDir: string;

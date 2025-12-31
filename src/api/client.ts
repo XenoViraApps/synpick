@@ -30,11 +30,11 @@ export class ApiClient {
   private setupInterceptors(): void {
     // Request interceptor
     this.axios.interceptors.request.use(
-      (config) => {
+      config => {
         console.debug(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
         return config;
       },
-      (error) => {
+      error => {
         console.error('API Request Error:', error);
         return Promise.reject(error);
       }
@@ -42,14 +42,16 @@ export class ApiClient {
 
     // Response interceptor
     this.axios.interceptors.response.use(
-      (response) => {
+      response => {
         console.debug(`API Response: ${response.status} ${response.statusText}`);
         return response;
       },
-      (error) => {
+      error => {
         if (axios.isAxiosError(error)) {
           if (error.response) {
-            console.error(`API Error Response: ${error.response.status} ${error.response.statusText}`);
+            console.error(
+              `API Error Response: ${error.response.status} ${error.response.statusText}`
+            );
           } else if (error.request) {
             console.error('API Network Error: No response received');
           } else {
@@ -122,11 +124,7 @@ export class ApiClient {
         const data = error.response.data;
         const message = data?.message || data?.error || error.response.statusText;
 
-        return new ApiError(
-          `API error ${status}: ${message}`,
-          status,
-          data
-        );
+        return new ApiError(`API error ${status}: ${message}`, status, data);
       } else if (error.request) {
         return new ApiError('Network error: No response received from API');
       } else {

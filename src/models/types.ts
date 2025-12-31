@@ -13,27 +13,40 @@ export const ModelInfoSchema = z.object({
   output_modalities: z.array(z.string()).optional().describe('Supported output modalities'),
   context_length: z.number().optional().describe('Context window size'),
   max_output_length: z.number().optional().describe('Maximum output tokens'),
-  pricing: z.object({
-    prompt: z.string().optional(),
-    completion: z.string().optional(),
-    image: z.string().optional(),
-    request: z.string().optional(),
-    input_cache_reads: z.string().optional(),
-    input_cache_writes: z.string().optional(),
-  }).optional().describe('Pricing information'),
+  pricing: z
+    .object({
+      prompt: z.string().optional(),
+      completion: z.string().optional(),
+      image: z.string().optional(),
+      request: z.string().optional(),
+      input_cache_reads: z.string().optional(),
+      input_cache_writes: z.string().optional(),
+    })
+    .optional()
+    .describe('Pricing information'),
   quantization: z.string().optional().describe('Model quantization'),
-  supported_sampling_parameters: z.array(z.string()).optional().describe('Supported sampling parameters'),
+  supported_sampling_parameters: z
+    .array(z.string())
+    .optional()
+    .describe('Supported sampling parameters'),
   supported_features: z.array(z.string()).optional().describe('Supported features'),
-  openrouter: z.object({
-    slug: z.string().optional(),
-  }).optional().describe('OpenRouter metadata'),
-  datacenters: z.array(z.object({
-    country_code: z.string().optional(),
-  })).optional().describe('Available datacenters'),
+  openrouter: z
+    .object({
+      slug: z.string().optional(),
+    })
+    .optional()
+    .describe('OpenRouter metadata'),
+  datacenters: z
+    .array(
+      z.object({
+        country_code: z.string().optional(),
+      })
+    )
+    .optional()
+    .describe('Available datacenters'),
 });
 
 export type ModelInfo = z.infer<typeof ModelInfoSchema>;
-
 
 export interface CacheInfo {
   exists: boolean;
@@ -51,7 +64,10 @@ export interface ApiModelsResponse {
 }
 
 export class ModelValidationError extends Error {
-  constructor(message: string, public override cause?: unknown) {
+  constructor(
+    message: string,
+    public override cause?: unknown
+  ) {
     super(message);
     this.name = 'ModelValidationError';
   }
