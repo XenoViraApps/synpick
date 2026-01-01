@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.3] - 2026-01-01
+
+### Added
+- Added GitHub Actions CI/CD pipeline with automated build, test, and release workflow
+- Added CodeQL security analysis (v4) for vulnerability detection
+- Added badges to README (npm version, license)
+
+### Fixed
+- Fixed global update command to use `npm update -g` instead of custom update logic
+- Removed all remaining "SynClaude" branding, now consistently uses "SynPick/Bundling"
+- Normalized path separators to forward slashes for Windows compatibility
+- Removed Python from CodeQL analysis (now only analyzes JavaScript)
+
+### Changed
+- Removed Node 18 from CI/CD build matrix (now tests on Node 20 and 22 only)
+- Updated CodeQL to version 4 for improved security scanning
+
+## [1.6.2] - 2026-01-01
+
+### Added
+- GitHub Actions CI/CD pipeline for automated releases
+- Automated npm package publishing workflow
+
+### Changed
+- Renamed package from synclaude to synpick
+- Fixed branding - renamed all "SynClaude" references to "SynPick"
+
 ## [1.6.1] - 2025-12-31
 
 ### Added
