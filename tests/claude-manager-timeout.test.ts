@@ -52,7 +52,7 @@ describe('ClaudeCodeManager - Timeout Handling', () => {
 
       // Trigger close immediately
       if (closeCallback) {
-        closeCallback(0);
+        (closeCallback as any)(0);
       }
 
       const result = await promise;
@@ -91,7 +91,7 @@ describe('ClaudeCodeManager - Timeout Handling', () => {
 
       // Trigger error immediately
       if (errorCallback) {
-        errorCallback(new Error('Spawn failed'));
+        (errorCallback as any)(new Error('Spawn failed'));
       }
 
       const result = await promise;
@@ -137,7 +137,7 @@ describe('ClaudeCodeManager - Timeout Handling', () => {
 
       // Process closes normally
       if (closeCallback) {
-        closeCallback(0);
+        (closeCallback as any)(0);
       }
 
       // Wait for the close to process
@@ -194,7 +194,7 @@ describe('ClaudeCodeManager - Timeout Handling', () => {
 
       // Trigger the timeout callback
       if (timeoutCallback) {
-        timeoutCallback();
+        (timeoutCallback as any)();
       }
 
       // Now the promise should resolve
@@ -232,7 +232,7 @@ describe('ClaudeCodeManager - Timeout Handling', () => {
 
       // Process closes immediately
       if (closeCallback) {
-        closeCallback(0);
+        (closeCallback as any)(0);
       }
 
       const result = await promise;
@@ -281,10 +281,10 @@ describe('ClaudeCodeManager - Timeout Handling', () => {
 
       // Emit some data before close
       if (dataCallback) {
-        dataCallback(Buffer.from('test output'));
+        (dataCallback as any)(Buffer.from('test output'));
       }
       if (closeCallback) {
-        closeCallback(0);
+        (closeCallback as any)(0);
       }
 
       const result = await promise;
@@ -313,7 +313,7 @@ describe('ClaudeCodeManager - Timeout Handling', () => {
       const promise = spawnCommand('test', []);
 
       if (closeCallback) {
-        closeCallback(0);
+        (closeCallback as any)(0);
       }
 
       await promise;

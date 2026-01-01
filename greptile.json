@@ -1,0 +1,88 @@
+{
+  "strictness": 2,
+  "model": "claude-sonnet-4-3-20250214",
+  "max_files": 100,
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/tests/**",
+    "**/coverage/**",
+    "**/.git/**",
+    "**/.nyc_output/**",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "package-lock.json",
+    "*.min.js",
+    "*.min.css"
+  ],
+  "custom_rules": [
+    {
+      "scope": "function",
+      "regex": "export (async )?function [a-zA-Z]",
+      "explanation": "Exported functions must have JSDoc comments for documentation. This ensures production-grade quality and maintainability.",
+      "review_as": "error"
+    },
+    {
+      "scope": "function",
+      "regex": "export (const|let|var) [a-zA-Z]",
+      "explanation": "Exported variables and constants should have JSDoc comments explaining their purpose and usage.",
+      "review_as": "warning"
+    },
+    {
+      "scope": "file",
+      "regex": "new Error\\(",
+      "explanation": "Use proper error handling in TypeScript. Prefer throwing typed Error objects with meaningful messages.",
+      "review_as": "suggestion"
+    },
+    {
+      "scope": "file",
+      "regex": "console\\.(log|warn|error)",
+      "explanation": "Prefer using structured logging via the logger utility instead of direct console statements in production code.",
+      "review_as": "warning"
+    },
+    {
+      "scope": "file",
+      "regex": "any",
+      "explanation": "Avoid using 'any' type in TypeScript. Use proper types or 'unknown' with type guards to maintain type safety.",
+      "review_as": "warning"
+    },
+    {
+      "scope": "function",
+      "regex": "import.*\\* as",
+      "explanation": "Namespace imports can lead to larger bundle sizes and unclear dependencies. Prefer named imports where possible.",
+      "review_as": "suggestion"
+    }
+  ],
+  "goals": [
+    "Production-grade code quality, test coverage, and adherence to documented patterns.",
+    "TypeScript best practices and type safety.",
+    "Security-conscious code with proper input validation.",
+    "Readable and maintainable code following project conventions."
+  ],
+  "instructions": [
+    "Measure results scientifically, not subjectively.",
+    "Read existing code patterns before suggesting changes.",
+    "Ensure changes align with ESM module system requirements.",
+    "Consider test coverage when suggesting refactors.",
+    "Prioritize security in code reviews - validate inputs, handle errors gracefully."
+  ],
+  "documentation": [
+    "README.md",
+    "USAGE.md",
+    "CLAUDE.md"
+  ],
+  "sacred_rules": [
+    "**ALWAYS read files before answering** - never make assumptions about file contents without reading them first.",
+    "**NEVER create files unless absolutely necessary** - prefer editing existing code or using Node.js fs APIs when possible.",
+    "**NEVER claim work is complete without validation** - always verify that the CLI commands actually work and tests pass.",
+    "**Security first** - always validate user inputs, sanitize data, and handle API keys properly.",
+    "**ESM compatibility** - ensure all code works in ESM environment, no `require()` or `__dirname` usage."
+  ],
+  "branch_workflow": {
+    "feature_branches": ["feature/*", "fix/*", "refactor/*"],
+    "exclude_authors": ["dependabot[bot]", "renovate[bot]"],
+    "exclude_labels": ["automated", "skip-review"]
+  }
+}

@@ -38,7 +38,7 @@ describe('ConfigManager - Backup Cleanup', () => {
       await configManager.saveConfig({
         apiKey: 'test-key',
         baseUrl: 'https://test.com',
-      });
+      } as any);
 
       // Save again - should create backup
       await configManager.updateConfig({ apiKey: 'new-key' });
@@ -52,9 +52,9 @@ describe('ConfigManager - Backup Cleanup', () => {
     });
 
     it('should NOT create backup when config does not exist', async () => {
-      await configManager.saveConfig({
+await configManager.saveConfig({
         apiKey: 'test-key',
-      });
+      } as any);
 
       // First save should not create backup since file didn't exist
       const backupExists = await fs
@@ -72,9 +72,9 @@ describe('ConfigManager - Backup Cleanup', () => {
 
     it('should remove excess backup files (keep only most recent)', async () => {
       // Create initial config
-      await configManager.saveConfig({
+await configManager.saveConfig({
         apiKey: 'test-key',
-      });
+      } as any);
 
       // Create multiple backup files manually to simulate old backups
       // Using different naming that matches the cleanup filter
@@ -107,9 +107,9 @@ describe('ConfigManager - Backup Cleanup', () => {
     });
 
     it('should not remove backup when only one exists', async () => {
-      await configManager.saveConfig({
+await configManager.saveConfig({
         apiKey: 'test-key',
-      });
+      } as any);
 
       // One backup should be created
       await configManager.updateConfig({ apiKey: 'new-key' });
@@ -134,9 +134,9 @@ describe('ConfigManager - Backup Cleanup', () => {
   describe('cleanup on save', () => {
     it('should clean up old backups when saving new config', async () => {
       // Create initial config
-      await configManager.saveConfig({
+await configManager.saveConfig({
         apiKey: 'test-key',
-      });
+      } as any);
 
       // Save multiple times
       await configManager.updateConfig({ apiKey: 'key2' });

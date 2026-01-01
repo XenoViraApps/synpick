@@ -1,0 +1,57 @@
+version: 2
+updates:
+  # Production dependencies (npm)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "05:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "area: dependencies"
+      - "chore"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    ignore:
+      # Ignore major version updates that require breaking changes
+      - dependency-name: "ink"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # Group all production dependencies
+      prod-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@types/*"
+          - "jest"
+          - "eslint"
+          - "prettier"
+          - "typescript"
+          - "ts-*"
+      # Group dev dependencies
+      dev-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "@types/*"
+          - "jest"
+          - "eslint"
+          - "prettier"
+          - "typescript"
+          - "ts-*"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "area: dependencies"
+      - "chore"
+      - "ci"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"

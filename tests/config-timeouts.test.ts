@@ -118,7 +118,7 @@ describe('Timeout Configuration', () => {
 
   describe('ClaudeLauncher uses configurable timeout', () => {
     it('should use timeout from options in checkClaudeInstallation', async () => {
-      const launcher = new ClaudeLauncher('claude');
+      const launcher = new ClaudeLauncher({ claudePath: 'claude' });
 
       let spawnCallback: (() => void) | null = null;
       const mockChild = {

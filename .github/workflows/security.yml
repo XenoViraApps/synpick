@@ -1,0 +1,123 @@
+name: Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run daily at 5 AM UTC
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  pull-requests: read
+
+jobs:
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript', 'python']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-extended,security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  vulnerability-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run npm audit with JSON output
+        id: audit
+        continue-on-error: true
+        run: |
+          npm ci
+          npm audit --json > audit-report.json || true
+
+      - name: Check for moderate+ vulnerabilities
+        run: |
+          if [ -f audit-report.json ]; then
+            HIGH_VULNS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('audit-report.json', 'utf8')).metadata.vulnerabilities.high || 0)")
+            MODERATE_VULNS=$(node -e "console.log(JSON.parse(require('fs').readFileSync('audit-report.json', 'utf8')).metadata.vulnerabilities.moderate || 0)")
+
+            echo "High vulnerabilities: $HIGH_VULNS"
+            echo "Moderate vulnerabilities: $MODERATE_VULNS"
+
+            if [ "$HIGH_VULNS" -gt "0" ]; then
+              echo "::error::Found $HIGH_VULNS high severity vulnerabilities"
+              exit 1
+            fi
+          fi
+
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for non-OSI/FSF approved licenses
+        run: |
+          npm list --json --depth=0 | \
+            jq -r '.dependencies | to_entries[] | "\(.key)@\(.value.version)"' | \
+          while read pkg; do
+            if npm info "$pkg" | grep -qiE "(GPL|AGPL|MPL|LGPL)"; then
+              echo "::warning::Package $pkg uses a copyleft license that may require attention"
+            fi
+          done || true
+
+  secrets-scan:
+    name: Secrets Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+        continue-on-error: true

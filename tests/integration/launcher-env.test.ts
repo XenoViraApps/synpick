@@ -58,8 +58,8 @@ describe('Launcher Environment Integration', () => {
       expect(result.pid).toBe(1234);
 
       // Verify all expected environment variables
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       // Verify base URL
       expect(env.ANTHROPIC_BASE_URL).toBe('https://api.synthetic.new/anthropic');
@@ -86,7 +86,7 @@ describe('Launcher Environment Integration', () => {
       expect(env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC).toBe('1');
 
       // Verify args
-      expect(spawnCall[1]).toEqual(['--workdir', '/home/user/project']);
+expect(spawnCall![1]).toEqual(['--workdir', '/home/user/project']);
     });
 
     it('should handle launch without thinking model', async () => {
@@ -101,8 +101,8 @@ describe('Launcher Environment Integration', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.ANTHROPIC_DEFAULT_MODEL).toBe('anthropic/claude-sonnet-4-20250514');
       expect(env.ANTHROPIC_THINKING_MODEL).toBeUndefined();
@@ -119,9 +119,9 @@ describe('Launcher Environment Integration', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
+const spawnCall = mockSpawn.mock.calls[0]!;
 
-      expect(spawnCall[1]).toEqual([]);
+expect(spawnCall![1]).toEqual([]);
     });
   });
 
@@ -139,8 +139,8 @@ describe('Launcher Environment Integration', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       // From process.env
       expect(env.EXISTING_VAR).toBe('existing-value');
@@ -161,8 +161,8 @@ describe('Launcher Environment Integration', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.ANTHROPIC_BASE_URL).toBe('https://custom-endpoint.com');
     });
@@ -178,8 +178,8 @@ describe('Launcher Environment Integration', () => {
         maxTokenSize: 200000,
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       // All model variables
       expect(env.ANTHROPIC_DEFAULT_MODEL).toBe(modelId);
@@ -215,8 +215,8 @@ describe('Launcher Environment Integration', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.ANTHROPIC_AUTH_TOKEN).toBe('sk-ant-test-key');
       expect(env.ANTHROPIC_DEFAULT_MODEL).toBe('anthropic/claude-sonnet-4-20250514');
@@ -233,8 +233,8 @@ describe('Launcher Environment Integration', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.ANTHROPIC_DEFAULT_MODEL).toBe('deepseek/deepseek-r1');
       expect(env.ANTHROPIC_THINKING_MODEL).toBeUndefined();
@@ -252,8 +252,8 @@ describe('Launcher Environment Integration', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.ANTHROPIC_DEFAULT_MODEL).toBe('anthropic/claude-sonnet-4-20250514');
       expect(env.ANTHROPIC_THINKING_MODEL).toBe('deepseek/deepseek-r1');
@@ -273,9 +273,9 @@ describe('Launcher Environment Integration', () => {
         ],
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
+const spawnCall = mockSpawn.mock.calls[0]!;
 
-      expect(spawnCall[1]).toEqual([
+expect(spawnCall![1]).toEqual([
         '--workdir',
         '/home/user/project',
         '--verbose',
@@ -292,8 +292,8 @@ describe('Launcher Environment Integration', () => {
         maxTokenSize: 200000,
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.CLAUDE_CODE_MAX_TOKEN_SIZE).toBe('200000');
     });
@@ -307,8 +307,8 @@ describe('Launcher Environment Integration', () => {
         maxTokenSize: 1000,
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.CLAUDE_CODE_MAX_TOKEN_SIZE).toBe('1000');
     });
@@ -322,8 +322,8 @@ describe('Launcher Environment Integration', () => {
         maxTokenSize: 200000,
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.CLAUDE_CODE_MAX_TOKEN_SIZE).toBe('200000');
     });
@@ -336,8 +336,8 @@ describe('Launcher Environment Integration', () => {
         model: 'anthropic/claude-sonnet-4-20250514',
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
-      const env = spawnCall[2].env;
+      const spawnCall = mockSpawn.mock.calls[0]!;
+      const env = spawnCall[2]!.env!;
 
       expect(env.CLAUDE_CODE_MAX_TOKEN_SIZE).toBe('128000');
     });
@@ -350,7 +350,7 @@ describe('Launcher Environment Integration', () => {
 
       await launcher.launchClaudeCode({ model: 'test-model' });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
+      const spawnCall = mockSpawn.mock.calls[0]![2] as any;
 
       expect(spawnCall.stdio).toBe('inherit');
     });
@@ -361,9 +361,9 @@ describe('Launcher Environment Integration', () => {
 
       await launcher.launchClaudeCode({ model: 'test-model' });
 
-      const spawnCall = mockSpawn.mock.calls[0];
+      const spawnCall = mockSpawn.mock.calls[0]!;
 
-      expect(spawnCall[0]).toBe('claude'); // command
+      expect(spawnCall![0]).toBe('claude'); // command
       expect(Array.isArray(spawnCall[1])).toBe(true); // args array
       expect(typeof spawnCall[2]).toBe('object'); // options object
     });
@@ -378,9 +378,9 @@ describe('Launcher Environment Integration', () => {
         additionalArgs: args,
       });
 
-      const spawnCall = mockSpawn.mock.calls[0];
+      const spawnCall = mockSpawn.mock.calls[0]!;
 
-      expect(spawnCall[1]).toEqual(args);
+      expect(spawnCall![1]).toEqual(args);
     });
   });
 
@@ -391,8 +391,8 @@ describe('Launcher Environment Integration', () => {
 
       await launcher.launchClaudeCode({ model: 'claude-sonnet-4' });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
-      expect(spawnCall.env.ANTHROPIC_DEFAULT_MODEL).toBe('claude-sonnet-4');
+      const spawnCall = mockSpawn.mock.calls[0]![2] as any;
+      expect(spawnCall.env!.ANTHROPIC_DEFAULT_MODEL).toBe('claude-sonnet-4');
     });
 
     it('should handle provider/model format', async () => {
@@ -401,8 +401,8 @@ describe('Launcher Environment Integration', () => {
 
       await launcher.launchClaudeCode({ model: 'anthropic/claude-sonnet-4-20250514' });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
-      expect(spawnCall.env.ANTHROPIC_DEFAULT_MODEL).toBe('anthropic/claude-sonnet-4-20250514');
+      const spawnCall = mockSpawn.mock.calls[0]![2] as any;
+      expect(spawnCall.env!.ANTHROPIC_DEFAULT_MODEL).toBe('anthropic/claude-sonnet-4-20250514');
     });
 
     it('should handle deep thinking model IDs', async () => {
@@ -411,8 +411,8 @@ describe('Launcher Environment Integration', () => {
 
       await launcher.launchClaudeCode({ model: 'deepseek/deepseek-r1' });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
-      expect(spawnCall.env.ANTHROPIC_DEFAULT_MODEL).toBe('deepseek/deepseek-r1');
+      const spawnCall = mockSpawn.mock.calls[0]![2] as any;
+expect(spawnCall.env!.ANTHROPIC_DEFAULT_MODEL).toBe('deepseek/deepseek-r1');
     });
   });
 });

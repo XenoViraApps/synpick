@@ -12,7 +12,7 @@ synpick is a modern TypeScript/Node.js application that provides a seamless inte
 - **Interactive Model Selection**: Rich terminal UI for browsing and selecting models
 - **Smart Search**: Search models by name, provider, or capabilities
 - **Persistent Configuration**: Save your preferred model choices
-- **Easy Installation**: One-line installer with npm support
+- **Easy Installation**: `npm install -g synpick` - available on npm registry
 - **System Health**: Built-in diagnostic tools
 - **Well Tested**: Comprehensive Jest test suite
 - **Beautiful UI**: Modern React-based terminal interface with Ink
@@ -29,16 +29,16 @@ synpick is a modern TypeScript/Node.js application that provides a seamless inte
 
 ### Installation
 
-#### Option 1: GitHub Release (Recommended)
+#### Option 1: npm Registry (Recommended)
 
-**Linux/Windows:**
+**Linux/Windows/macOS:**
 ```bash
-npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
+npm install -g synpick
 ```
 
 **macOS (if permissions error):**
 ```bash
-sudo npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
+sudo npm install -g synpick
 ```
 
 **Alternative for macOS (permanent fix):**
@@ -47,19 +47,19 @@ mkdir ~/.npm-global
 npm config set prefix '~/.npm-global'
 echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
 source ~/.zshrc
+npm install -g synpick
+```
+
+#### Option 2: GitHub Release
+
+```bash
 npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
 ```
 
-#### Option 2: One-line Installer
+#### Option 3: One-line Installer
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash
-```
-
-#### Option 3: macOS One-line Script
-
-```bash
-curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install-macos.sh | bash
 ```
 
 #### Option 4: Clone and Install
@@ -70,18 +70,10 @@ cd synpick
 ./scripts/install.sh
 ```
 
-You can also use the macOS-specific installer:
-```bash
-git clone https://github.com/jeffersonwarrior/synpick.git
-cd synpick
-./scripts/install-macos.sh
-```
-
 **Important**:
-- Direct git installation via npm is not supported due to npm's git installation limitations
-- Use the specific release tarball from GitHub Releases
-- GitHub-only installation (npm registry fallback removed)
-- Installer tries version-specific release first, then falls back to main branch
+- npm registry is the recommended installation method
+- GitHub releases and install scripts are available as alternatives
+- The installer script automatically configures nvm for Node.js v24.12.0 if available
 
 ### Uninstallation
 
@@ -160,6 +152,13 @@ Synpick stores configuration in `~/.config/synpick/config.json`. Key options inc
 
 Synpick provides multiple ways to update:
 
+#### Update via npm (Recommended)
+
+```bash
+# Update to the latest version
+npm update -g synpick
+```
+
 #### Automatic Update Command
 
 ```bash
@@ -171,16 +170,15 @@ The update command:
 - Checks GitHub repository for the latest release
 - Compares versions using semver (won't downgrade)
 - Runs the installer if a newer version is available
-- Only updates from official GitHub releases
 
-#### Manual Update via GitHub
+#### Manual Update
 
 ```bash
-# Install specific version from GitHub release
-npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
+# Install specific version from npm
+npm install -g synpick@1.6.1
 
-# Or run the installer again
-curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash
+# Or from GitHub release
+npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
 ```
 
 #### Check Current Version
@@ -273,9 +271,10 @@ When launching Claude Code, Synpick automatically sets:
 
 This version includes:
 - ESM (ES Modules) compatibility - fixed `__dirname is not defined` and `require()` errors
+- Now available on npm registry: `npm install -g synpick`
 - Installer script now configures nvm for Node.js v24.12.0 automatically
 - All 227 tests passing across 12 test suites
-- GitHub-only installation (npm registry fallback removed)
+- Multiple installation options (npm, GitHub, install scripts)
 
 ### Common Issues
 

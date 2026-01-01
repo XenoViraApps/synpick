@@ -149,7 +149,7 @@ describe('ClaudeLauncher', () => {
 
       await launcher.launchClaudeCode({ model: 'test', maxTokenSize: 200000 });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
+      const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       expect(typeof spawnCall.env.CLAUDE_CODE_MAX_TOKEN_SIZE).toBe('string');
       expect(spawnCall.env.CLAUDE_CODE_MAX_TOKEN_SIZE).toBe('200000');
     });
@@ -178,7 +178,7 @@ describe('ClaudeLauncher', () => {
 
       await launcher.launchClaudeCode({ model: 'regular-model' });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
+const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       expect(spawnCall.env.ANTHROPIC_THINKING_MODEL).toBeUndefined();
     });
 
@@ -204,7 +204,7 @@ describe('ClaudeLauncher', () => {
 
       await launcher.launchClaudeCode({ model: 'test' });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
+const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       expect(spawnCall.env.EXISTING_VAR).toBe('existing-value');
     });
 
@@ -218,7 +218,7 @@ describe('ClaudeLauncher', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
+const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       expect(spawnCall.env.CUSTOM_VAR).toBe('custom-value');
       expect(spawnCall.env.ANTHROPIC_BASE_URL).toBe('https://api.synthetic.new/anthropic');
     });
@@ -234,7 +234,7 @@ describe('ClaudeLauncher', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
+const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       expect(spawnCall.env.EXISTING_VAR).toBe('existing-value'); // From process.env
       expect(spawnCall.env.ANTHROPIC_BASE_URL).toBe('https://api.synthetic.new/anthropic'); // From launcher
       expect(spawnCall.env.CUSTOM_VAR).toBe('custom-value'); // From options.env
@@ -250,7 +250,7 @@ describe('ClaudeLauncher', () => {
         },
       });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
+const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       expect(spawnCall.env.ANTHROPIC_BASE_URL).toBe('https://custom-endpoint.com');
     });
   });
@@ -412,7 +412,7 @@ describe('ClaudeLauncher', () => {
         maxTokenSize: 200000,
       });
 
-      const spawnCall = mockSpawn.mock.calls[0][2];
+const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       const env = spawnCall.env;
 
       // Verify all ANTHROPIC model variables

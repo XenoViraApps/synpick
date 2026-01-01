@@ -96,6 +96,18 @@ export const AppConfigSchema = z.object({
     .max(200000)
     .default(128000)
     .describe('Max token size for Claude Code context window'),
+  apiTimeoutMs: z.number()
+    .int()
+    .min(1000)
+    .max(300000)
+    .default(30000)
+    .describe('HTTP API request timeout in milliseconds'),
+  commandTimeoutMs: z.number()
+    .int()
+    .min(1000)
+    .max(60000)
+    .default(5000)
+    .describe('Command execution timeout in milliseconds'),
 });
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;
@@ -117,6 +129,8 @@ export type AppConfig = z.infer<typeof AppConfigSchema>;
 | `claudeCodeUpdateCheckInterval` | number | `24` | 1-720 | Hours between update checks |
 | `lastClaudeCodeUpdateCheck` | string? | `undefined` | ISO-8601 | Last update check timestamp |
 | `maxTokenSize` | number | `128000` | 1000-200000 | Claude Code context window size |
+| `apiTimeoutMs` | number | `30000` | 1000-300000 | HTTP API request timeout in milliseconds |
+| `commandTimeoutMs` | number | `5000` | 1000-60000 | Command execution timeout in milliseconds |
 
 ---
 

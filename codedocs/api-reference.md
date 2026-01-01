@@ -140,6 +140,10 @@ interface AppConfig {
 
   // Claude Code settings
   maxTokenSize: number;  // 1000-200000
+
+  // Timeout settings
+  apiTimeoutMs: number;  // 1000-300000, HTTP API request timeout
+  commandTimeoutMs: number;  // 1000-60000, Command execution timeout
 }
 ```
 

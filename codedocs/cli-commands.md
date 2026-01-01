@@ -271,6 +271,8 @@ synpick config set <key> <value>
 | `autoUpdateClaudeCode` | boolean | `true`, `false`, `1`, `0` |
 | `claudeCodeUpdateCheckInterval` | number | 1-720 hours |
 | `maxTokenSize` | number | 1000-200000 |
+| `apiTimeoutMs` | number | 1000-300000 milliseconds |
+| `commandTimeoutMs` | number | 1000-60000 milliseconds |
 
 **Examples:**
 ```bash
@@ -285,6 +287,12 @@ synpick config set autoUpdateClaudeCode false
 
 # Set max token size
 synpick config set maxTokenSize 200000
+
+# Set API timeout (for slow connections)
+synpick config set apiTimeoutMs 60000
+
+# Set command timeout
+synpick config set commandTimeoutMs 10000
 ```
 
 ### `synpick config reset`

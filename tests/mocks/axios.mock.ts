@@ -45,12 +45,12 @@ const createMockAxiosInstance = (options: any = {}) => {
 };
 
 // Mock axios.isAxiosError to detect axios error objects
-(axios.isAxiosError as jest.Mock).mockImplementation((error: any) => {
+(axios.isAxiosError as unknown as jest.Mock).mockImplementation((error: any) => {
   return error?.isAxiosError === true;
 });
 
 // Mock axios.create to return a mock instance
-(axios.create as jest.Mock).mockImplementation(createMockAxiosInstance);
+(axios.create as unknown as jest.Mock).mockImplementation(createMockAxiosInstance);
 
 // Type assertion for mocked axios
 export const mockAxios = axios as jest.Mocked<typeof axios>;
@@ -94,17 +94,12 @@ export function resetAxiosMocks() {
   mockAxios.post.mockReset();
   mockAxios.put.mockReset();
   mockAxios.delete.mockReset();
-  (axios.isAxiosError as jest.Mock).mockReset();
-  (axios.isAxiosError as jest.Mock).mockImplementation((error: any) => {
+  (axios.isAxiosError as unknown as jest.Mock).mockReset();
+  (axios.isAxiosError as unknown as jest.Mock).mockImplementation((error: any) => {
     return error?.isAxiosError === true;
   });
-  (axios.create as jest.Mock).mockReset();
-  (axios.create as jest.Mock).mockImplementation(createMockAxiosInstance);
-}
-
-// Helper to get the mock instance created by axios.create
-export function getMockAxiosInstance() {
-  return lastMockAxiosInstance;
+  (axios.create as unknown as jest.Mock).mockReset();
+  (axios.create as unknown as jest.Mock).mockImplementation(createMockAxiosInstance);
 }
 
 // Helper to setup axios error
@@ -118,5 +113,5 @@ export function setupAxiosError(message: string, status?: number) {
 
 // Helper to get the mock instance created by axios.create
 export function getMockAxiosInstance() {
-  return (axios.create as jest.Mock).mock.results[0]?.value;
+  return (axios.create as unknown as jest.Mock).mock.results[0]?.value;
 }
