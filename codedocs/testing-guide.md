@@ -14,7 +14,7 @@
 
 ## Overview
 
-Synclaude uses **Jest** as its testing framework with full TypeScript support. The test suite covers:
+Synpick uses **Jest** as its testing framework with full TypeScript support. The test suite covers:
 
 - Configuration management
 - Model data parsing and caching

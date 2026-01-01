@@ -435,7 +435,7 @@ export async function verifyInstallation(
 /**
  * Main installation function
  */
-export async function installSynclaude(options: InstallOptions = {}): Promise<InstallResult> {
+export async function installSynpick(options: InstallOptions = {}): Promise<InstallResult> {
   const { verbose = false, skipPathUpdate = false } = options;
 
   // Detect or use specified install method
@@ -594,7 +594,7 @@ export async function installSynclaude(options: InstallOptions = {}): Promise<In
 /**
  * Uninstall function
  */
-export async function uninstallSynclaude(
+export async function uninstallSynpick(
   options: { verbose?: boolean } = {}
 ): Promise<{ success: boolean; error?: string }> {
   const { verbose = false } = options;

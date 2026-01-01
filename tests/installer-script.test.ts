@@ -18,7 +18,7 @@ describe('Installer Script', () => {
 
     it('should have valid content', () => {
       const scriptContent = readFileSync(INSTALL_SCRIPT, 'utf8');
-      expect(scriptContent).toContain('# Synclaude Installation Script');
+      expect(scriptContent).toContain('# Synpick Installation Script');
       expect(scriptContent).toBeTruthy();
     });
 
@@ -54,7 +54,7 @@ describe('Installer Script', () => {
         encoding: 'utf8',
         timeout: 5000,
       });
-      expect(output).toContain('Synclaude Installation Script');
+      expect(output).toContain('Synpick Installation Script');
       expect(output).toContain('Usage:');
       expect(output).toContain('--help');
       expect(output).toContain('--verbose');
@@ -119,9 +119,9 @@ describe('Installer Script', () => {
       expect(scriptContent).toContain('LOCAL=');
     });
 
-    it('should respect SYNCLAUDE_VERSION environment variable', () => {
+    it('should respect SYNPICK_VERSION environment variable', () => {
       const scriptContent = readFileSync(INSTALL_SCRIPT, 'utf8');
-      expect(scriptContent).toContain('SYNCLAUDE_VERSION=');
+      expect(scriptContent).toContain('SYNPICK_VERSION=');
     });
   });
 
@@ -139,7 +139,7 @@ describe('Installer Script', () => {
     it('should download from version-specific tarball first', () => {
       const scriptContent = readFileSync(INSTALL_SCRIPT, 'utf8');
       expect(scriptContent).toContain('TARBALL_URL=');
-      expect(scriptContent).toContain('${SYNCLAUDE_VERSION}');
+      expect(scriptContent).toContain('${SYNPICK_VERSION}');
     });
 
     it('should fallback to main branch if version tag fails', () => {

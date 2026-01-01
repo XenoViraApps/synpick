@@ -254,8 +254,8 @@ User runs: synpick update
 ┌─────────────────────────────────────────────┐
 │ App: updateClaudeCode(force?)               │
 │                                             │
-│  Update Synclaude (self)                    │
-│  ├─> updateSynclaudeSelf()                 │
+│  Update Synpick (self)                    │
+│  ├─> updateSynpickSelf()                 │
 │  │   1. Get current version                │
 │  │       └─> execSync('synpick --version')│
 │  │                                         │

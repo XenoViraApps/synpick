@@ -686,10 +686,10 @@ interface PathUpdateResult {
 
 #### Functions
 
-##### `installSynclaude`
+##### `installSynpick`
 
 ```typescript
-async function installSynclaude(options?: InstallOptions): Promise<boolean>
+async function installSynpick(options?: InstallOptions): Promise<boolean>
 ```
 
 Main installation function that detects the best installation method and executes it.
@@ -709,10 +709,10 @@ Main installation function that detects the best installation method and execute
 5. Update PATH if needed
 6. Verify installation
 
-##### `uninstallSynclaude`
+##### `uninstallSynpick`
 
 ```typescript
-async function uninstallSynclaude(): Promise<void>
+async function uninstallSynpick(): Promise<void>
 ```
 
 Uninstalls synpick from the system.
@@ -823,10 +823,10 @@ Checks if synpick is installed globally via npm.
 
 **Returns:** `true` if installed, `false` otherwise
 
-##### `getSynclaudeGlobalInstallPath`
+##### `getSynpickGlobalInstallPath`
 
 ```typescript
-function getSynclaudeGlobalInstallPath(): string | null
+function getSynpickGlobalInstallPath(): string | null
 ```
 
 Gets the global installation path if synpick is installed via npm.

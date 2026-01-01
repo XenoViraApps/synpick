@@ -350,7 +350,7 @@ export async function verifyInstallation(method) {
 /**
  * Main installation function
  */
-export async function installSynclaude(options = {}) {
+export async function installSynpick(options = {}) {
     const { verbose = false, skipPathUpdate = false } = options;
     // Detect or use specified install method
     const method = options.installMethod || detectInstallMethod();
@@ -465,7 +465,7 @@ export async function installSynclaude(options = {}) {
 /**
  * Uninstall function
  */
-export async function uninstallSynclaude(options = {}) {
+export async function uninstallSynpick(options = {}) {
     const { verbose = false } = options;
     try {
         // Try npm uninstall first

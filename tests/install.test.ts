@@ -3,7 +3,7 @@ import {
   isPathInPath,
   addToPathIfNotExists,
   checkCleanStaleSymlinks,
-  installSynclaude,
+  installSynpick,
   type InstallMethodEnum,
 } from '../src/install/install';
 
@@ -60,10 +60,10 @@ describe('Install Module', () => {
     });
   });
 
-  describe('installSynclaude', () => {
+  describe('installSynpick', () => {
     it('should return a valid install result', async () => {
       // Pass skipPathUpdate to avoid modifying shell config
-      const result = await installSynclaude({
+      const result = await installSynpick({
         verbose: false,
         skipPathUpdate: true,
       });

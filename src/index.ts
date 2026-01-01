@@ -1,4 +1,4 @@
-// Main entry point for Synclaude
+// Main entry point for Synpick
 export * from './cli';
 export * from './core';
 export * from './config';
@@ -9,4 +9,4 @@ export * from './utils';
 export * from './api';
 
 // Default export for convenience
-export { SyntheticClaudeApp } from './core/app';
+export { SyntheticClaudeApp as SynpickApp } from './core/app';

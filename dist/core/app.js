@@ -141,7 +141,7 @@ export class SyntheticClaudeApp {
      */
     async updateClaudeCode(force = false) {
         // Update synpick itself first
-        await this.updateSynclaudeSelf(force);
+        await this.updateSynpickSelf(force);
         // Then update Claude Code
         this.ui.info('Checking for Claude Code updates...');
         // Check if Claude Code is installed via npm
@@ -222,7 +222,7 @@ export class SyntheticClaudeApp {
     /**
      * Update synpick itself via npm
      */
-    async updateSynclaudeSelf(force = false) {
+    async updateSynpickSelf(force = false) {
         try {
             // Get current synpick version
             const currentVersion = execSync('synpick --version', { encoding: 'utf-8' }).trim();
@@ -348,7 +348,9 @@ export class SyntheticClaudeApp {
                 await this.configManager.setSavedThinkingModel(selectedThinkingModel.id);
                 this.ui.coloredSuccess(`Thinking model saved: ${selectedThinkingModel.getDisplayName()}`);
             }
-            this.ui.highlightInfo('Now run "synpick" to start Claude Code with your selected model(s).', ['synpick']);
+            this.ui.highlightInfo('Now run "synpick" to start Claude Code with your selected model(s).', [
+                'synpick',
+            ]);
             return true;
         }
         catch (error) {
@@ -760,11 +762,7 @@ export class SyntheticClaudeApp {
                 this.ui.info('You may need to add it to your shell config or restart your terminal.');
             }
             this.ui.info('');
-            this.ui.highlightInfo('Getting started:', [
-                'synpick setup',
-                'synpick model',
-                'synpick',
-            ]);
+            this.ui.highlightInfo('Getting started:', ['synpick setup', 'synpick model', 'synpick']);
             this.ui.info('  synpick setup    # First-time configuration');
             this.ui.info('  synpick          # Launch Claude Code');
             this.ui.info('  synpick --help   # Show all commands');

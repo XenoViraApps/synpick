@@ -367,6 +367,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
+- **Discord**: [Join our Discord](https://discord.gg/UETtdzH8Wu)
 - **Usage Guide**: [USAGE.md](USAGE.md) - Comprehensive command reference
 - **Issues**: [GitHub Issues](https://github.com/jeffersonwarrior/synpick/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/jeffersonwarrior/synpick/discussions)

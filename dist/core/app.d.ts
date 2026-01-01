@@ -80,7 +80,7 @@ export declare class SyntheticClaudeApp {
     /**
      * Update synpick itself via npm
      */
-    private updateSynclaudeSelf;
+    private updateSynpickSelf;
     /**
      * Check if there are available updates without installing
      */

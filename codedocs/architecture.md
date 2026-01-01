@@ -136,7 +136,7 @@ class SyntheticClaudeApp {
 - `UserInterface` - Terminal UI
 - `ClaudeLauncher` - Process launcher
 - `ClaudeCodeManager` - Version management
-- `installSynclaude` - Local installation utilities
+- `installSynpick` - Local installation utilities
 
 ### 3. Configuration Layer (`src/config/`)
 
@@ -292,8 +292,8 @@ CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1"
 - `install.ts` - InstallModule with installation strategies
 
 **Key Functions:**
-- `installSynclaude()` - Main installation with multiple strategies
-- `uninstallSynclaude()` - Complete removal
+- `installSynpick()` - Main installation with multiple strategies
+- `uninstallSynpick()` - Complete removal
 - `detectInstallMethod()` - Auto-detect best installation method
 - `configureNpmUserPrefix()` - Configure npm for non-sudo installs
 - `addToPathIfNotExists()` - Add directory to PATH
@@ -410,7 +410,7 @@ get config(): AppConfig {
 Installation uses different strategies based on environment:
 
 ```typescript
-function installSynclaude(options: InstallOptions): Promise<boolean> {
+function installSynpick(options: InstallOptions): Promise<boolean> {
   const method = detectInstallMethod();
 
   switch (method) {

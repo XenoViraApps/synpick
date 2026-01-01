@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Synclaude Installation Script
+# Synpick Installation Script
 # One-line installer: curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash
 
 set -e
@@ -19,14 +19,14 @@ REPO_URL="https://github.com/jeffersonwarrior/synpick"
 # Specify version to install from GitHub releases
 # Read from version.txt if available in the source directory, otherwise use default
 if [ -f "$(dirname "$0")/version.txt" ]; then
-    SYNCLAUDE_VERSION="${SYNCLAUDE_VERSION:-$(cat "$(dirname "$0")/version.txt" | tr -d '[:space:]')}"
+    SYNPICK_VERSION="${SYNPICK_VERSION:-$(cat "$(dirname "$0")/version.txt" | tr -d '[:space:]')}"
 elif [ -f "version.txt" ]; then
-    SYNCLAUDE_VERSION="${SYNCLAUDE_VERSION:-$(cat version.txt | tr -d '[:space:]')}"
+    SYNPICK_VERSION="${SYNPICK_VERSION:-$(cat version.txt | tr -d '[:space:]')}"
 else
-    SYNCLAUDE_VERSION="${SYNCLAUDE_VERSION:-1.6.1}"
+    SYNPICK_VERSION="${SYNPICK_VERSION:-1.6.1}"
 fi
 # Use GitHub releases instead of main branch to get specific version
-TARBALL_URL="https://github.com/jeffersonwarrior/synpick/archive/refs/tags/v${SYNCLAUDE_VERSION}.tar.gz"
+TARBALL_URL="https://github.com/jeffersonwarrior/synpick/archive/refs/tags/v${SYNPICK_VERSION}.tar.gz"
 
 # Script variables
 VERBOSE="${VERBOSE:-false}"
@@ -305,14 +305,14 @@ install_package() {
                     progress
                     DOWNLOAD_SUCCESS=true
                 else
-                    warn "Failed to download version $SYNCLAUDE_VERSION from GitHub, trying main branch..."
+                    warn "Failed to download version $SYNPICK_VERSION from GitHub, trying main branch..."
                 fi
             elif command_exists wget; then
                 if wget -qO- "$TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
                     progress
                     DOWNLOAD_SUCCESS=true
                 else
-                    warn "Failed to download version $SYNCLAUDE_VERSION from GitHub, trying main branch..."
+                    warn "Failed to download version $SYNPICK_VERSION from GitHub, trying main branch..."
                 fi
             fi
 
@@ -404,14 +404,14 @@ install_package() {
                 progress
                 DOWNLOAD_SUCCESS=true
             else
-                warn "Failed to download version $SYNCLAUDE_VERSION from GitHub, trying main branch..."
+                warn "Failed to download version $SYNPICK_VERSION from GitHub, trying main branch..."
             fi
         elif command_exists wget; then
             if wget -qO- "$TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
                 progress
                 DOWNLOAD_SUCCESS=true
             else
-                warn "Failed to download version $SYNCLAUDE_VERSION from GitHub, trying main branch..."
+                warn "Failed to download version $SYNPICK_VERSION from GitHub, trying main branch..."
             fi
         fi
 
@@ -603,8 +603,8 @@ verify_installation() {
 
     if command_exists synpick; then
         progress
-        SYNCLAUDE_VERSION=$(synpick --version 2>/dev/null || echo "unknown")
-        VERSION_INSTALLED="$SYNCLAUDE_VERSION"
+        SYNPICK_VERSION=$(synpick --version 2>/dev/null || echo "unknown")
+        VERSION_INSTALLED="$SYNPICK_VERSION"
         info "Detected version: $VERSION_INSTALLED"
 
         # Test that it actually works
@@ -709,7 +709,7 @@ main() {
 # Handle script arguments
 case "${1:-}" in
     --help|-h)
-        echo "Synclaude Installation Script"
+        echo "Synpick Installation Script"
         echo "Usage: $0 [options]"
         echo ""
         echo "Options:"

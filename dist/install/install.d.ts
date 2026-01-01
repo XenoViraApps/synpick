@@ -79,11 +79,11 @@ export declare function verifyInstallation(method: InstallMethodEnum): Promise<{
 /**
  * Main installation function
  */
-export declare function installSynclaude(options?: InstallOptions): Promise<InstallResult>;
+export declare function installSynpick(options?: InstallOptions): Promise<InstallResult>;
 /**
  * Uninstall function
  */
-export declare function uninstallSynclaude(options?: {
+export declare function uninstallSynpick(options?: {
     verbose?: boolean;
 }): Promise<{
     success: boolean;

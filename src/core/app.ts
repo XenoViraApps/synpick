@@ -176,7 +176,7 @@ export class SyntheticClaudeApp {
    */
   async updateClaudeCode(force: boolean = false): Promise<void> {
     // Update synpick itself first
-    await this.updateSynclaudeSelf(force);
+    await this.updateSynpickSelf(force);
 
     // Then update Claude Code
     this.ui.info('Checking for Claude Code updates...');
@@ -265,7 +265,7 @@ export class SyntheticClaudeApp {
   /**
    * Update synpick itself via npm
    */
-  private async updateSynclaudeSelf(force: boolean = false): Promise<void> {
+  private async updateSynpickSelf(force: boolean = false): Promise<void> {
     try {
       // Get current synpick version
       const currentVersion = execSync('synpick --version', { encoding: 'utf-8' }).trim();
@@ -418,10 +418,9 @@ export class SyntheticClaudeApp {
         this.ui.coloredSuccess(`Thinking model saved: ${selectedThinkingModel.getDisplayName()}`);
       }
 
-      this.ui.highlightInfo(
-        'Now run "synpick" to start Claude Code with your selected model(s).',
-        ['synpick']
-      );
+      this.ui.highlightInfo('Now run "synpick" to start Claude Code with your selected model(s).', [
+        'synpick',
+      ]);
       return true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -901,11 +900,7 @@ export class SyntheticClaudeApp {
       }
 
       this.ui.info('');
-      this.ui.highlightInfo('Getting started:', [
-        'synpick setup',
-        'synpick model',
-        'synpick',
-      ]);
+      this.ui.highlightInfo('Getting started:', ['synpick setup', 'synpick model', 'synpick']);
       this.ui.info('  synpick setup    # First-time configuration');
       this.ui.info('  synpick          # Launch Claude Code');
       this.ui.info('  synpick --help   # Show all commands');

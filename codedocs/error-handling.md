@@ -13,7 +13,7 @@
 
 ## Overview
 
-Synclaude uses a structured error handling approach with custom error classes, consistent patterns, and graceful degradation where appropriate.
+Synpick uses a structured error handling approach with custom error classes, consistent patterns, and graceful degradation where appropriate.
 
 ### Error Handling Principles
 

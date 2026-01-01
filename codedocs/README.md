@@ -1,10 +1,10 @@
-# Synclaude Codebase Documentation
+# Synpick Codebase Documentation
 
-This directory contains comprehensive documentation of the Synclaude codebase architecture, patterns, and implementation details.
+This directory contains comprehensive documentation of the Synpick codebase architecture, patterns, and implementation details.
 
 ## Project Overview
 
-**Synclaude** is a TypeScript/Node.js interactive CLI tool that integrates Synthetic AI models with Claude Code. It provides:
+**Synpick** is a TypeScript/Node.js interactive CLI tool that integrates Synthetic AI models with Claude Code. It provides:
 
 - Model selection from the Synthetic API
 - Configuration management with Zod validation

@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { URL, fileURLToPath } from 'url';
+import { fileURLToPath } from 'url';
 import { ConfigManager } from '../config';
 import chalk from 'chalk';
 

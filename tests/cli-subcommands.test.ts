@@ -16,7 +16,7 @@ const TEMP_CONFIG_DIR = tmpdir() + `/.synpick-test-${Date.now()}`;
 const TEMP_CONFIG_FILE = TEMP_CONFIG_DIR + '/config.json';
 
 // Helper function to run synpick command
-function runSynclaude(args: string[], env: Record<string, string> = {}): {
+function runSynpick(args: string[], env: Record<string, string> = {}): {
   stdout: string;
   stderr: string;
   exitCode: number | null;
@@ -52,7 +52,7 @@ function runSynclaude(args: string[], env: Record<string, string> = {}): {
 describe('CLI Subcommands', () => {
   describe('--help', () => {
     it('should display help information', () => {
-      const result = runSynclaude(['--help']);
+      const result = runSynpick(['--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('synpick');
       expect(result.stdout).toContain('model');
@@ -61,20 +61,20 @@ describe('CLI Subcommands', () => {
     });
 
     it('should exit with code 0', () => {
-      const result = runSynclaude(['--help']);
+      const result = runSynpick(['--help']);
       expect(result.exitCode).toBe(0);
     });
   });
 
   describe('--version', () => {
     it('should display version information', () => {
-      const result = runSynclaude(['--version']);
+      const result = runSynpick(['--version']);
       expect(result.success).toBe(true);
       expect(result.stdout).toMatch(/\d+\.\d+\.\d+/);
     });
 
     it('should match version.txt', () => {
-      const result = runSynclaude(['--version']);
+      const result = runSynpick(['--version']);
       const versionTxtPath = process.cwd() + '/version.txt';
       try {
         const versionTxt = readFileSync(versionTxtPath, 'utf8').trim();
@@ -87,7 +87,7 @@ describe('CLI Subcommands', () => {
 
   describe('doctor', () => {
     it('should run doctor command without errors', () => {
-      const result = runSynclaude(['doctor']);
+      const result = runSynpick(['doctor']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('System Health Check');
     });
@@ -95,7 +95,7 @@ describe('CLI Subcommands', () => {
 
   describe('config show', () => {
     it('should show configuration', () => {
-      const result = runSynclaude(['config', 'show']);
+      const result = runSynpick(['config', 'show']);
       // Should complete without error
       expect(result.success || result.stderr).toBeTruthy();
     });
@@ -103,7 +103,7 @@ describe('CLI Subcommands', () => {
 
   describe('cache info', () => {
     it('should show cache information', () => {
-      const result = runSynclaude(['cache', 'info']);
+      const result = runSynpick(['cache', 'info']);
       // Should complete without error
       expect(result.success || result.stderr.length > 0).toBeTruthy();
     });
@@ -111,27 +111,27 @@ describe('CLI Subcommands', () => {
 
   describe('models', () => {
     it('should show help for models command', () => {
-      const result = runSynclaude(['models', '--help']);
+      const result = runSynpick(['models', '--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('models');
     });
 
     it('should show description for models command', () => {
-      const result = runSynclaude(['models', '--help']);
+      const result = runSynpick(['models', '--help']);
       expect(result.stdout).toContain('List available models');
     });
   });
 
   describe('search', () => {
     it('should show help for search command', () => {
-      const result = runSynclaude(['search', '--help']);
+      const result = runSynpick(['search', '--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('search');
       expect(result.stdout).toContain('query');
     });
 
     it('should require a query argument', () => {
-      const result = runSynclaude(['search']);
+      const result = runSynpick(['search']);
       expect(result.success).toBe(false);
       // Missing query should cause an error
     });
@@ -139,7 +139,7 @@ describe('CLI Subcommands', () => {
 
   describe('check-update', () => {
     it('should run check-update command', () => {
-      const result = runSynclaude(['check-update']);
+      const result = runSynpick(['check-update']);
       // Should complete (may not find updates, but shouldn't crash)
       expect(result.success || result.stderr).toBeTruthy();
     });
@@ -147,20 +147,20 @@ describe('CLI Subcommands', () => {
 
   describe('dangerous', () => {
     it('should show help for dangerous command', () => {
-      const result = runSynclaude(['dangerous', '--help']);
+      const result = runSynpick(['dangerous', '--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('dangerously-skip-permissions');
     });
 
     it('should have correct description', () => {
-      const result = runSynclaude(['dangerous', '--help']);
+      const result = runSynpick(['dangerous', '--help']);
       expect(result.stdout).toContain('Launch with --dangerously-skip-permissions');
     });
   });
 
   describe('setup', () => {
     it('should show help for setup command', () => {
-      const result = runSynclaude(['setup', '--help']);
+      const result = runSynpick(['setup', '--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('setup');
     });
@@ -168,54 +168,54 @@ describe('CLI Subcommands', () => {
 
   describe('install', () => {
     it('should show help for install command', () => {
-      const result = runSynclaude(['install', '--help']);
+      const result = runSynpick(['install', '--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('install');
     });
 
     it('should show verbose option', () => {
-      const result = runSynclaude(['install', '--help']);
+      const result = runSynpick(['install', '--help']);
       expect(result.stdout).toContain('--verbose');
     });
 
     it('should show force option', () => {
-      const result = runSynclaude(['install', '--help']);
+      const result = runSynpick(['install', '--help']);
       expect(result.stdout).toContain('--force');
     });
 
     it('should show skip-path option', () => {
-      const result = runSynclaude(['install', '--help']);
+      const result = runSynpick(['install', '--help']);
       expect(result.stdout).toContain('--skip-path');
     });
   });
 
   describe('config set', () => {
     it('should show help for config set command', () => {
-      const result = runSynclaude(['config', 'set', '--help']);
+      const result = runSynpick(['config', 'set', '--help']);
       expect(result.success).toBe(true);
     });
 
     it('should require key and value arguments', () => {
       // Missing value
-      const result1 = runSynclaude(['config', 'set', 'selectedModel']);
+      const result1 = runSynpick(['config', 'set', 'selectedModel']);
       expect(result1.success).toBe(false);
 
       // Missing key
-      const result2 = runSynclaude(['config', 'set']);
+      const result2 = runSynpick(['config', 'set']);
       expect(result2.success).toBe(false);
     });
   });
 
   describe('config reset', () => {
     it('should show help for config reset command', () => {
-      const result = runSynclaude(['config', 'reset', '--help']);
+      const result = runSynpick(['config', 'reset', '--help']);
       expect(result.success).toBe(true);
     });
   });
 
   describe('model', () => {
     it('should show help for model command', () => {
-      const result = runSynclaude(['model', '--help']);
+      const result = runSynpick(['model', '--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('model');
     });
@@ -223,7 +223,7 @@ describe('CLI Subcommands', () => {
 
   describe('thinking-model', () => {
     it('should show help for thinking-model command', () => {
-      const result = runSynclaude(['thinking-model', '--help']);
+      const result = runSynpick(['thinking-model', '--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('thinking-model');
     });
@@ -231,51 +231,51 @@ describe('CLI Subcommands', () => {
 
   describe('cache clear', () => {
     it('should show help for cache clear command', () => {
-      const result = runSynclaude(['cache', 'clear', '--help']);
+      const result = runSynpick(['cache', 'clear', '--help']);
       expect(result.success).toBe(true);
     });
   });
 
   describe('update', () => {
     it('should show help for update command', () => {
-      const result = runSynclaude(['update', '--help']);
+      const result = runSynpick(['update', '--help']);
       expect(result.success).toBe(true);
       expect(result.stdout).toContain('update');
     });
 
     it('should show force option', () => {
-      const result = runSynclaude(['update', '--help']);
+      const result = runSynpick(['update', '--help']);
       expect(result.stdout).toContain('--force');
     });
   });
 
   describe('verbose flag', () => {
     it('should accept -v flag', () => {
-      const result = runSynclaude(['-v', 'doctor']);
+      const result = runSynpick(['-v', 'doctor']);
       expect(result.success).toBe(true);
     });
 
     it('should accept --verbose flag', () => {
-      const result = runSynclaude(['--verbose', 'doctor']);
+      const result = runSynpick(['--verbose', 'doctor']);
       expect(result.success).toBe(true);
     });
   });
 
   describe('quiet flag', () => {
     it('should accept -q flag', () => {
-      const result = runSynclaude(['-q', 'doctor']);
+      const result = runSynpick(['-q', 'doctor']);
       expect(result.success).toBe(true);
     });
 
     it('should accept --quiet flag', () => {
-      const result = runSynclaude(['--quiet', 'doctor']);
+      const result = runSynpick(['--quiet', 'doctor']);
       expect(result.success).toBe(true);
     });
   });
 
   describe('unknown commands', () => {
     it('should reject unknown commands', () => {
-      const result = runSynclaude(['unknown-command']);
+      const result = runSynpick(['unknown-command']);
       expect(result.success).toBe(false);
     });
   });
@@ -284,7 +284,7 @@ describe('CLI Subcommands', () => {
 describe('CLI Integration - Banner Display', () => {
   it('should show banner without __dirname error', () => {
     // This test verifies the ESM __dirname fix works
-    const result = runSynclaude(['doctor']);
+    const result = runSynpick(['doctor']);
     expect(result.success).toBe(true);
     // Should not contain "ReferenceError: __dirname is not defined"
     expect(result.stderr).not.toContain('ReferenceError: __dirname');
@@ -293,12 +293,12 @@ describe('CLI Integration - Banner Display', () => {
 
 describe('CLI Integration - Safe Mode Commands', () => {
   it('should handle quiet mode with doctor', () => {
-    const result = runSynclaude(['--quiet', 'doctor']);
+    const result = runSynpick(['--quiet', 'doctor']);
     expect(result.success).toBe(true);
   });
 
   it('should handle verbose mode with doctor', () => {
-    const result = runSynclaude(['--verbose', 'doctor']);
+    const result = runSynpick(['--verbose', 'doctor']);
     expect(result.success).toBe(true);
   });
 });

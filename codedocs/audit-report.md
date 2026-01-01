@@ -38,13 +38,13 @@ The synpick codebase is well-structured with clear separation of concerns. The a
 
 2. **Install Utilities** (`src/install/install.ts`)
    - `InstallMethodEnum` for method detection
-   - `installSynclaude()` with multiple installation strategies
+   - `installSynpick()` with multiple installation strategies
    - `checkCleanStaleSymlinks()` for cleanup
    - `detectInstallMethod()` for automatic detection
    - `configureNpmUserPrefix()` for non-sudo installs
    - `addToPathIfNotExists()` for PATH management
    - `verifyInstallation()` for post-install validation
-   - `uninstallSynclaude()` for complete removal
+   - `uninstallSynpick()` for complete removal
 
 3. **Banner Utilities** (`src/utils/banner.ts`)
    - `normalizeDangerousFlags()` - Normalizes various `--dangerously-skip-permissions` flag formats
@@ -193,8 +193,8 @@ export function isThinkingModel(modelId: string): boolean
 **Exports:**
 - `InstallMethodEnum` - Installation method options
 - `InstallOptions`, `InstallResult`, `PathUpdateResult` - Type definitions
-- `installSynclaude()` - Main installation function
-- `uninstallSynclaude()` - Uninstallation function
+- `installSynpick()` - Main installation function
+- `uninstallSynpick()` - Uninstallation function
 - `detectInstallMethod()` - Auto-detect best install method
 - `configureNpmUserPrefix()` - Configure npm for non-sudo installs
 - `addToPathIfNotExists()` - Add directory to PATH

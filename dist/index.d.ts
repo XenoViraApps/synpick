@@ -6,5 +6,5 @@ export * from './ui';
 export * from './launcher';
 export * from './utils';
 export * from './api';
-export { SyntheticClaudeApp } from './core/app';
+export { SyntheticClaudeApp as SynpickApp } from './core/app';
 //# sourceMappingURL=index.d.ts.map
