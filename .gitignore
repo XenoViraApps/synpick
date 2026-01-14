@@ -127,6 +127,9 @@ out
 # Claude Code local configuration
 .claude/
 
+# Generated documentation
+codedocs/
+
 # yarn v2
 .yarn/cache
 .yarn/unplugged
