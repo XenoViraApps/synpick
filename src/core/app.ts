@@ -241,7 +241,7 @@ export class SyntheticClaudeApp {
    * Get latest synpick version from GitHub repository
    */
   private async getLatestGitHubVersion(): Promise<string | null> {
-    const GITHUB_REPO = 'jeffersonwarrior/synpick';
+    const GITHUB_REPO = 'XenoViraApps/synpick';
 
     try {
       // Try GitHub releases API first
@@ -287,7 +287,7 @@ export class SyntheticClaudeApp {
         }
         this.ui.info('Run the installer manually to update:');
         this.ui.info(
-          '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash'
+          '  curl -sSL https://raw.githubusercontent.com/XenoViraApps/synpick/main/scripts/install.sh | bash'
         );
         return;
       }
@@ -318,7 +318,7 @@ export class SyntheticClaudeApp {
         this.ui.info('Automatic update failed');
         this.ui.info('Please update manually:');
         this.ui.info(
-          '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash'
+          '  curl -sSL https://raw.githubusercontent.com/XenoViraApps/synpick/main/scripts/install.sh | bash'
         );
         throw new Error('Automatic update unavailable');
       }
@@ -338,7 +338,7 @@ export class SyntheticClaudeApp {
       );
       this.ui.info('Try manual installation:');
       this.ui.info(
-        '  curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash'
+        '  curl -sSL https://raw.githubusercontent.com/XenoViraApps/synpick/main/scripts/install.sh | bash'
       );
       // Don't exit - continue to try updating Claude Code
     }

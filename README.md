@@ -3,8 +3,8 @@
 ![](https://img.shields.io/npm/v/synpick?style=flat-square)
 ![](https://img.shields.io/npm/dm/synpick?style=flat-square)
 ![](https://img.shields.io/node/v/synpick?style=flat-square)
-![](https://img.shields.io/github/actions/workflow/status/jeffersonwarrior/synpick/ci.yml?branch=main&style=flat-square)
-![](https://img.shields.io/github/actions/workflow/status/jeffersonwarrior/synpick/security.yml?branch=main&style=flat-square)
+![](https://img.shields.io/github/actions/workflow/status/XenoViraApps/synpick/ci.yml?branch=main&style=flat-square)
+![](https://img.shields.io/github/actions/workflow/status/XenoViraApps/synpick/security.yml?branch=main&style=flat-square)
 ![](https://img.shields.io/badge/CodeQL-passing-brightgreen?style=flat-square)
 ![](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
@@ -61,19 +61,19 @@ npm install -g synpick
 #### Option 2: GitHub Release
 
 ```bash
-npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
+npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
 ```
 
 #### Option 3: One-line Installer
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/XenoViraApps/synpick/main/scripts/install.sh | bash
 ```
 
 #### Option 4: Clone and Install
 
 ```bash
-git clone https://github.com/jeffersonwarrior/synpick.git
+git clone https://github.com/XenoViraApps/synpick.git
 cd synpick
 ./scripts/install.sh
 ```
@@ -88,7 +88,7 @@ cd synpick
 #### Option 1: One-line Uninstaller
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/uninstall.sh | bash
+curl -sSL https://raw.githubusercontent.com/XenoViraApps/synpick/main/scripts/uninstall.sh | bash
 ```
 
 #### Option 2: Manual Uninstall
@@ -186,7 +186,7 @@ The update command:
 npm install -g synpick@1.6.1
 
 # Or from GitHub release
-npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
+npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
 ```
 
 #### Check Current Version
@@ -210,7 +210,7 @@ export SYNTHETIC_CACHE_DURATION=24
 #### Setup Development Environment
 
 ```bash
-git clone https://github.com/jeffersonwarrior/synpick.git
+git clone https://github.com/XenoViraApps/synpick.git
 cd synpick
 npm install
 ```
@@ -369,6 +369,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Discord**: [Join our Discord](https://discord.gg/UETtdzH8Wu)
 - **Usage Guide**: [USAGE.md](USAGE.md) - Comprehensive command reference
-- **Issues**: [GitHub Issues](https://github.com/jeffersonwarrior/synpick/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/jeffersonwarrior/synpick/discussions)
+- **Issues**: [GitHub Issues](https://github.com/XenoViraApps/synpick/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/XenoViraApps/synpick/discussions)
 - **Synthetic API**: [https://dev.synthetic.new](https://dev.synthetic.new)

@@ -34,14 +34,14 @@ echo "📦 Installing Synclaude v1.6.1..."
 
 # Method 1: Try without sudo first
 echo "🔧 Attempting installation without sudo..."
-if npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz 2>/dev/null; then
+if npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz 2>/dev/null; then
     echo "✅ Installation successful!"
 else
     echo "⚠️  Permission denied. Trying alternative methods..."
 
     # Method 2: Try with sudo
     echo "🔧 Attempting installation with sudo..."
-    if sudo npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz; then
+    if sudo npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz; then
         echo "✅ Installation successful with sudo!"
     else
         echo "⚠️  Sudo installation failed. Setting up user npm directory..."
@@ -71,12 +71,12 @@ else
 
         # Try installation again
         echo "🔧 Attempting installation with user npm directory..."
-        if npm install -g https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz; then
+        if npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz; then
             echo "✅ Installation successful with user directory!"
         else
             echo "❌ All installation methods failed."
             echo "💡 Manual installation instructions:"
-            echo "   1. Download: https://github.com/jeffersonwarrior/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz"
+            echo "   1. Download: https://github.com/XenoViraApps/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz"
             echo "   2. Extract and run: sudo npm install -g ."
             exit 1
         fi

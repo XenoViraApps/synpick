@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Synclaude Uninstallation Script
-# One-line uninstaller: curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/uninstall.sh | bash
+# One-line uninstaller: curl -sSL https://raw.githubusercontent.com/XenoViraApps/synpick/main/scripts/uninstall.sh | bash
 
 set -e
 

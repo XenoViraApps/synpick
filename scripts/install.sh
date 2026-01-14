@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Synpick Installation Script
-# One-line installer: curl -sSL https://raw.githubusercontent.com/jeffersonwarrior/synpick/main/scripts/install.sh | bash
+# One-line installer: curl -sSL https://raw.githubusercontent.com/XenoViraApps/synpick/main/scripts/install.sh | bash
 
 set -e
 
@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # Default installation directory
 INSTALL_DIR="$HOME/.local/share/synpick"
 BIN_DIR="$HOME/.local/bin"
-REPO_URL="https://github.com/jeffersonwarrior/synpick"
+REPO_URL="https://github.com/XenoViraApps/synpick"
 # Specify version to install from GitHub releases
 # Read from version.txt if available in the source directory, otherwise use default
 if [ -f "$(dirname "$0")/version.txt" ]; then
@@ -26,7 +26,7 @@ else
     SYNPICK_VERSION="${SYNPICK_VERSION:-1.6.1}"
 fi
 # Use GitHub releases instead of main branch to get specific version
-TARBALL_URL="https://github.com/jeffersonwarrior/synpick/archive/refs/tags/v${SYNPICK_VERSION}.tar.gz"
+TARBALL_URL="https://github.com/XenoViraApps/synpick/archive/refs/tags/v${SYNPICK_VERSION}.tar.gz"
 
 # Script variables
 VERBOSE="${VERBOSE:-false}"
@@ -318,7 +318,7 @@ install_package() {
 
             # Fallback: download from main branch if version specific failed
             if [ "$DOWNLOAD_SUCCESS" = false ]; then
-                MAIN_TARBALL_URL="https://github.com/jeffersonwarrior/synpick/archive/refs/heads/main.tar.gz"
+                MAIN_TARBALL_URL="https://github.com/XenoViraApps/synpick/archive/refs/heads/main.tar.gz"
                 if command_exists curl; then
                     if curl -sL "$MAIN_TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
                         progress
@@ -417,7 +417,7 @@ install_package() {
 
         # Fallback: download from main branch if version specific failed
         if [ "$DOWNLOAD_SUCCESS" = false ]; then
-            MAIN_TARBALL_URL="https://github.com/jeffersonwarrior/synpick/archive/refs/heads/main.tar.gz"
+            MAIN_TARBALL_URL="https://github.com/XenoViraApps/synpick/archive/refs/heads/main.tar.gz"
             if command_exists curl; then
                 if curl -sL "$MAIN_TARBALL_URL" | tar -xz --strip-components=1 >/dev/null 2>&1; then
                     progress
