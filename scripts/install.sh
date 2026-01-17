@@ -654,35 +654,18 @@ update_path() {
     fi
 }
 
-# Fix nvm prefix conflict
+# Fix nvm prefix conflict (silent - runs before any npm commands)
 fix_nvm_conflict() {
-    # Check if nvm is loaded
-    if [ -n "$NVM_DIR" ] || command_exists nvm; then
-        # Check if .npmrc has prefix or globalconfig settings that conflict with nvm
-        if [ -f "$HOME/.npmrc" ]; then
-            if grep -q "^prefix=" "$HOME/.npmrc" || grep -q "^globalconfig=" "$HOME/.npmrc"; then
-                # Get current nvm Node.js version
-                local NVM_VERSION=""
-                if [ -n "$NVM_INC" ]; then
-                    # Extract version from NVM_INC path (e.g., ~/.nvm/versions/node/v24.12.0/include/node)
-                    NVM_VERSION=$(echo "$NVM_INC" | sed -n 's|.*versions/node/\(v[0-9.]*\)/.*|\1|p')
-                elif command -v node >/dev/null 2>&1; then
-                    # Fallback: try to get version from node
-                    NVM_VERSION=$(node -v 2>/dev/null || echo "")
-                fi
-
-                if [ -n "$NVM_VERSION" ]; then
-                    # Try to run nvm use --delete-prefix to clear the prefix conflict
-                    if nvm use --delete-prefix "$NVM_VERSION" --silent >/dev/null 2>&1; then
-                        info "Fixed nvm prefix conflict for version $NVM_VERSION"
-                        # Update VERIFY_BIN_DIR for further steps
-                        VERIFY_BIN_DIR="$(npm config get prefix)/bin"
-                    elif nvm use --delete-prefix --silent >/dev/null 2>&1; then
-                        info "Fixed nvm prefix conflict"
-                        VERIFY_BIN_DIR="$(npm config get prefix)/bin"
-                    fi
-                fi
-            fi
+    # Check if .npmrc has prefix or globalconfig settings that conflict with nvm
+    if [ -f "$HOME/.npmrc" ]; then
+        if grep -q "^prefix=" "$HOME/.npmrc" || grep -q "^globalconfig=" "$HOME/.npmrc"; then
+            # Create a backup silently
+            cp "$HOME/.npmrc" "$HOME/.npmrc.synpick-backup" 2>/dev/null
+            # Comment out prefix and globalconfig lines (safe for both Linux and macOS)
+            sed -e 's/^prefix=/# prefix= (commented for nvm compatibility)/' \
+                -e 's/^globalconfig=/# globalconfig= (commented for nvm compatibility)/' \
+                "$HOME/.npmrc.synpick-backup" > "$HOME/.npmrc" 2>/dev/null
+            rm -f "$HOME/.npmrc.synpick-backup" 2>/dev/null
         fi
     fi
 }
@@ -690,9 +673,6 @@ fix_nvm_conflict() {
 # Verify installation
 verify_installation() {
     info "Verifying installation..."
-
-    # Fix nvm prefix conflict before verification
-    fix_nvm_conflict
 
     # Determine which bin directory to use for verification
     if [ "$NPM_GLOBAL_INSTALL" = "true" ]; then
@@ -742,7 +722,7 @@ show_final_message() {
     if command_exists nvm; then
         progress
         info "Configuring nvm for Node.js v24.12.0..."
-        nvm use --delete-prefix v24.12.0 --silent 2>/dev/null || \
+        nvm use v24.12.0 --silent 2>/dev/null || \
             warn "Could not set nvm to v24.12.0. Please run manually: nvm use v24.12.0"
     fi
 
@@ -798,6 +778,9 @@ show_final_message() {
 
 # Main installation flow
 main() {
+    # Fix nvm prefix conflict first (silently, before any npm commands)
+    fix_nvm_conflict
+
     echo -n "Installing synpick"
 
     # Pre-installation checks
