@@ -23,7 +23,7 @@ if [ -f "$(dirname "$0")/version.txt" ]; then
 elif [ -f "version.txt" ]; then
     SYNPICK_VERSION="${SYNPICK_VERSION:-$(cat version.txt | tr -d '[:space:]')}"
 else
-    SYNPICK_VERSION="${SYNPICK_VERSION:-1.6.1}"
+    SYNPICK_VERSION="${SYNPICK_VERSION:-1.7.0}"
 fi
 # Use GitHub releases instead of main branch to get specific version
 TARBALL_URL="https://github.com/XenoViraApps/synpick/archive/refs/tags/v${SYNPICK_VERSION}.tar.gz"
@@ -77,37 +77,146 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Detect operating system
+detect_os() {
+    case "$(uname -s)" in
+        Darwin*) echo "macos" ;;
+        Linux*)  echo "linux" ;;
+        *)       echo "unknown" ;;
+    esac
+}
+
+# Install Homebrew on macOS if not present
+install_homebrew_if_needed() {
+    if [ "$(detect_os)" != "macos" ]; then
+        return 0  # Not macOS, skip Homebrew installation
+    fi
+
+    if command_exists brew; then
+        info "Homebrew is already installed"
+        return 0
+    fi
+
+    info "Homebrew not found on macOS. Installing Homebrew..."
+    if command_exists curl; then
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    elif command_exists wget; then
+        /bin/bash -c "$(wget -qO- https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    else
+        error "Neither curl nor wget is available for installing Homebrew."
+        exit 1
+    fi
+
+    # Add Homebrew to PATH for current session and future sessions
+    if [ -d "/opt/homebrew/bin" ]; then
+        # Apple Silicon
+        if ! echo "$PATH" | grep -q "/opt/homebrew/bin"; then
+            export PATH="/opt/homebrew/bin:$PATH"
+            # Add to shell config
+            SHELL_CONFIG="$(basename "$SHELL")"
+            if [ "$SHELL_CONFIG" = "zsh" ] && [ -f "$HOME/.zshrc" ]; then
+                echo 'export PATH="/opt/homebrew/bin:$PATH"' >> "$HOME/.zshrc"
+            elif [ -f "$HOME/.bash_profile" ]; then
+                echo 'export PATH="/opt/homebrew/bin:$PATH"' >> "$HOME/.bash_profile"
+            fi
+        fi
+    elif [ -d "/usr/local/bin" ]; then
+        # Intel Mac
+        if ! echo "$PATH" | grep -q "/usr/local/bin"; then
+            export PATH="/usr/local/bin:$PATH"
+            # Add to shell config
+            SHELL_CONFIG="$(basename "$SHELL")"
+            if [ "$SHELL_CONFIG" = "zsh" ] && [ -f "$HOME/.zshrc" ]; then
+                echo 'export PATH="/usr/local/bin:$PATH"' >> "$HOME/.zshrc"
+            elif [ -f "$HOME/.bash_profile" ]; then
+                echo 'export PATH="/usr/local/bin:$PATH"' >> "$HOME/.bash_profile"
+            fi
+        fi
+    fi
+
+    success "Homebrew installed successfully"
+    progress
+}
+
+# Install Node.js using appropriate method
+install_nodejs_if_needed() {
+    OS="$(detect_os)"
+
+    if command_exists node && command_exists npm; then
+        info "Node.js and npm are already installed"
+        progress
+        return 0
+    fi
+
+    if [ "$OS" = "macos" ]; then
+        if ! command_exists brew; then
+            install_homebrew_if_needed
+        fi
+
+        info "Installing Node.js via Homebrew on macOS..."
+        brew install node
+        success "Node.js and npm installed via Homebrew"
+    elif [ "$OS" = "linux" ]; then
+        # For Linux, we'll provide instructions since package managers vary
+        if [ -f /etc/debian_version ]; then
+            error "Node.js is not installed. Please install Node.js first:"
+            echo "  sudo apt-get update"
+            echo "  sudo apt-get install -y nodejs npm"
+            echo "  # Alternative: Using NodeSource repository for latest version"
+            echo "  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -"
+            echo "  sudo apt-get install -y nodejs"
+        elif [ -f /etc/redhat-release ]; then
+            error "Node.js is not installed. Please install Node.js first:"
+            echo "  sudo yum install -y nodejs npm"
+            echo "  # Alternative: Using NodeSource repository for latest version"
+            echo "  curl -fsSL https://rpm.nodesource.com/setup_lts.x | sudo bash -"
+            echo "  sudo yum install -y nodejs"
+        else
+            error "Node.js is not installed. Please install Node.js using your package manager."
+            echo "  Or download from: https://nodejs.org/"
+        fi
+        exit 1
+    else
+        error "Node.js is not installed. Please install Node.js first."
+        echo "Visit: https://nodejs.org/ for installation instructions."
+        exit 1
+    fi
+
+    progress
+}
+
 # Check system dependencies
 check_dependencies() {
-    # Check for Node.js and npm
+    # Ensure Node.js and npm are installed
+    install_nodejs_if_needed
+
+    # Verify installation succeeded
     if ! command_exists node; then
-        error "Node.js is not installed. Please install Node.js first."
-        echo "Visit: https://nodejs.org/ or use your package manager:"
-        echo "  macOS: brew install node"
-        echo "  Windows: Download from https://nodejs.org/"
-        echo "  Linux (Ubuntu/Debian): sudo apt-get install nodejs npm"
-        echo "  Linux (RedHat/CentOS): sudo yum install nodejs npm"
+        error "Node.js installation failed. Please install Node.js manually and run the installer again."
+        echo "Visit: https://nodejs.org/ for installation instructions."
         exit 1
     fi
 
     if ! command_exists npm; then
-        error "npm is not installed. Please install npm first."
-        echo "npm usually comes with Node.js. If not available:"
-        echo "  Linux (Ubuntu/Debian): sudo apt-get install npm"
-        echo "  Linux (RedHat/CentOS): sudo yum install npm"
+        error "npm installation failed. npm should come with Node.js."
+        echo "Please reinstall Node.js from https://nodejs.org/"
         exit 1
     fi
 
     # Check for curl or wget for downloading
     if ! command_exists curl && ! command_exists wget; then
         error "Neither curl nor wget is available for downloading."
-        echo "Please install one of them:"
-        echo "  curl: sudo apt-get install curl (Ubuntu/Debian)"
-        echo "  wget: sudo apt-get install wget (Ubuntu/Debian)"
+        if [ "$(detect_os)" = "macos" ]; then
+            echo "On macOS, run: brew install curl"
+        else
+            echo "Please install one of them:"
+            echo "  curl: sudo apt-get install curl (Ubuntu/Debian)"
+            echo "  wget: sudo apt-get install wget (Ubuntu/Debian)"
+        fi
         exit 1
     fi
 
- progress
+    progress
 }
 
 # Create directories
@@ -718,11 +827,14 @@ case "${1:-}" in
         echo "  --local         Install from the current directory (development mode)"
         echo ""
         echo "This script will:"
-        echo "1. Check for Node.js and npm installation"
-        echo "2. Download and install the synpick package (or use local if --local)"
-        echo "3. Clean up old installations"
-        echo "4. Set up PATH if needed"
-        echo "5. Verify the installation"
+        echo "1. Auto-install Homebrew on macOS (if needed)"
+        echo "2. Auto-install Node.js and npm via Homebrew on macOS (if needed)"
+        echo "3. Download and install the synpick package (or use local if --local)"
+        echo "4. Clean up old installations"
+        echo "5. Set up PATH if needed"
+        echo "6. Verify the installation"
+        echo ""
+        echo "Note: On Linux, you must install Node.js manually before running this script."
         exit 0
         ;;
     --local)

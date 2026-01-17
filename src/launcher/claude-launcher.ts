@@ -5,8 +5,19 @@ export interface LaunchOptions {
   claudePath?: string;
   additionalArgs?: string[];
   env?: Record<string, string>;
-  thinkingModel?: string | null;
+  tierModels?: TierLaunchModels;
   maxTokenSize?: number;
+  thinkingModel?: string;
+  systemPrompt?: string;
+}
+
+export interface TierLaunchModels {
+  default?: string;
+  opus?: string;
+  sonnet?: string;
+  haiku?: string;
+  subagent?: string;
+  thinking?: string;
 }
 
 export interface LauncherOptions {
@@ -50,11 +61,11 @@ export class ClaudeLauncher {
    * and spawns a new Claude Code process.
    *
    * @param options - Launch options for Claude Code
-   * @param options.model - The model to use
+   * @param options.model - The default model to use
    * @param options.claudePath - Optional custom path to claude executable
    * @param options.additionalArgs - Additional command-line arguments to pass
    * @param options.env - Additional environment variables
-   * @param options.thinkingModel - Optional thinking model for reasoning tasks
+   * @param.options.tierModels - Optional tier-specific model overrides
    * @param options.maxTokenSize - Optional max token size (default: 128000)
    * @returns Promise resolving to the launch result
    */
@@ -107,30 +118,62 @@ export class ClaudeLauncher {
     }
   }
 
+  /**
+   * Normalizes a model ID to ensure it has the hf: prefix
+   * Model IDs from the API already have the prefix, but user config might not
+   *
+   * @param modelId - The model ID to normalize (may be undefined)
+   * @returns The normalized model ID with hf: prefix, or undefined if input was undefined/empty
+   */
+  private normalizeModelId(modelId?: string): string | undefined {
+    if (!modelId) return undefined;
+    // If already starts with hf: or other valid prefixes, return as-is
+    // Common prefixes: hf:, openai:, anthropic:, etc.
+    const knownPrefixes = ['hf:', 'openai:', 'anthropic:', 'claude:', 'google:', 'meta:'];
+    for (const prefix of knownPrefixes) {
+      if (modelId.startsWith(prefix)) {
+        return modelId;
+      }
+    }
+    // Add hf: prefix for normalized IDs
+    return `hf:${modelId}`;
+  }
+
   private createClaudeEnvironment(options: LaunchOptions): Record<string, string> {
     const env: Record<string, string> = {};
-    const model = options.model;
+    const tiers = options.tierModels || {};
+    const defaultModel = this.normalizeModelId(tiers.default || options.model) || '';
 
     // Set Anthropic-compatible endpoint
     env.ANTHROPIC_BASE_URL = 'https://api.synthetic.new/anthropic';
 
-    // Set all the model environment variables to the full model identifier
-    // This ensures Claude Code uses the correct model regardless of which tier it requests
-    env.ANTHROPIC_DEFAULT_OPUS_MODEL = model;
-    env.ANTHROPIC_DEFAULT_SONNET_MODEL = model;
-    env.ANTHROPIC_DEFAULT_HAIKU_MODEL = model;
-    env.ANTHROPIC_DEFAULT_HF_MODEL = model;
-    env.ANTHROPIC_DEFAULT_MODEL = model;
+    // Set tier-specific models, falling back to default tier
+    // Normalize all model IDs to ensure they have the hf: prefix
+    const opusModel = this.normalizeModelId(tiers.opus) || defaultModel;
+    const sonnetModel = this.normalizeModelId(tiers.sonnet) || defaultModel;
+    const haikuModel = this.normalizeModelId(tiers.haiku) || defaultModel;
+    const subagentModel = this.normalizeModelId(tiers.subagent) || defaultModel;
+
+    env.ANTHROPIC_DEFAULT_OPUS_MODEL = opusModel;
+    env.ANTHROPIC_DEFAULT_SONNET_MODEL = sonnetModel;
+    env.ANTHROPIC_DEFAULT_HAIKU_MODEL = haikuModel;
+    env.ANTHROPIC_DEFAULT_MODEL = defaultModel;
 
     // Set Claude Code subagent model
-    env.CLAUDE_CODE_SUBAGENT_MODEL = model;
+    env.CLAUDE_CODE_SUBAGENT_MODEL = subagentModel;
+
+    // Set thinking model - first check tier models, then options.thinkingModel
+    const thinkingModel = this.normalizeModelId(tiers.thinking || options.thinkingModel || '');
+    if (thinkingModel) {
+      env.ANTHROPIC_THINKING_MODEL = thinkingModel;
+    }
 
     // Set max token size (default 128000 if not specified)
     env.CLAUDE_CODE_MAX_TOKEN_SIZE = (options.maxTokenSize ?? 128000).toString();
 
-    // Set thinking model if provided
-    if (options.thinkingModel) {
-      env.ANTHROPIC_THINKING_MODEL = options.thinkingModel;
+    // Set system prompt if provided
+    if (options.systemPrompt) {
+      env.CLAUDE_SYSTEM_PROMPT = options.systemPrompt;
     }
 
     // Disable non-essential traffic

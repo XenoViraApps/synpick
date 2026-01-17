@@ -7,6 +7,7 @@
 ![](https://img.shields.io/github/actions/workflow/status/XenoViraApps/synpick/security.yml?branch=main&style=flat-square)
 ![](https://img.shields.io/badge/CodeQL-passing-brightgreen?style=flat-square)
 ![](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+![](https://img.shields.io/badge/version-1.7.0-blue?style=flat-square)
 
 Interactive model selection tool for Claude Code with Synthetic AI models.
 
@@ -24,6 +25,9 @@ synpick is a modern TypeScript/Node.js application that provides a seamless inte
 - **System Health**: Built-in diagnostic tools
 - **Well Tested**: Comprehensive Jest test suite
 - **Beautiful UI**: Modern React-based terminal interface with Ink
+- **System Prompt Support**: Custom system prompts for Claude Code with live editing
+- **Full Configuration Management**: Comprehensive Claude Code config including skills, MCP, and continuous mode
+- **Config Sharing**: Save and share configurations via GitHub
 
 ## Quick Start
 
@@ -61,7 +65,7 @@ npm install -g synpick
 #### Option 2: GitHub Release
 
 ```bash
-npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
+npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.7.0/synpick-1.7.0.tgz
 ```
 
 #### Option 3: One-line Installer
@@ -183,10 +187,10 @@ The update command:
 
 ```bash
 # Install specific version from npm
-npm install -g synpick@1.6.1
+npm install -g synpick@1.7.0
 
 # Or from GitHub release
-npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.6.1/synpick-1.6.1.tgz
+npm install -g https://github.com/XenoViraApps/synpick/releases/download/v1.7.0/synpick-1.7.0.tgz
 ```
 
 #### Check Current Version
@@ -273,7 +277,82 @@ When launching Claude Code, Synpick automatically sets:
 - `ANTHROPIC_DEFAULT_*_MODEL` variants
 - `CLAUDE_CODE_SUBAGENT_MODEL={selected_model}`
 
+## Advanced Features
+
+### System Prompt Management
+
+Customize Claude Code's behavior with custom system prompts:
+
+```bash
+# Set a new system prompt
+synpick sysprompt set "You are a helpful coding assistant..."
+
+# Show current system prompt
+synpick sysprompt show
+
+# Clear system prompt
+synpick sysprompt clear
+
+# Live edit in your default editor
+synpick sysprompt
+synpick sysprompt --editor vim
+```
+
+### Full Configuration Management
+
+Comprehensive configuration for Claude Code including skills, MCP servers, and settings:
+
+```bash
+# Initialize a new config file
+synpick full-config init my-config.yaml
+
+# Validate an existing config
+synpick full-config validate my-config.yaml
+
+# Apply configuration (dry-run first)
+synpick full-config apply my-config.yaml --dry-run
+
+# Apply configuration for real
+synpick full-config apply my-config.yaml --confirm
+
+# Fetch config from GitHub
+synpick full-config https://github.com/owner/repo/raw/main/config.yaml
+
+# List saved configurations
+synpick full-config list-saved
+```
+
+#### Config Share
+
+Capture your current Claude Code configuration and save it for sharing:
+
+```bash
+# Save locally only
+synpick save-config my-config.yaml
+
+# Save to GitHub (format: owner/repo/path)
+synpick save-config XenoViraApps/myrepo/configs/synpick-config.yaml
+
+# With custom name and description
+synpick save-config my-config.yaml --name "Dev Config" --description "My development environment setup"
+
+# Local-only with custom output path
+synpick save-config --local-only --output ~/.config/synpick/backups/config-$(date +%Y%m%d).yaml
+```
+
+For complete YAML configuration format reference, see the [synpick-config schema](src/full-config/schema.ts).
+
 ## Troubleshooting
+
+### Recent Fixes (v1.7.0)
+
+This version includes:
+- **System prompt support**: New `synpick sysprompt` command for custom system prompts
+- **Full configuration management**: `synpick full-config` for comprehensive Claude Code setup
+- **Config sharing**: `synpick save-config` to capture and share configurations
+- **Fresh Mac installation fix**: Auto-installs Homebrew and Node.js on macOS
+- **Model prefix normalization**: Auto-adds `hf:` prefix for HuggingFace models
+- **Full-install command**: Skills, MCP servers, continuous mode, and settings management
 
 ### Recent Fixes (v1.6.1)
 

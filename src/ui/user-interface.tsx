@@ -4,7 +4,9 @@ import chalk from 'chalk';
 import { createInterface } from 'readline';
 import { ModelInfoImpl } from '../models';
 import { ModelSelector } from './components/ModelSelector';
+import { TierSelector, type TierSelection } from './components/TierSelector';
 import { StatusMessage } from './components/StatusMessage';
+import { PasswordInput } from './components/PasswordInput';
 import { BYTES_PER_KB, PERCENTAGE_MAX, DEFAULT_PROGRESS_BAR_LENGTH } from '../utils/constants';
 import { isThinkingModel } from '../utils';
 
@@ -261,6 +263,50 @@ export class UserInterface {
   }
 
   /**
+   * Interactive tier-based model selection using Ink
+   *
+   * Allows selecting different models for each tier (default, opus, sonnet, haiku, subagent, thinking).
+   * Navigation: Tab/Shift+Tab switch tiers, ↑/↓ navigate models, Space selects, Enter confirms, Esc cancels.
+   *
+   * @param models - The models to select from
+   * @param initialSelection - Optional initial tier selections
+   * @param defaultModelId - Optional default model ID to use as fallback
+   * @returns Promise resolving to tier selections, or null if cancelled
+   */
+  async selectTiers(
+    models: ModelInfoImpl[],
+    initialSelection?: TierSelection,
+    defaultModelId?: string
+  ): Promise<TierSelection | null> {
+    if (models.length === 0) {
+      this.error('No models available for selection');
+      return null;
+    }
+
+    return new Promise(resolve => {
+      const { waitUntilExit } = render(
+        <TierSelector
+          models={models}
+          initialSelection={initialSelection}
+          defaultModelId={defaultModelId}
+          onSelect={selection => {
+            this.coloredSuccess('Tier models saved successfully');
+            resolve(selection);
+          }}
+          onCancel={() => {
+            this.info('Tier selection cancelled');
+            resolve(null);
+          }}
+        />
+      );
+
+      waitUntilExit().catch(() => {
+        resolve(null);
+      });
+    });
+  }
+
+  /**
    * Shows a progress bar on the console
    *
    * @param current - Current progress value
@@ -370,6 +416,90 @@ export class UserInterface {
       };
 
       stdin.on('data', onData);
+    });
+  }
+
+  /**
+   * Prompts user to enter a password to create/set encryption
+   *
+   * Uses the PasswordInput component with confirmation for security.
+   * User must enter the same password twice to confirm.
+   *
+   * @param options - Password prompt options
+   * @returns Promise resolving to the entered password (null if cancelled)
+   */
+  async promptPasswordCreate(options: {
+    prompt?: string;
+    minLength?: number;
+  } = {}): Promise<string | null> {
+    const { prompt = 'Enter password', minLength = 8 } = options;
+
+    return new Promise(resolve => {
+      let password: string | null = null;
+      let confirmPasswordStep = false;
+      let firstPassword = '';
+
+      const renderInput = () => {
+        const { waitUntilExit, unmount } = render(
+          <PasswordInput
+            prompt={confirmPasswordStep ? 'Confirm password' : prompt}
+            minLength={confirmPasswordStep ? firstPassword.length : minLength}
+            onSubmit={submittedPassword => {
+              if (!confirmPasswordStep) {
+                firstPassword = submittedPassword;
+                confirmPasswordStep = true;
+                // Re-render for confirmation step
+                unmount();
+                renderInput();
+              } else {
+                if (submittedPassword === firstPassword) {
+                  password = submittedPassword;
+                } else {
+                  this.error('Passwords do not match!');
+                  password = null;
+                }
+                unmount();
+                resolve(password);
+              }
+            }}
+            onCancel={() => {
+              unmount();
+              resolve(null);
+            }}
+          />
+        );
+
+        return { waitUntilExit };
+      };
+
+      renderInput();
+    });
+  }
+
+  /**
+   * Prompts user to enter a password to decrypt an encrypted config
+   *
+   * Uses the PasswordInput component for secure password entry.
+   *
+   * @param prompt - The prompt to display
+   * @returns Promise resolving to the entered password (null if cancelled)
+   */
+  async promptPasswordDecrypt(prompt = 'Enter password to decrypt'): Promise<string | null> {
+    return new Promise(resolve => {
+      const { unmount } = render(
+        <PasswordInput
+          prompt={prompt}
+          minLength={0}
+          onSubmit={password => {
+            unmount();
+            resolve(password);
+          }}
+          onCancel={() => {
+            unmount();
+            resolve(null);
+          }}
+        />
+      );
     });
   }
 

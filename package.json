@@ -1,6 +1,6 @@
 {
   "name": "synpick",
-  "version": "1.6.3",
+  "version": "1.7.0",
   "description": "Interactive model selection tool for Claude Code with Synthetic AI models",
   "main": "dist/index.js",
   "bin": {
@@ -52,11 +52,12 @@
     "commander": "^14.0.2",
     "ink": "^6.6.0",
     "react": "^19.0.0",
+    "yaml": "^2.8.2",
     "zod": "^4.3.3"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
     "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.12",
     "@types/node": "^25.0.3",
     "@types/react": "^19.0.8",
     "@typescript-eslint/eslint-plugin": "^8.51.0",

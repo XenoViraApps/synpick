@@ -5,6 +5,82 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-01-16
+
+### Added
+- **System Prompt Support**: New `synpick sysprompt` command with subcommands:
+  - `set` - Set a custom system prompt
+  - `show` - Display the current system prompt
+  - `clear` - Remove the custom system prompt
+  - Default behavior opens editor for live editing (`synpick sysprompt`)
+- **Full Configuration Management**: Added `synpick full-config` command group:
+  - `init` - Initialize new config file with templates
+  - `validate` - Validate config files against schema
+  - `save` - Save configuration files to `~/.synpick/configs/`
+  - `list-saved` - List locally saved configurations
+- **Full Install Command**: Added `synpick full-install` command:
+  - Install full configuration from local file or GitHub repository
+  - Options: `--github <owner/repo>`, `--branch`, `--path`, `--yes` (auto-confirm), `--dry-run`
+  - Supports skills installation, MCP server setup, and Claude settings
+- **Config Sharing**: Added `synpick save-config` command:
+  - Capture current Claude Code and SynPick configuration
+  - Save to local file or push to GitHub (format: `owner/repo/path`)
+  - Options: `--local-only`, `--name`, `--description`, `--output`, `--branch`
+  - Config capture includes: Claude channel, MCP servers, skills, settings, synpick settings
+- **Config Schema**: Added `src/full-config/schema.ts` with Zod validation for YAML config format
+  - Supports Claude Code version/channel configuration
+  - MCP server configurations (npm, go, python, builtin, command)
+  - Skills management with URL/file support
+  - Claude settings (theme, telemetry, auto-update, history size)
+  - SynPick settings (model, API key, system prompt)
+- **Config Parser**: Added `src/full-config/parser.ts` with:
+  - GitHub URL fetching for config files
+  - Local file parsing with YAML support
+  - Error handling with clear validation messages
+- **Config Installer**: Added `src/full-config/installer.ts` with:
+  - Dry run mode for testing without making changes
+  - Interactive confirmation before applying changes
+  - Skills cloning from git repositories
+  - MCP server installation (npm packages, go/python packages, custom commands)
+  - Settings application to Claude Code config
+  - Progress reporting with step-by-step feedback
+- **Config Capturer**: Added `src/full-config/capturer.ts` with:
+  - Capture current Claude Code configuration from `~/.anthropic/`
+  - Capture SynPick configuration from `~/.synpick/`
+  - Detect Claude Code channel (stable/beta/canary)
+  - Discover installed MCP servers
+  - List installed skills with git URLs
+  - Export to YAML format
+- **E2E Tests**: Added `tests/e2e-new-commands.test.ts` for testing v1.7.0 commands
+
+### Fixed
+- **Fresh Mac Installation**: Fixed install script to auto-install Homebrew and Node.js on macOS
+  - Added Homebrew detection and installation for macOS
+  - Added Node.js via Homebrew installation with version management
+  - Added node, typescript, tsc auto-installation on first run
+  - Fixed multiple TypeScript errors that were blocking fresh installs
+- **Model Prefix Normalization**: Fixed HuggingFace models causing 400 errors due to missing `hf:` prefix
+  - Added automatic prefix normalization for known model providers
+  - Supports: `hf:`, `openai:`, `anthropic:`, `claude:`, `google:`, `meta:`
+  - Prevents API errors when switching models or using skills
+- **Test Suite**: Fixed test failures due to model prefix normalization
+  - Updated all model ID assertions to include `hf:` prefix
+  - Cleaned up environment variable handling in tests
+  - All 241 tests passing
+
+### Changed
+- **Version**: Bumped to v1.7.0
+- **Config Schema**: Extended with `systemPrompt` field for custom prompts
+- **Launcher**: Added system prompt injection into Claude Code environment
+- **README**: Updated with v1.7.0 features and documentation
+
+### Dependency Updates
+- Added `yaml` package for YAML parsing (replaced js-yaml)
+
+### Testing
+- All 13 test suites passing
+- 241 total tests passing
+
 ## [1.6.3] - 2026-01-01
 
 ### Added

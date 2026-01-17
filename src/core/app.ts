@@ -475,6 +475,79 @@ export class SyntheticClaudeApp {
   }
 
   /**
+   * Initiates interactive tier-based model selection
+   *
+   * Allows selecting different models for each tier (default, opus, sonnet, haiku, subagent, thinking).
+   *
+   * @returns Promise resolving to true if tier models were selected and saved, false otherwise
+   */
+  async interactiveTierSelection(): Promise<boolean> {
+    if (!this.configManager.hasApiKey()) {
+      this.ui.error('No API key configured. Please run "synpick setup" first.');
+      return false;
+    }
+
+    try {
+      const modelManager = this.getModelManager();
+      this.ui.coloredInfo('Fetching available models...');
+      const models = await modelManager.fetchModels();
+
+      if (models.length === 0) {
+        this.ui.error('No models available. Please check your API key and connection.');
+        return false;
+      }
+
+      // Sort models for consistent display
+      const sortedModels = modelManager.getModels(models);
+
+      // Get current tier selections from config
+      const currentSelections = this.configManager.config.models || undefined;
+      const defaultModelId = this.configManager.config.selectedModel || undefined;
+
+      const tierSelection = await this.ui.selectTiers(
+        sortedModels,
+        currentSelections,
+        defaultModelId
+      );
+      if (!tierSelection) {
+        this.ui.info('Tier selection cancelled');
+        return false;
+      }
+
+      // Save tier models to config - convert optional to required with empty string defaults
+      await this.configManager.updateConfig({
+        models: {
+          default: tierSelection.default || '',
+          opus: tierSelection.opus || '',
+          sonnet: tierSelection.sonnet || '',
+          haiku: tierSelection.haiku || '',
+          subagent: tierSelection.subagent || '',
+          thinking: tierSelection.thinking || '',
+        },
+      });
+      this.ui.coloredSuccess('Tier models saved successfully');
+
+      // Display summary
+      this.ui.info('Selected tier models:');
+      if (tierSelection.default) this.ui.info(`  Default: ${tierSelection.default}`);
+      if (tierSelection.opus) this.ui.info(`  Opus: ${tierSelection.opus}`);
+      if (tierSelection.sonnet) this.ui.info(`  Sonnet: ${tierSelection.sonnet}`);
+      if (tierSelection.haiku) this.ui.info(`  Haiku: ${tierSelection.haiku}`);
+      if (tierSelection.subagent) this.ui.info(`  Subagent: ${tierSelection.subagent}`);
+      if (tierSelection.thinking) this.ui.info(`  Thinking: ${tierSelection.thinking}`);
+
+      this.ui.highlightInfo('Now run "synpick" to start Claude Code with your tier models.', [
+        'synpick',
+      ]);
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.ui.error(`Failed to select tier models: ${message}`);
+      return false;
+    }
+  }
+
+  /**
    * Lists all available models
    *
    * @param options - Options for model listing
@@ -559,6 +632,13 @@ export class SyntheticClaudeApp {
     this.ui.info(`Auto-update Claude Code: ${config.autoUpdateClaudeCode ? 'Yes' : 'No'}`);
     this.ui.info(`Update Check Interval: ${config.claudeCodeUpdateCheckInterval} hours`);
     this.ui.info(`Max Token Size: ${config.maxTokenSize}`);
+    if (config.systemPrompt) {
+      const preview =
+        config.systemPrompt.length > 50
+          ? config.systemPrompt.slice(0, 50) + '...'
+          : config.systemPrompt;
+      this.ui.info(`System Prompt: ${preview}`);
+    }
   }
 
   /**
@@ -599,6 +679,9 @@ export class SyntheticClaudeApp {
         break;
       case 'maxTokenSize':
         updates.maxTokenSize = parseInt(value, 10);
+        break;
+      case 'systemPrompt':
+        updates.systemPrompt = value;
         break;
       default:
         this.ui.error(`Unknown configuration key: ${key}`);
@@ -922,17 +1005,41 @@ export class SyntheticClaudeApp {
     options: LaunchOptions,
     thinkingModel?: string | null
   ): Promise<void> {
-    const launchInfo = thinkingModel
-      ? `Launching with ${model} (thinking: ${thinkingModel}). Use "synpick model" to change model.`
-      : `Launching with ${model}. Use "synpick model" to change model.`;
+    // Get tier models from config if configured
+    const configModels = this.configManager.config.models || {};
+    const hasTierModels = Object.values(configModels).some(v => v && v.length > 0);
 
-    this.ui.highlightInfo(launchInfo, [model, 'synpick model']);
+    let launchInfo = '';
+    if (hasTierModels) {
+      // Using tier models
+      const tierList: string[] = [];
+      if (configModels.default) tierList.push(`default: ${configModels.default}`);
+      if (configModels.opus) tierList.push(`opus: ${configModels.opus}`);
+      if (configModels.sonnet) tierList.push(`sonnet: ${configModels.sonnet}`);
+      if (configModels.haiku) tierList.push(`haiku: ${configModels.haiku}`);
+      if (configModels.subagent) tierList.push(`subagent: ${configModels.subagent}`);
+      if (configModels.thinking) tierList.push(`thinking: ${configModels.thinking}`);
+
+      launchInfo = `Launching with tier models configured. Use "synpick tiers" to change.`;
+      if (tierList.length > 0) {
+        this.ui.info('Tier models:');
+        tierList.forEach(tier => this.ui.info(`  ${tier}`));
+      }
+    } else if (thinkingModel) {
+      launchInfo = `Launching with ${model} (thinking: ${thinkingModel}). Use "synpick model" to change model.`;
+    } else {
+      launchInfo = `Launching with ${model}. Use "synpick model" to change model.`;
+    }
+
+    this.ui.highlightInfo(launchInfo, hasTierModels ? ['synpick tiers'] : ['synpick model']);
 
     const result = await this.launcher.launchClaudeCode({
       model,
-      thinkingModel,
+      thinkingModel: thinkingModel || undefined,
+      tierModels: hasTierModels ? configModels : undefined,
       additionalArgs: options.additionalArgs,
       maxTokenSize: this.configManager.config.maxTokenSize,
+      systemPrompt: this.configManager.config.systemPrompt,
       env: {
         ANTHROPIC_AUTH_TOKEN: this.configManager.getApiKey(),
       },
@@ -940,6 +1047,63 @@ export class SyntheticClaudeApp {
 
     if (!result.success) {
       this.ui.error(`Failed to launch Claude Code: ${result.error}`);
+    }
+  }
+
+  /**
+   * Sets a custom system prompt for Claude Code
+   *
+   * @param prompt - The system prompt to set (or empty string to clear)
+   * @returns Promise that resolves when system prompt is set
+   */
+  async setSystemPrompt(prompt: string): Promise<void> {
+    const success = await this.configManager.updateConfig({ systemPrompt: prompt });
+    if (success) {
+      if (prompt) {
+        this.ui.success('System prompt set successfully');
+        this.ui.info('The system prompt will be used when launching Claude Code');
+      } else {
+        this.ui.success('System prompt cleared');
+      }
+    } else {
+      this.ui.error('Failed to set system prompt');
+    }
+  }
+
+  /**
+   * Gets the current system prompt
+   *
+   * @returns The current system prompt or null if not set
+   */
+  getSystemPrompt(): string | null {
+    return this.configManager.config.systemPrompt || null;
+  }
+
+  /**
+   * Clears the current system prompt
+   *
+   * @returns Promise that resolves when system prompt is cleared
+   */
+  async clearSystemPrompt(): Promise<void> {
+    await this.setSystemPrompt('');
+  }
+
+  /**
+   * Shows the current system prompt
+   *
+   * @returns Promise that resolves when system prompt is displayed
+   */
+  async showSystemPrompt(): Promise<void> {
+    const prompt = this.getSystemPrompt();
+    if (prompt) {
+      this.ui.info('Current System Prompt:');
+      this.ui.info('=======================');
+      this.ui.info(prompt);
+      this.ui.info('=======================');
+      this.ui.info(`Character count: ${prompt.length}`);
+    } else {
+      this.ui.info('No system prompt is currently set.');
+      this.ui.info("Use 'synpick sysprompt set <prompt>' to set one.");
     }
   }
 }

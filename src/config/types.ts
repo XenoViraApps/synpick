@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+export const TierModelsSchema = z.object({
+  default: z.string().default('').describe('Default model'),
+  opus: z.string().default('').describe('Opus tier model'),
+  sonnet: z.string().default('').describe('Sonnet tier model'),
+  haiku: z.string().default('').describe('Haiku tier model'),
+  subagent: z.string().default('').describe('Subagent model'),
+  thinking: z.string().default('').describe('Thinking model'),
+});
+
 export const AppConfigSchema = z.object({
   apiKey: z.string().default('').describe('Synthetic API key'),
   baseUrl: z.string().default('https://api.synthetic.new').describe('Synthetic API base URL'),
@@ -18,8 +27,22 @@ export const AppConfigSchema = z.object({
     .max(168)
     .default(24)
     .describe('Model cache duration in hours'),
-  selectedModel: z.string().default('').describe('Last selected model'),
-  selectedThinkingModel: z.string().default('').describe('Last selected thinking model'),
+  models: TierModelsSchema.default({
+    default: '',
+    opus: '',
+    sonnet: '',
+    haiku: '',
+    subagent: '',
+    thinking: '',
+  }),
+  selectedModel: z
+    .string()
+    .default('')
+    .describe('Last selected model (legacy, for backward compatibility)'),
+  selectedThinkingModel: z
+    .string()
+    .default('')
+    .describe('Last selected thinking model (legacy, for backward compatibility)'),
   firstRunCompleted: z
     .boolean()
     .default(false)
@@ -60,9 +83,11 @@ export const AppConfigSchema = z.object({
     .max(60000)
     .default(5000)
     .describe('Command execution timeout in milliseconds'),
+  systemPrompt: z.string().optional().describe('Custom system prompt for Claude Code'),
 });
 
 export type AppConfig = z.infer<typeof AppConfigSchema>;
+export type TierModels = z.infer<typeof TierModelsSchema>;
 
 export class ConfigValidationError extends Error {
   constructor(

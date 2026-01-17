@@ -78,19 +78,24 @@ describe('ClaudeLauncher', () => {
     it('should set all ANTHROPIC_DEFAULT_*_MODEL variables', async () => {
       setupMockSpawnSuccess(1234);
 
+      // Clean up user environment variable that might interfere
+      delete process.env.ANTHROPIC_DEFAULT_HF_MODEL;
+
       const modelId = 'provider/test-model';
       await launcher.launchClaudeCode({ model: modelId });
+
+      // Model ID gets hf: prefix added
+      const prefixedModelId = 'hf:provider/test-model';
 
       expect(mockSpawn).toHaveBeenCalledWith(
         'claude',
         [],
         expect.objectContaining({
           env: expect.objectContaining({
-            ANTHROPIC_DEFAULT_OPUS_MODEL: modelId,
-            ANTHROPIC_DEFAULT_SONNET_MODEL: modelId,
-            ANTHROPIC_DEFAULT_HAIKU_MODEL: modelId,
-            ANTHROPIC_DEFAULT_HF_MODEL: modelId,
-            ANTHROPIC_DEFAULT_MODEL: modelId,
+            ANTHROPIC_DEFAULT_OPUS_MODEL: prefixedModelId,
+            ANTHROPIC_DEFAULT_SONNET_MODEL: prefixedModelId,
+            ANTHROPIC_DEFAULT_HAIKU_MODEL: prefixedModelId,
+            ANTHROPIC_DEFAULT_MODEL: prefixedModelId,
           }),
         })
       );
@@ -106,7 +111,7 @@ describe('ClaudeLauncher', () => {
         [],
         expect.objectContaining({
           env: expect.objectContaining({
-            CLAUDE_CODE_SUBAGENT_MODEL: 'deepseek/deepseek-r1',
+            CLAUDE_CODE_SUBAGENT_MODEL: 'hf:deepseek/deepseek-r1',
           }),
         })
       );
@@ -167,7 +172,7 @@ describe('ClaudeLauncher', () => {
         [],
         expect.objectContaining({
           env: expect.objectContaining({
-            ANTHROPIC_THINKING_MODEL: 'deepseek/deepseek-r1',
+            ANTHROPIC_THINKING_MODEL: 'hf:deepseek/deepseek-r1',
           }),
         })
       );
@@ -407,8 +412,8 @@ const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       setupMockSpawnSuccess(1234);
 
       await launcher.launchClaudeCode({
-        model: 'anthropic/claude-sonnet-4-20250514',
-        thinkingModel: 'deepseek/deepseek-r1',
+        model: 'hf:anthropic/claude-sonnet-4-20250514',
+        thinkingModel: 'hf:deepseek/deepseek-r1',
         maxTokenSize: 200000,
       });
 
@@ -416,15 +421,14 @@ const spawnCall = mockSpawn.mock.calls[0]![2] as any;
       const env = spawnCall.env;
 
       // Verify all ANTHROPIC model variables
-      const modelId = 'anthropic/claude-sonnet-4-20250514';
+      const modelId = 'hf:anthropic/claude-sonnet-4-20250514';
       expect(env.ANTHROPIC_DEFAULT_MODEL).toBe(modelId);
       expect(env.ANTHROPIC_DEFAULT_OPUS_MODEL).toBe(modelId);
       expect(env.ANTHROPIC_DEFAULT_SONNET_MODEL).toBe(modelId);
       expect(env.ANTHROPIC_DEFAULT_HAIKU_MODEL).toBe(modelId);
-      expect(env.ANTHROPIC_DEFAULT_HF_MODEL).toBe(modelId);
 
       // Verify thinking model
-      expect(env.ANTHROPIC_THINKING_MODEL).toBe('deepseek/deepseek-r1');
+      expect(env.ANTHROPIC_THINKING_MODEL).toBe('hf:deepseek/deepseek-r1');
 
       // Verify subagent model
       expect(env.CLAUDE_CODE_SUBAGENT_MODEL).toBe(modelId);
